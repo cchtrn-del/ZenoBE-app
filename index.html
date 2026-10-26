@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#1d4ed8" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20class%3D%22logo-sq%22%20data-x%3D%22favicon%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%20512%20512%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20role%3D%22img%22%20aria-label%3D%22Logo%20ZenoBE%22%3E%20%3Cdefs%3E%20%3ClinearGradient%20id%3D%22f-bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23123E7C%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231E6FBF%22/%3E%20%3C/linearGradient%3E%20%3ClinearGradient%20id%3D%22f-brass%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23E7C55A%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23B8891F%22/%3E%20%3C/linearGradient%3E%20%3CradialGradient%20id%3D%22f-sheen%22%20cx%3D%220.3%22%20cy%3D%220.25%22%20r%3D%220.9%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220.18%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220%22/%3E%20%3C/radialGradient%3E%20%3C/defs%3E%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22480%22%20height%3D%22480%22%20rx%3D%22108%22%20fill%3D%22url%28%23f-bg%29%22/%3E%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22480%22%20height%3D%22480%22%20rx%3D%22108%22%20fill%3D%22url%28%23f-sheen%29%22/%3E%20%3Crect%20x%3D%22136%22%20y%3D%2290%22%20width%3D%22240%22%20height%3D%2234%22%20rx%3D%2217%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Crect%20x%3D%22136%22%20y%3D%22290%22%20width%3D%22240%22%20height%3D%2234%22%20rx%3D%2217%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Cpath%20d%3D%22M%20150%20124%20L%20362%20290%20L%20362%20256%20L%20150%20124%20Z%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Ctext%20x%3D%22256%22%20y%3D%22388%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2266%22%20font-weight%3D%22bold%22%20letter-spacing%3D%223%22%3E%3Ctspan%20fill%3D%22%23FFFFFF%22%3EZeno%3C/tspan%3E%3Ctspan%20fill%3D%22url%28%23f-brass%29%22%3EBE%3C/tspan%3E%3C/text%3E%20%3Ccircle%20cx%3D%22200%22%20cy%3D%22422%22%20r%3D%229%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.95%22/%3E%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22422%22%20r%3D%226.5%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.75%22/%3E%20%3Ccircle%20cx%3D%22304%22%20cy%3D%22422%22%20r%3D%224.5%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.55%22/%3E%20%3C/svg"/>
+<title>ZenoBE — Fiches médicaments pédiatriques (CHC)</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f7fb; --card: #ffffff; --ink: #0f172a; --muted: #64748b;
+    --accent: #1E6FBF; --accent-soft: #eff6ff; --border: #e2e8f0;
+    --ok: #047857; --ok-soft: #ecfdf5; --warn: #b45309; --warn-soft: #fffbeb;
+    --radius: 14px; --shadow: 0 1px 2px rgba(15,23,42,.05);
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* ---------- Barre supérieure ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 30; background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; padding: 10px 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; } .brand .logo-h { height: 42px; width: auto; display: block; }
+  .brand .logo { font-size: 20px; }
+  .nav { display: flex; gap: 4px; }
+  .nav a {
+    text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13.5px;
+    padding: 7px 12px; border-radius: 10px;
+  }
+  .nav a:hover { background: var(--accent-soft); color: var(--accent); }
+  .nav a.on { background: var(--accent-soft); color: var(--accent); }
+  .top-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .count-pill {
+    background: var(--accent-soft); color: var(--accent); font-weight: 700;
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
+  /* ---------- Composants ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2.f-section {
+    font-size: 15px; text-transform: none; letter-spacing: .2px;
+    margin: 22px 0 8px; padding: 9px 14px; background: var(--accent-soft);
+    color: #1e3a8a; border-radius: 10px; border-left: 4px solid var(--accent);
+  }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  h4 { font-size: 14.5px; margin: 14px 0 6px; color: #334155; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  a { color: var(--accent); }
+  code { background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; padding: 1px 5px; font-size: .9em; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+    background: #fff; border: 1px solid var(--border); color: var(--ink);
+    font-weight: 600; font-size: 13.5px; padding: 9px 14px; border-radius: 10px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1e40af; color: #fff; }
+  .btn-danger { color: #b91c1c; border-color: #fecaca; }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+  input[type=text], input[type=number], input[type=password], select, textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: inherit; background: #fff; color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #bfdbfe; border-color: var(--accent); }
+  label { display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin: 10px 0 4px; }
+  .field-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  /* ---------- Liste des fiches ---------- */
+  .searchbar { display: flex; gap: 10px; margin-bottom: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip {
+    border: 1px solid var(--border); background: #fff; color: #334155;
+    font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .grid-fiches { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .fiche-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; cursor: pointer; box-shadow: var(--shadow); position: relative;
+    transition: transform .08s ease, border-color .08s ease;
+  }
+  .fiche-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .fiche-card .t { font-weight: 700; font-size: 15px; margin: 0 24px 6px 0; }
+  .fiche-card .m { font-size: 12px; color: var(--muted); }
+  .fiche-card .star { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px; }
+  .tagchip {
+    display: inline-block; background: var(--accent-soft); color: var(--accent);
+    font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 5px;
+  }
+  .empty {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+  }
+  .empty .big { font-size: 40px; margin-bottom: 10px; }
+  /* ---------- Tableaux de posologie ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th {
+    background: #f8fafc; color: #1e40af; text-align: left; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .4px; padding: 9px 10px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { border-top: 1px solid #eef2f7; padding: 8px 10px; vertical-align: top; }
+  tbody tr:nth-child(even) { background: #fafcff; }
+  .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-first { background: var(--ok-soft); color: var(--ok); }
+  .b-alt { background: var(--warn-soft); color: var(--warn); }
+  .b-relais { background: var(--accent-soft); color: var(--accent); }
+  .b-none { background: #f1f5f9; color: var(--muted); }
+  /* ---------- Fiche ---------- */
+  .fiche-head { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .fiche-head h1 { flex: 1 1 100%; }
+  .meta-line { color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
+  .back { text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+  .back:hover { color: var(--accent); }
+  /* ---------- Calculateur ---------- */
+/* ---------- Calculateur ---------- */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; }
+  .kpi { background: var(--accent-soft); border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; }
+  .kpi .v { font-size: 21px; font-weight: 800; color: #1e3a8a; }
+  .kpi .l { font-size: 11.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .4px; }
+  .warning-box { background: var(--warn-soft); border: 1px solid #fde68a; color: #92400e; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-top: 12px; }
+  .formula { font-size: 12.5px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  /* ---------- Import / GitHub ---------- */
+  .log {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+    background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 10px;
+    max-height: 230px; overflow: auto; white-space: pre-wrap; margin-top: 12px; display: none;
+  }
+  .dropzone {
+    border: 2px dashed #bfdbfe; border-radius: 12px; padding: 26px; text-align: center;
+    color: var(--muted); cursor: pointer;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--accent-soft); }
+  .ok-note { color: var(--ok); font-weight: 700; }
+  .section-title { font-size: 16px; font-weight: 800; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .toast {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: #0f172a; color: #fff; font-size: 13.5px; font-weight: 600;
+    padding: 10px 18px; border-radius: 999px; z-index: 60; display: none;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+  .disclaimer { background: #fff; border: 1px solid #fecaca; color: #7f1d1d; border-radius: 10px; padding: 10px 14px; font-size: 12.5px; margin: 18px 0; }
+  @media print {
+    .topbar, .back, .actions, footer, .fiche-actions { display: none !important; }
+    body { background: #fff; }
+    .card { border: none; box-shadow: none; padding: 0; }
+    main { max-width: 100%; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand" style="padding:4px 0"><svg class="logo-h" width="118" height="59" viewBox="0 0 1024 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ZenoBE">
+              <defs>
+                <linearGradient id="h-bg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/>
+                </linearGradient>
+                <linearGradient id="h-brass" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/>
+                </linearGradient>
+                <radialGradient id="h-sheen" cx="0.3" cy="0.25" r="0.9">
+                  <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-bg)"/>
+              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-sheen)"/>
+              <rect x="86" y="136" width="200" height="30" rx="15" fill="#FFFFFF"/>
+              <rect x="86" y="346" width="200" height="30" rx="15" fill="#FFFFFF"/>
+              <path d="M 98 166 L 274 346 L 274 316 L 98 166 Z" fill="#FFFFFF"/>
+              <text x="330" y="316" font-family="Helvetica, Arial, sans-serif" font-size="138" font-weight="bold" letter-spacing="4"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#h-brass)">BE</tspan></text>
+              <circle cx="578" cy="368" r="11" fill="#FFFFFF" opacity="0.95"/>
+              <circle cx="610" cy="368" r="8" fill="#FFFFFF" opacity="0.75"/>
+              <circle cx="638" cy="368" r="5.5" fill="#FFFFFF" opacity="0.55"/>
+            </svg></div>
+  <nav class="nav" id="nav">
+    <a href="#/" data-r="/">Fiches</a>
+    <a href="#/calculateur">Calculateur</a>
+    <a href="#/import">Import</a>
+  </nav>
+  <div class="top-right">
+    <span class="count-pill" id="count-pill">0 fiche</span>
+    <button class="btn" id="quick-sync" title="Synchroniser depuis GitHub">☁️ Sync</button>
+  </div>
+</div>
+
+<main id="view"></main>
+<footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.1 — 2026 — copyright cchtrn</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ================================================================
+   État et persistance
+================================================================ */
+var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2" };
+
+function loadLs(key, fallback) {
+  try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch (e) { return fallback; }
+}
+function saveLs(key, val) {
+  try { window.localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch (e) { toast("⚠️ Stockage local saturé — impossible d'enregistrer."); return false; }
+}
+
+var fiches = loadLs(LS.fiches, []);
+var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, lastSync: null });
+var favs = loadLs(LS.fav, []);
+var recents = loadLs(LS.rec, []);
+var ui = { q: "", tag: "", favOnly: false };
+
+function persistFiches() { saveLs(LS.fiches, fiches); updateCount(); }
+function persistCfg() { saveLs(LS.cfg, cfg); }
+
+/* ================================================================
+   Utilitaires
+================================================================ */
+function norm(s) {
+  return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function slugify(s) {
+  return norm(s).replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "non-classe";
+}
+function esc(s) {
+  return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+var ENTITIES = { lt: "<", gt: ">", quot: '"', nbsp: " ", amp: "&", "#39": "'" };
+function decodeEnt(s) {
+  return String(s || "").replace(/&(lt|gt|quot|nbsp|amp|#39);/g, function (m, e) { return ENTITIES[e] || m; });
+}
+function fmtMg(mg) {
+  if (mg === null || mg === undefined || isNaN(mg)) return "—";
+  var v = Math.round(mg * 100) / 100;
+  var s = String(v).replace(".", ",");
+  if (v >= 1000) { s += " mg (" + String(Math.round(v / 100) / 10).replace(".", ",") + " g)"; }
+  else { s += " mg"; }
+  return s;
+}
+function toast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.style.display = "block";
+  setTimeout(function () { t.style.display = "none"; }, 2600);
+}
+function updateCount() {
+  document.getElementById("count-pill").textContent = fiches.length + " fiche" + (fiches.length > 1 ? "s" : "");
+}
+
+/* ================================================================
+   Analyse markdown (nouveau format des fiches)
+================================================================ */
+function normKey(k) { return norm(k).replace(/[^a-z0-9]+/g, "_").replace(/(^_|_$)/g, ""); }
+
+function splitFiche(md) {
+  var fm = {}, body = md;
+  var m = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  if (m) {
+    body = md.slice(m[0].length);
+    var lastKey = null;
+    var lines = m[1].split("\n");
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var kv = line.match(/^([A-Za-z0-9_\- ]+?)\s*:\s*(.*)$/);
+      if (kv) {
+        var k = normKey(kv[1]), v = kv[2].trim();
+        if (v === "") { fm[k] = []; }
+        else if (/^\[.*\]$/.test(v)) { fm[k] = v.slice(1, -1).split(",").map(function (x) { return x.trim().replace(/^['"]|['"]$/g, ""); }).filter(Boolean); }
+        else { fm[k] = v.replace(/^['"]|['"]$/g, ""); }
+        lastKey = k;
+      } else if (/^\s*-\s+/.test(line) && lastKey) {
+        if (!Array.isArray(fm[lastKey])) fm[lastKey] = [];
+        fm[lastKey].push(line.replace(/^\s*-\s+/, "").trim().replace(/^['"]|['"]$/g, ""));
+      }
+    }
+  }
+  return { fm: fm, body: body };
+}
+
+function inlineMd(s) {
+  var x = esc(decodeEnt(s));
+  x = x.replace(/\\\[(.*?)\\\]/g, "[$1]");
+  x = x.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  x = x.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  x = x.replace(/`([^`]+)`/g, "<code>$1</code>");
+  x = x.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  return x;
+}
+
+function parseTableRow(line) {
+  var s = line.trim();
+  if (s.indexOf("|") === 0) s = s.slice(1);
+  if (s.lastIndexOf("|") === s.length - 1 && s.length > 0) s = s.slice(0, -1);
+  return s.split("|").map(function (c) { return c.trim(); });
+}
+function isSepRow(cells) {
+  return cells.length > 0 && cells.every(function (c) { return /^:?-{2,}:?$/.test(c.replace(/\s+/g, "")); });
+}
+
+function renderTable(rows) {
+  if (!rows.length) return "";
+  var head = rows[0];
+  var typeIdx = -1;
+  for (var h = 0; h < head.length; h++) { if (norm(head[h]) === "type") { typeIdx = h; break; } }
+  var html = '<div class="tbl-wrap"><table><thead><tr>';
+  for (var a = 0; a < head.length; a++) html += "<th>" + inlineMd(head[a]) + "</th>";
+  html += "</tr></thead><tbody>";
+  for (var r = 1; r < rows.length; r++) {
+    if (isSepRow(rows[r])) continue;
+    html += "<tr>";
+    for (var c = 0; c < head.length; c++) {
+      var cell = rows[r][c] || "";
+      if (c === typeIdx) {
+        var n = norm(cell);
+        var cls = "b-none";
+        if (n.indexOf("1er") === 0 || n.indexOf("premier") === 0) cls = "b-first";
+        else if (n.indexOf("alt") === 0) cls = "b-alt";
+        else if (n.indexOf("relais") === 0) cls = "b-relais";
+        html += '<td><span class="badge ' + cls + '">' + inlineMd(cell) + "</span></td>";
+      } else {
+        html += "<td>" + inlineMd(cell) + "</td>";
+      }
+    }
+    html += "</tr>";
+  }
+  html += "</tbody></table></div>";
+  return html;
+}
+
+function mdToHtml(md) {
+  var lines = decodeEnt(md).split("\n");
+  var out = "", i = 0;
+  while (i < lines.length) {
+    var t = lines[i].trim();
+    if (!t) { i++; continue; }
+    if (t.indexOf("|") === 0) {
+      var tbl = [];
+      while (i < lines.length && lines[i].trim().indexOf("|") === 0) { tbl.push(parseTableRow(lines[i])); i++; }
+      out += renderTable(tbl);
+      continue;
+    }
+    var h = t.match(/^(#{1,6})\s+(.*)$/);
+    if (h) {
+      var lvl = h[1].length;
+      if (lvl === 1) { out += "<h1>" + inlineMd(h[2]) + "</h1>"; }
+      else { out += "<h" + lvl + ">" + inlineMd(h[2]) + "</h" + lvl + ">"; }
+      i++; continue;
+    }
+    if (/^(-{3,}|\*{3,})$/.test(t)) { out += "<hr/>"; i++; continue; }
+    if (/^[-*+]\s+/.test(t)) {
+      var items = [];
+      while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
+        items.push("<li>" + inlineMd(lines[i].replace(/^\s*[-*+]\s+/, "")) + "</li>"); i++;
+      }
+      out += "<ul>" + items.join("") + "</ul>";
+      continue;
+    }
+    if (t.indexOf(">") === 0) { out += "<blockquote><p>" + inlineMd(t.slice(1).trim()) + "</p></blockquote>"; i++; continue; }
+    var para = [t]; i++;
+    while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|\||>)/.test(lines[i].trim()) && !/^\s*[-*+]\s+/.test(lines[i])) {
+      para.push(lines[i].trim()); i++;
+    }
+    out += "<p>" + para.map(inlineMd).join("<br/>") + "</p>";
+  }
+  return out;
+}
+
+/* --- Extraction des schémas de posologie depuis le tableau --- */
+function extractPoso(md) {
+  var lines = decodeEnt(md).split("\n");
+  var schemas = [];
+  var head = null, i = 0;
+  while (i < lines.length) {
+    if (lines[i].trim().indexOf("|") === 0) {
+      var rows = [];
+      while (i < lines.length && lines[i].trim().indexOf("|") === 0) { rows.push(parseTableRow(lines[i])); i++; }
+      if (rows.length > 1) {
+        var hd = rows[0].map(norm);
+        var idxInd = hd.findIndex(function (c) { return c.indexOf("indication") === 0; });
+        var idxDose = hd.findIndex(function (c) { return c.indexOf("dose") === 0; });
+        if (idxDose < 0) idxDose = hd.findIndex(function (c) { return c.indexOf("posologie") === 0; });
+        var idxFreq = hd.findIndex(function (c) { return c.indexOf("frequence") === 0; });
+        var idxVoie = hd.findIndex(function (c) { return c.indexOf("voie") === 0; });
+        if (idxInd >= 0 && idxDose >= 0 && idxFreq >= 0) {
+          for (var r = 1; r < rows.length; r++) {
+            if (isSepRow(rows[r])) continue;
+            var dose = rows[r][idxDose] || "";
+            var info = parseDoseInfo(dose);
+            var freqText = idxFreq >= 0 ? (rows[r][idxFreq] || "") : "";
+            var mFreqCol = freqText.match(/(\d+)\s*x\s*\/?\s*j/i);
+            if (mFreqCol && !info.freq) info.freq = parseInt(mFreqCol[1], 10);
+            schemas.push({
+              indication: rows[r][idxInd] || "",
+              doseText: dose,
+              voie: idxVoie >= 0 ? (rows[r][idxVoie] || "") : "",
+              freqText: freqText,
+              info: info
+            });
+          }
+        }
+      }
+    } else { i++; }
+  }
+  return schemas;
+}
+
+function parseDoseInfo(doseStr) {
+  var s = decodeEnt(doseStr || "");
+  var info = { perDay: null, perDose: null, perM2: false, min: null, max: null, freq: null, capMg: null };
+  var mDay = s.match(/(\d+(?:[.,]\d+)?)\s*(?:[-–]\s*(\d+(?:[.,]\d+)?)\s*)?mg\s*\/\s*kg\s*\/\s*j(?:our)?\b/i);
+  var mDose = s.match(/(\d+(?:[.,]\d+)?)\s*(?:[-–]\s*(\d+(?:[.,]\d+)?)\s*)?mg\s*\/\s*kg\s*\/\s*(?:dose|prise)\b/i);
+  var mM2 = s.match(/(\d+(?:[.,]\d+)?)\s*(?:[-–]\s*(\d+(?:[.,]\d+)?)\s*)?mg\s*\/\s*m[²2]\s*(?:\/\s*(j(?:our)?|dose|prise))?/i);
+  var mFreq = s.match(/(\d+)\s*x\s*\/?\s*j\b/i);
+  var mCap = s.match(/max\.?\s*(\d+(?:[.,]\d+)?)\s*(g|mg)\s*\/?\s*j/i);
+  if (mDay) {
+    info.perDay = true;
+    info.min = parseFloat(mDay[1].replace(",", "."));
+    info.max = mDay[2] ? parseFloat(mDay[2].replace(",", ".")) : info.min;
+  } else if (mDose) {
+    info.perDose = true;
+    info.min = parseFloat(mDose[1].replace(",", "."));
+    info.max = mDose[2] ? parseFloat(mDose[2].replace(",", ".")) : info.min;
+  } else if (mM2) {
+    info.perM2 = true;
+    info.min = parseFloat(mM2[1].replace(",", "."));
+    info.max = mM2[2] ? parseFloat(mM2[2].replace(",", ".")) : info.min;
+    if (mM2[3] && /dose|prise/i.test(mM2[3])) info.perDose = true;
+  }
+  if (mFreq) info.freq = parseInt(mFreq[1], 10);
+  if (mCap) {
+    var cap = parseFloat(mCap[1].replace(",", "."));
+    info.capMg = (mCap[2].toLowerCase() === "g") ? cap * 1000 : cap;
+  }
+  return info;
+}
+
+/* ================================================================
+   Import d'une fiche (fusion par slug)
+================================================================ */
+function importMd(filename, md, logFn) {
+  var parts = splitFiche(md);
+  var fm = parts.fm, body = parts.body;
+  var title = fm.titre || fm.title || filename.replace(/\.(md|markdown|txt)$/i, "").trim();
+  var h1 = body.match(/^#\s+(.+)$/m);
+  if ((!fm.titre && !fm.title) && h1) title = h1[1].trim();
+  var slug = slugify(title);
+  var tags = [];
+  if (Array.isArray(fm.tags)) tags = fm.tags.slice();
+  else if (fm.tags) tags = [String(fm.tags)];
+  if (fm.categorie) tags.push(String(fm.categorie));
+  var fiche = {
+    id: slug, slug: slug, title: title, filename: filename,
+    tags: tags, author: fm.author || "", created: fm.created || "", updated: fm.updated || "",
+    md: body, html: mdToHtml(body), poso: extractPoso(body),
+    text: norm(title + " " + tags.join(" ") + " " + body)
+  };
+  var replaced = false;
+  for (var i = 0; i < fiches.length; i++) {
+    if (fiches[i].slug === slug) { fiches[i] = fiche; replaced = true; break; }
+  }
+  if (!replaced) fiches.push(fiche);
+  fiches.sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
+  return { fiche: fiche, replaced: replaced };
+}
+
+/* ================================================================
+   Synchronisation GitHub
+================================================================ */
+function ghHeaders(raw) {
+  var h = { Accept: raw ? "application/vnd.github.raw" : "application/vnd.github+json" };
+  if (cfg.token && cfg.token.trim()) h.Authorization = "Bearer " + cfg.token.trim();
+  return h;
+}
+
+async function syncGitHub(logFn, silent) {
+  var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
+  var branch = (cfg.branch || "main").trim(), folder = (cfg.folder || "").trim();
+  if (!user || !repo) { if (!silent) logFn("⚠️ Renseignez au minimum l'utilisateur et le dépôt."); return; }
+  logFn("Connexion au dépôt " + user + "/" + repo + " (branche " + branch + ")…");
+  var url = "https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+    "/git/trees/" + encodeURIComponent(branch) + "?recursive=1";
+  var r;
+  try {
+    r = await fetch(url, { headers: ghHeaders(false) });
+  } catch (e) {
+    logFn("❌ Impossible de joindre GitHub (réseau indisponible, ou aperçu dans un environnement sans réseau). " +
+      "Le fichier téléchargé et ouvert depuis votre dossier fonctionne normalement.");
+    return;
+  }
+  if (r.status === 404) { logFn("❌ Dépôt ou branche introuvable. Vérifiez l'utilisateur / dépôt / branche. Un dépôt PRIVÉ requiert un jeton."); return; }
+  if (r.status === 401 || r.status === 403) { logFn("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+  if (!r.ok) { logFn("❌ Erreur GitHub " + r.status); return; }
+  var tree = (await r.json()).tree || [];
+  var prefix = folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "";
+  var files = tree.filter(function (t) {
+    return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(prefix) === 0 &&
+      !/(^|\/)\.obsidian\//.test(t.path) && !/(^|\/)\.git\//.test(t.path);
+  });
+  if (!files.length) {
+    logFn("⚠️ Aucun fichier .md trouvé" + (folder ? " dans « " + folder + " »" : "") + ".");
+    return;
+  }
+  logFn(files.length + " fiche(s) détectée(s) — téléchargement…");
+  var ok = 0, replaced = 0;
+  for (var i = 0; i < files.length; i++) {
+    var p = files[i].path;
+    var rr = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
+      { headers: ghHeaders(true) });
+    if (!rr.ok) { logFn("⚠️ Échec : " + p); continue; }
+    var md = await rr.text();
+    var name = p.split("/").pop();
+    var res = importMd(name, md);
+    if (res.replaced) replaced++;
+    ok++;
+    logFn("✅ " + name);
+  }
+  persistFiches();
+  cfg.lastSync = new Date().toISOString();
+  persistCfg();
+  logFn("Synchronisation terminée : " + ok + " fiche(s) (" + replaced + " mise(s) à jour).");
+  if (ok > 0 && !silent) toast("☁️ " + ok + " fiche(s) synchronisée(s)");
+  render();
+}
+
+/* ================================================================
+   Vues
+================================================================ */
+var view = document.getElementById("view");
+
+function allTags() {
+  var seen = {}, out = [];
+  fiches.forEach(function (f) { f.tags.forEach(function (t) { if (!seen[t]) { seen[t] = 1; out.push(t); } }); });
+  return out.sort();
+}
+
+function render() {
+  var h = window.location.hash || "#/";
+  document.querySelectorAll("#nav a").forEach(function (a) {
+    a.classList.toggle("on", a.getAttribute("href") === h.split("/").slice(0, 2).join("/").replace(/\/$/, "") || (h === "#/" && a.getAttribute("href") === "#/"));
+  });
+  if (h.indexOf("#/fiche/") === 0) renderFiche(decodeURIComponent(h.slice(8)));
+  else if (h.indexOf("#/calculateur") === 0) renderCalculateur();
+  else if (h.indexOf("#/import") === 0) renderImport();
+  else renderHome();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Accueil / liste ---------- */
+function renderHome() {
+  var q = norm(ui.q);
+  var list = fiches.filter(function (f) {
+    if (ui.favOnly && favs.indexOf(f.slug) < 0) return false;
+    if (ui.tag && f.tags.map(norm).indexOf(norm(ui.tag)) < 0) return false;
+    if (q && f.text.indexOf(q) < 0) return false;
+    return true;
+  });
+  var recentList = (q || ui.tag || ui.favOnly) ? [] :
+    recents.map(function (s) { return fiches.find(function (f) { return f.slug === s; }); }).filter(Boolean).slice(0, 4);
+
+  var html = "";
+  if (!fiches.length) {
+    html += '<div class="card" style="text-align:center"><div class="empty">' +
+      '<svg class="logo-sq" width="132" height="132" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ZenoBE" style="margin:0 auto 10px"> <defs> <linearGradient id="s-bg" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/> </linearGradient> <linearGradient id="s-brass" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/> </linearGradient> <radialGradient id="s-sheen" cx="0.3" cy="0.25" r="0.9"> <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/> </radialGradient> </defs> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-bg)"/> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-sheen)"/> <rect x="136" y="90" width="240" height="34" rx="17" fill="#FFFFFF"/> <rect x="136" y="290" width="240" height="34" rx="17" fill="#FFFFFF"/> <path d="M 150 124 L 362 290 L 362 256 L 150 124 Z" fill="#FFFFFF"/> <text x="256" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="bold" letter-spacing="3"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#s-brass)">BE</tspan></text> <circle cx="200" cy="422" r="9" fill="#FFFFFF" opacity="0.95"/> <circle cx="256" cy="422" r="6.5" fill="#FFFFFF" opacity="0.75"/> <circle cx="304" cy="422" r="4.5" fill="#FFFFFF" opacity="0.55"/> </svg>' +
+      "<h1>Bienvenue dans ZenoBE</h1>" +
+      '<p>Aucune fiche pour le moment.</p>' +
+      '<a class="btn btn-primary" href="#/import">📥 Importer mes fiches</a></div></div>';
+    view.innerHTML = html; return;
+  }
+  html += '<div class="searchbar"><input type="text" id="search" placeholder="🔎 Rechercher un médicament, une indication, une dose…" value="' + esc(ui.q) + '"/></div>';
+  var tags = allTags();
+  if (tags.length) {
+    html += '<div class="chips">';
+    if (ui.favOnly || ui.tag || ui.q) html += '<span class="chip" onclick="clearFilters()">✕ Réinitialiser</span>';
+    html += '<span class="chip' + (ui.favOnly ? " on" : "") + '" onclick="toggleFav()">★ Favoris</span>';
+    tags.forEach(function (t) {
+      html += '<span class="chip' + (norm(ui.tag) === norm(t) ? " on" : "") + '" onclick="setTag(\'' + esc(t) + '\')">' + esc(t) + "</span>";
+    });
+    html += "</div>";
+  }
+  if (recentList.length) {
+    html += "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>Récemment consultées</p>";
+    html += '<div class="grid-fiches">' + recentList.map(cardHtml).join("") + "</div>";
+    html += "<div style='height:14px'></div>";
+  }
+  if (list.length) {
+    html += (recentList.length ? "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>Toutes les fiches</p>" : "");
+    html += '<div class="grid-fiches">' + list.map(cardHtml).join("") + "</div>";
+  } else {
+    html += '<div class="empty">Aucune fiche ne correspond à la recherche.</div>';
+  }
+  view.innerHTML = html;
+  var s = document.getElementById("search");
+  if (s) {
+    s.addEventListener("input", function () { ui.q = s.value; renderHome(); var s2 = document.getElementById("search"); if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); } });
+  }
+}
+
+function cardHtml(f) {
+  var isFav = favs.indexOf(f.slug) >= 0;
+  var tags = f.tags.slice(0, 3).map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join("");
+  return '<div class="fiche-card" onclick="openFiche(\'' + f.slug + '\')">' +
+    '<button class="star" title="Favori" onclick="toggleFavStar(event,\'' + f.slug + '\')">' + (isFav ? "★" : "☆") + "</button>" +
+    '<p class="t">' + esc(f.title) + "</p>" + tags +
+    '<p class="m">' + (f.updated ? "MAJ : " + esc(f.updated) : (f.created ? "Créée : " + esc(f.created) : "")) + "</p>" +
+    "</div>";
+}
+
+function openFiche(slug) {
+  recents = [slug].concat(recents.filter(function (s) { return s !== slug; })).slice(0, 6);
+  saveLs(LS.rec, recents);
+  window.location.hash = "#/fiche/" + slug;
+}
+function toggleFavStar(ev, slug) {
+  ev.stopPropagation();
+  var i = favs.indexOf(slug);
+  if (i >= 0) favs.splice(i, 1); else favs.push(slug);
+  saveLs(LS.fav, favs);
+  render();
+}
+function toggleFav() { ui.favOnly = !ui.favOnly; renderHome(); }
+function setTag(t) { ui.tag = (norm(ui.tag) === norm(t)) ? "" : t; renderHome(); }
+function clearFilters() { ui.q = ""; ui.tag = ""; ui.favOnly = false; renderHome(); }
+
+/* ---------- Fiche ---------- */
+function renderFiche(slug) {
+  var f = fiches.find(function (x) { return x.slug === slug; });
+  if (!f) { view.innerHTML = '<div class="empty">Fiche introuvable. <a href="#/">Retour</a></div>'; return; }
+  var isFav = favs.indexOf(f.slug) >= 0;
+  recents = [f.slug].concat(recents.filter(function (x) { return x !== f.slug; })).slice(0, 6);
+  saveLs(LS.rec, recents);
+  var meta = [];
+  if (f.author) meta.push("✍️ " + esc(f.author));
+  if (f.created) meta.push("Créée : " + esc(f.created));
+  if (f.updated) meta.push("MAJ : " + esc(f.updated));
+  var tags = f.tags.map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
+  var html = '<a class="back" href="#/">← Toutes les fiches</a>';
+  html += '<div class="card">';
+  html += '<div class="fiche-head"><h1>' + esc(f.title) + "</h1></div>";
+  if (tags) html += "<div>" + tags + "</div>";
+  if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
+  html += '<div class="fiche-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">' +
+    '<button class="btn" onclick="toggleFavStar(event,\'' + f.slug + '\')">' + (isFav ? "★ Favori" : "☆ Favori") + "</button>" +
+    (f.poso.length ? '<a class="btn" href="#/calculateur?f=' + f.slug + '">🧮 Calculateur de dose</a>' : "") +
+    '<button class="btn" onclick="window.print()">🖨️ Imprimer</button>' +
+    '<button class="btn" onclick="exportFiche(event, \'' + f.slug + '\')">📤 Exporter</button>' +
+    "</div>";
+  html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
+  html += f.html;
+  html += "</div>";
+  view.innerHTML = html;
+}
+
+  /* ---------- Export d'une fiche ---------- */
+function calcBackHtml(preselect, calcFiches) {
+  var f = calcFiches.filter(function (x) { return x.slug === preselect; })[0];
+  if (f) return '<a class="back" href="#/fiche/' + f.slug + '">← Fiche : ' + esc(f.title) + '</a>';
+  return '<a class="back" href="#/">← Toutes les fiches</a>';
+}
+
+function exportFiche(ev, slug) {
+  var old = document.getElementById("zenobe-export-menu");
+  if (old) { old.remove(); return; }
+  var f = fiches.find(function (x) { return x.slug === slug; });
+  if (!f) return;
+  var div = document.createElement("div");
+  div.id = "zenobe-export-menu";
+  div.style.cssText = "position:fixed;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.2);padding:8px;display:flex;flex-direction:column;gap:2px;min-width:260px";
+  if (ev && ev.currentTarget && ev.currentTarget.getBoundingClientRect) {
+    var r = ev.currentTarget.getBoundingClientRect();
+    div.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 280)) + "px";
+    div.style.top = (r.bottom + 6) + "px";
+  }
+  function item(label, fn) {
+    var b = document.createElement("button");
+    b.className = "btn";
+    b.style.cssText = "text-align:left;justify-content:flex-start;border:none;background:transparent;width:100%";
+    b.textContent = label;
+    b.onclick = function () { fn(); if (div.parentNode) div.remove(); };
+    div.appendChild(b);
+  }
+  item("📧 Partager par e-mail (fiche complète)", function () {
+    var body = "FICHE : " + f.title + "\n";
+    if (f.tags && f.tags.length) body += "Catégories : " + f.tags.join(", ") + "\n";
+    if (f.updated || f.created) body += "Dernière mise à jour : " + (f.updated || f.created) + "\n";
+    body += "――――――――――――――――――――\n\n" + (f.md || ("# " + f.title)) +
+      "\n\n――――――――――――――――――――\n⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.\n— Envoyé depuis ZenoBE, fiches médicaments pédiatriques";
+    var href = "mailto:?subject=" + encodeURIComponent("Fiche ZenoBE — " + f.title) + "&body=" + encodeURIComponent(body);
+    if (href.length > 1900) {
+      toast("ℹ️ Fiche longue : certains webmails tronquent les e-mails longs — le PDF ou le fichier .md peut être préférable.");
+    }
+    window.location.href = href;
+  });
+  item("📄 Enregistrer en PDF", function () { window.print(); });
+  item("📋 Copier la fiche (Markdown)", function () {
+    var md = f.md || ("# " + f.title);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(md).then(function () { toast("✅ Fiche copiée dans le presse-papiers"); }, function () { toast("⚠️ Copie impossible sur cet appareil"); });
+    } else { toast("⚠️ Copie impossible sur cet appareil"); }
+  });
+  item("💾 Télécharger le fichier .md", function () {
+    var md = "---\ntitre: " + f.title + "\ntags: [" + f.tags.join(", ") + "]\nupdated: " + (f.updated || f.created || "") + "\nauthor: " + (f.author || "") + "\n---\n\n" + (f.md || ("# " + f.title));
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+    a.download = f.slug + ".md";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+  document.body.appendChild(div);
+  setTimeout(function () {
+    document.addEventListener("click", function closer(e) {
+      if (div.parentNode && !div.contains(e.target)) { div.remove(); document.removeEventListener("click", closer); }
+    });
+  }, 0);
+}
+
+/* ---------- Calculateur ---------- */
+function renderCalculateur() {
+  var preselect = null;
+  var qi = window.location.hash.indexOf("?f=");
+  if (qi >= 0) preselect = decodeURIComponent(window.location.hash.slice(qi + 3));
+  var calcFiches = fiches.filter(function (f) { return f.poso.length; });
+  if (!preselect) {
+    for (var ri = 0; ri < recents.length; ri++) {
+      var rf = calcFiches.filter(function (x) { return x.slug === recents[ri]; })[0];
+      if (rf) { preselect = rf.slug; break; }
+    }
+  }
+  var html = '<div id="calc-back">' + calcBackHtml(preselect, calcFiches) + '</div>';
+  html += '<div class="card"><div class="section-title">🧮 Calculateur de doses</div>';
+  if (!calcFiches.length) {
+    html += '<div class="empty">Aucune fiche ne contient de tableau de posologie exploitable.<br/>' +
+      'Importez d\'abord des fiches, ou utilisez le <a href="#/calculateur?manual=1">mode manuel</a>.</div>';
+  } else {
+    html += '<label>Médicament</label><select id="calc-fiche">';
+    calcFiches.forEach(function (f) {
+      html += '<option value="' + f.slug + '"' + (f.slug === preselect ? " selected" : "") + ">" + esc(f.title) + "</option>";
+    });
+    html += "</select>";
+    html += '<div id="calc-schema-wrap"></div>';
+  }
+  html += '<div class="grid3" style="margin-top:6px">' +
+    '<div><label>Poids (kg)</label><input type="number" id="calc-poids" step="0.1" min="0.5" placeholder="ex : 12.5"/></div>' +
+    '<div><label>Dose (mg/kg ou mg/m²)</label><input type="number" id="calc-dose" step="0.5" min="0"/></div>' +
+    '<div><label>Prises / jour</label><input type="number" id="calc-freq" step="1" min="1"/></div>' +
+    "</div>";
+  html += '<div class="grid3">' +
+    '<div><label>Dose max (mg/j) — optionnel</label><input type="number" id="calc-cap" step="100" min="0"/></div>' +
+    '<div><label>Mode</label><select id="calc-mode"><option value="jour">mg/kg/jour</option><option value="prise">mg/kg/prise</option><option value="m2jour">mg/m²/jour (surface)</option><option value="m2prise">mg/m²/prise (surface)</option></select></div>' +
+    '<div><label>Taille (cm) — requise si mg/m²</label><input type="number" id="calc-taille" step="0.5" min="1" placeholder="ex : 95"/></div></div>';
+  html += '<button class="btn btn-primary" style="margin-top:14px" onclick="computeDose()">Calculer</button>';
+  html += '<div id="calc-result"></div>';
+  html += '<div class="warning-box"><strong>Avertissement :</strong> résultat calculé automatiquement — à contrôler face à la fiche et au référentiel officiel (maximum de doses, forme galénique, fonction rénale…).</div>';
+  html += "</div>";
+  view.innerHTML = html;
+  var sel = document.getElementById("calc-fiche");
+  if (sel) {
+    sel.addEventListener("change", fillSchema);
+    fillSchema();
+  }
+}
+
+function fillSchema() {
+  var wrap = document.getElementById("calc-schema-wrap");
+  var sel = document.getElementById("calc-fiche");
+  var f = fiches.find(function (x) { return x.slug === sel.value; });
+  if (!wrap || !f) return;
+  var html = '<label>Schéma posologique (issu de la fiche)</label><select id="calc-schema">';
+  f.poso.forEach(function (p, idx) {
+    html += '<option value="' + idx + '">' + esc(p.indication) + " — " + esc(p.doseText) + "</option>";
+  });
+  html += "</select>";
+  wrap.innerHTML = html;
+  var s = document.getElementById("calc-schema");
+  s.addEventListener("change", applySchema);
+  applySchema();
+  var back = document.getElementById("calc-back");
+  if (back) back.innerHTML = calcBackHtml(sel.value, fiches.filter(function (x) { return x.poso.length; }));
+}
+
+function applySchema() {
+  var selF = document.getElementById("calc-fiche"), selS = document.getElementById("calc-schema");
+  if (!selF || !selS) return;
+  var f = fiches.find(function (x) { return x.slug === selF.value; });
+  var p = f.poso[parseInt(selS.value, 10)];
+  var iDose = document.getElementById("calc-dose"), iFreq = document.getElementById("calc-freq"),
+      iCap = document.getElementById("calc-cap"), iMode = document.getElementById("calc-mode");
+  iDose.value = p.info.min || "";
+  iFreq.value = p.info.freq || "";
+  iCap.value = p.info.capMg || "";
+  iMode.value = p.info.perM2 ? (p.info.perDose ? "m2prise" : "m2jour") : (p.info.perDose ? "prise" : "jour");
+}
+
+function computeDose() {
+  var w = parseFloat((document.getElementById("calc-poids").value || "").replace(",", "."));
+  var tEl = document.getElementById("calc-taille");
+  var h = tEl ? parseFloat((tEl.value || "").replace(",", ".")) : NaN;
+  var dose = parseFloat((document.getElementById("calc-dose").value || "").replace(",", "."));
+  var freq = parseInt(document.getElementById("calc-freq").value || "0", 10);
+  var cap = parseFloat((document.getElementById("calc-cap").value || "0").replace(",", "."));
+  var mode = document.getElementById("calc-mode").value;
+  var out = document.getElementById("calc-result");
+  if (!w || w <= 0) { out.innerHTML = '<div class="warning-box">Saisissez le poids du patient.</div>'; return; }
+  if (!dose || dose <= 0) { out.innerHTML = '<div class="warning-box">Saisissez la dose (mg/kg ou mg/m²).</div>'; return; }
+  var isM2 = (mode === "m2jour" || mode === "m2prise");
+  var bsa = null;
+  if (isM2) {
+    if (!h || h <= 0) { out.innerHTML = '<div class="warning-box">Dose en mg/m² : saisissez aussi la taille du patient (surface corporelle, formule de Mosteller).</div>'; return; }
+    bsa = Math.sqrt((w * h) / 3600);
+  }
+  var daily, perPrise, capped = false;
+  if (isM2 && mode === "m2prise") {
+    perPrise = dose * bsa;
+    daily = freq > 0 ? perPrise * freq : null;
+  } else if (isM2) {
+    daily = dose * bsa;
+    perPrise = freq > 0 ? daily / freq : null;
+  } else if (mode === "prise") {
+    perPrise = dose * w;
+    daily = freq > 0 ? perPrise * freq : null;
+  } else {
+    daily = dose * w;
+    perPrise = freq > 0 ? daily / freq : null;
+  }
+  if (cap && daily && daily > cap) { daily = cap; capped = true; perPrise = freq > 0 ? daily / freq : null; }
+  var unitLabel = isM2 ? "mg/m²/" + (mode === "m2prise" ? "prise" : "jour") : "mg/kg/" + (mode === "prise" ? "prise" : "jour");
+  var html = '<div class="kpi-row">';
+  if (daily !== null) html += '<div class="kpi"><div class="v">' + fmtMg(daily) + '</div><div class="l">Dose totale / jour</div></div>';
+  if (perPrise !== null) html += '<div class="kpi"><div class="v">' + fmtMg(perPrise) + '</div><div class="l">Dose par prise (' + freq + 'x/j)</div></div>';
+  html += '<div class="kpi"><div class="v">' + String(dose).replace(".", ",") + " " + unitLabel + '</div><div class="l">Règle appliquée</div></div>';
+  if (bsa !== null) html += '<div class="kpi"><div class="v">' + bsa.toFixed(2).replace(".", ",") + ' m²</div><div class="l">Surface corporelle (Mosteller)</div></div>';
+  html += "</div>";
+  html += '<p class="formula">' + (isM2 ? (mode === "m2prise" ? "prise = " : "jour = ") + dose + " mg/m² × " + bsa.toFixed(2) + " m² (SC = √(" + w + " kg × " + h + " cm / 3600))"
+    : (mode === "prise" ? "prise = " : "jour = ") + dose + " mg/kg × " + w + " kg") +
+    (capped ? " → plafonné au maximum : " + cap + " mg/j" : "") + "</p>";
+  if (capped) html += '<div class="warning-box">⚠️ Dose maximale atteinte : le total journalier est plafonné.</div>';
+  out.innerHTML = html;
+}
+
+/* ---------- Import ---------- */
+function renderImport() {
+  var lastSync = cfg.lastSync ? new Date(cfg.lastSync).toLocaleString("fr-BE") : "jamais";
+  var html = '<div class="card"><div class="section-title">📥 Importer des fiches</div>';
+  html += '<p style="margin-top:0;color:var(--muted)">Formats acceptés : fichiers <code>.md</code> avec frontmatter YAML (format des fiches du coffre Obsidian).</p>';
+  /* Fichiers */
+  html += "<h3>Depuis des fichiers</h3>";
+  html += '<div class="dropzone" id="dropzone">📁 Cliquez ou glissez-déposez ici vos fichiers .md<br/>' +
+    '<span style="font-size:12px">(sélection multiple possible)</span></div>';
+  html += '<input type="file" id="file-input" accept=".md,.markdown,.txt" multiple style="display:none"/>';
+  /* Coller */
+  html += "<h3>Depuis le presse-papiers</h3>";
+  html += "<label>Collez le contenu d'une fiche (markdown)</label>";
+  html += '<textarea id="paste-area" rows="5" placeholder="---\ncréé : 2026-10-20\n…"></textarea>';
+  html += '<div style="display:flex;gap:8px;margin-top:10px">' +
+    '<input type="text" id="paste-name" placeholder="Nom du médicament (ex : Amoxicilline-clavulanate)"/>' +
+    '<button class="btn btn-primary" onclick="importPaste()">Ajouter</button></div>';
+  html += "</div>";
+
+  /* Carte GitHub */
+  html += '<div class="card"><div class="section-title">☁️ Synchronisation GitHub</div>';
+  html += '<p style="margin-top:0;color:var(--muted)">Architecture : le coffre Obsidian est poussé automatiquement vers GitHub ' +
+    "(plugiciel Git) ; l'application récupère ici les fiches du dépôt. Ajouter une fiche dans Obsidian → " +
+    "elle apparaît ici après synchronisation.</p>";
+  html += '<div class="grid2">' +
+    "<div><label>Utilisateur GitHub</label><input type='text' id='gh-user' value='" + esc(cfg.user) + "'/></div>" +
+    "<div><label>Dépôt</label><input type='text' id='gh-repo' value='" + esc(cfg.repo) + "'/></div>" +
+    "<div><label>Branche</label><input type='text' id='gh-branch' value='" + esc(cfg.branch) + "'/></div>" +
+    "<div><label>Dossier (vide = racine)</label><input type='text' id='gh-folder' value='" + esc(cfg.folder) + "' placeholder='ex : fiches'/></div>" +
+    "</div>";
+  html += "<label>Jeton GitHub (requis pour un dépôt privé — lecture seule)</label>" +
+    "<input type='password' id='gh-token' value='" + esc(cfg.token) + "' placeholder='github_pat_…'/>";
+  html += "<p class='field-note'>Le jeton reste stocké uniquement sur cet appareil. Créer un jeton : GitHub → Settings → Developer settings → Personal access tokens → fine-grained, accès au seul dépôt, permission Contents : Read-only.</p>";
+  html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px">' +
+    '<button class="btn btn-primary" id="gh-sync-btn" onclick="runSync()">☁️ Synchroniser maintenant</button>' +
+    '<label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;cursor:pointer">' +
+    '<input type="checkbox" id="gh-auto"' + (cfg.autoSync ? " checked" : "") + ' style="width:auto"/> Synchroniser au démarrage</label>' +
+    '<span style="font-size:12px;color:var(--muted)">Dernière synchro : ' + esc(lastSync) + "</span></div>";
+  html += '<label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;cursor:pointer">' +
+    '<input type="checkbox" id="gh-replace" style="width:auto"/> Remplacer toute la collection (sinon, fusion par nom de fiche)</label>';
+  html += '<div class="log" id="gh-log"></div>';
+  html += "</div>";
+
+  /* Gestion des données */
+  html += '<div class="card"><div class="section-title">🗄️ Données locales</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" onclick="exportData()">⬇️ Exporter (sauvegarde JSON)</button>' +
+    '<button class="btn btn-danger" onclick="wipeAll()">🗑️ Tout effacer</button></div>';
+  html += '<p class="field-note">Les fiches importées sont conservées sur cet appareil (stockage local du navigateur) — ' +
+    "l'application fonctionne ensuite hors ligne.</p>";
+  html += '<p class="field-note">💡 Astuce : dans un aperçu intégré (Vibe), l&rsquo;accès réseau peut être bloqué — le fichier téléchargé ' +
+    "et ouvert depuis votre coffre fonctionne normalement.</p>";
+  html += "</div>";
+
+  view.innerHTML = html;
+
+  var dz = document.getElementById("dropzone"), fi = document.getElementById("file-input");
+  dz.addEventListener("click", function () { fi.click(); });
+  dz.addEventListener("dragover", function (e) { e.preventDefault(); dz.classList.add("drag"); });
+  dz.addEventListener("dragleave", function () { dz.classList.remove("drag"); });
+  dz.addEventListener("drop", function (e) {
+    e.preventDefault(); dz.classList.remove("drag");
+    handleFiles(e.dataTransfer.files);
+  });
+  fi.addEventListener("change", function () { handleFiles(fi.files); });
+  ["gh-user", "gh-repo", "gh-branch", "gh-folder", "gh-token"].forEach(function (id) {
+    document.getElementById(id).addEventListener("change", readGhForm);
+  });
+  document.getElementById("gh-auto").addEventListener("change", function () {
+    readGhForm();
+    toast(cfg.autoSync ? "Synchronisation au démarrage activée" : "Synchronisation au démarrage désactivée");
+  });
+}
+
+function readGhForm() {
+  cfg.user = document.getElementById("gh-user").value;
+  cfg.repo = document.getElementById("gh-repo").value;
+  cfg.branch = document.getElementById("gh-branch").value || "main";
+  cfg.folder = document.getElementById("gh-folder").value;
+  cfg.token = document.getElementById("gh-token").value;
+  cfg.autoSync = document.getElementById("gh-auto").checked;
+  persistCfg();
+}
+
+function runSync() {
+  readGhForm();
+  var logEl = document.getElementById("gh-log");
+  var btn = document.getElementById("gh-sync-btn");
+  if (document.getElementById("gh-replace").checked) { fiches = []; persistFiches(); }
+  logEl.style.display = "block";
+  logEl.textContent = "";
+  var log = function (m) { logEl.textContent += m + "\n"; logEl.scrollTop = logEl.scrollHeight; };
+  btn.disabled = true;
+  syncGitHub(log, false).then(function () { btn.disabled = false; });
+}
+
+function handleFiles(fileList) {
+  var files = Array.prototype.slice.call(fileList).filter(function (f) { return /\.(md|markdown|txt)$/i.test(f.name); });
+  if (!files.length) { toast("⚠️ Aucun fichier .md trouvé"); return; }
+  var done = 0, added = 0;
+  files.forEach(function (f) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var res = importMd(f.name, String(reader.result));
+      done++; if (!res.replaced) added++;
+      if (done === files.length) { persistFiches(); toast("✅ " + added + " fiche(s) ajoutée(s), " + (files.length - added) + " mise(s) à jour"); renderImport(); }
+    };
+    reader.readAsText(f);
+  });
+}
+
+function importPaste() {
+  var md = document.getElementById("paste-area").value.trim();
+  var name = document.getElementById("paste-name").value.trim() || "fiche-collee.md";
+  if (!md) { toast("⚠️ Collez d'abord le contenu d'une fiche"); return; }
+  if (!/\.md$/i.test(name)) name += ".md";
+  var res = importMd(name, md);
+  persistFiches();
+  toast(res.replaced ? "✅ Fiche mise à jour" : "✅ Fiche ajoutée");
+  document.getElementById("paste-area").value = "";
+  document.getElementById("paste-name").value = "";
+}
+
+function exportData() {
+  var data = { fiches: fiches, cfg: cfg, favs: favs, exported: new Date().toISOString() };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "zenobe-sauvegarde.json";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function wipeAll() {
+  if (!confirm("Effacer toutes les fiches et réglages de cet appareil ?")) return;
+  fiches = []; favs = []; recents = [];
+  cfg.token = "";
+  persistFiches(); persistCfg(); saveLs(LS.fav, favs); saveLs(LS.rec, recents);
+  toast("Données effacées");
+  render();
+}
+
+/* ================================================================
+   Démarrage
+================================================================ */
+document.getElementById("quick-sync").addEventListener("click", function () {
+  window.location.hash = "#/import";
+  setTimeout(runSync, 60);
+});
+window.addEventListener("hashchange", render);
+render();
+updateCount();
+if (cfg.autoSync && fiches.length >= 0) {
+  var silentLog = function () {};
+  syncGitHub(silentLog, true);
+}
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
