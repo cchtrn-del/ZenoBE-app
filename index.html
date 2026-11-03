@@ -211,7 +211,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.6 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.8 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -846,12 +846,12 @@ function renderCalculateur() {
   }
   html += '<div class="grid3" style="margin-top:6px">' +
     '<div><label>Poids (kg)</label><input type="number" id="calc-poids" step="0.1" min="0.5" placeholder="ex : 12.5"/></div>' +
-    '<div><label>Dose (mg/kg, mg/m² ou µg/kg/h)</label><input type="number" id="calc-dose" step="0.5" min="0"/></div>' +
+    '<div><label>Dose</label><div style="display:flex;gap:6px"><input type="number" id="calc-dose" step="any" min="0" style="flex:1"/><select id="calc-unite" style="width:110px;flex:0 0 auto"><option value="mgkg">mg/kg</option><option value="ugkg">µg/kg</option><option value="mgm2">mg/m²</option></select></div></div>' +
     '<div><label>Prises / jour</label><input type="number" id="calc-freq" step="1" min="1"/></div>' +
     "</div>";
   html += '<div class="grid3">' +
     '<div><label>Dose max (mg/j) — optionnel</label><input type="number" id="calc-cap" step="100" min="0"/></div>' +
-    '<div><label>Mode</label><select id="calc-mode"><option value="jour">mg/kg/jour</option><option value="prise">mg/kg/prise</option><option value="ugkgjour">µg/kg/jour</option><option value="ugkgdose">µg/kg/dose</option><option value="ugkgh">µg/kg/h (perfusion continue)</option><option value="mgkgh">mg/kg/h (perfusion continue)</option><option value="ugkgmin">µg/kg/min (perfusion continue)</option><option value="mgkgmin">mg/kg/min (perfusion continue)</option><option value="m2jour">mg/m²/jour (surface)</option><option value="m2prise">mg/m²/prise (surface)</option></select></div>' +
+    '<div><label>Répartition</label><select id="calc-mode"><option value="jour">par jour</option><option value="prise">par prise</option><option value="h">par heure — perfusion continue</option><option value="min">par minute — perfusion continue</option></select></div>' +
     "<div></div></div>";
   html += '<div class="grid3">' +
     '<div><label>Taille (cm) — requise si mg/m²</label><input type="number" id="calc-taille" step="0.5" min="1" placeholder="ex : 95"/></div>' +
@@ -866,6 +866,10 @@ function renderCalculateur() {
   var sel = document.getElementById("calc-fiche");
   if (sel) {
     sel.addEventListener("change", fillSchema);
+    var iUnite = document.getElementById("calc-unite");
+    if (iUnite) iUnite.addEventListener("change", convertUnite);
+    var iModeSel = document.getElementById("calc-mode");
+    if (iModeSel) iModeSel.addEventListener("change", convertRepartition);
     fillSchema();
   }
 }
@@ -892,13 +896,112 @@ function applySchema() {
   var f = fiches.find(function (x) { return x.slug === selF.value; });
   var p = f.poso[parseInt(selS.value, 10)];
   var iDose = document.getElementById("calc-dose"), iFreq = document.getElementById("calc-freq"),
-      iCap = document.getElementById("calc-cap"), iMode = document.getElementById("calc-mode");
-  iDose.value = p.info.min || "";
-  iFreq.value = p.info.freq || "";
-  iCap.value = p.info.capMg || "";
-  iMode.value = p.info.perRate
-    ? (p.info.rateUnit === "mg" ? (p.info.ratePer === "min" ? "mgkgmin" : "mgkgh") : (p.info.ratePer === "min" ? "ugkgmin" : "ugkgh"))
-    : (p.info.ugDay ? "ugkgjour" : (p.info.ugDose ? "ugkgdose" : (p.info.perM2 ? (p.info.perDose ? "m2prise" : "m2jour") : (p.info.perDose ? "prise" : "jour"))));
+      iCap = document.getElementById("calc-cap"), iMode = document.getElementById("calc-mode"),
+      iUnite = document.getElementById("calc-unite");
+  /* Défauts selon le schéma : unité + répartition */
+  var unite, par;
+  if (p.info.perRate) {
+    unite = (p.info.rateUnit === "mg") ? "mgkg" : "ugkg";
+    par = (p.info.ratePer === "min") ? "min" : "h";
+  } else if (p.info.ugDay || p.info.ugDose) {
+    unite = "ugkg";
+    par = p.info.ugDay ? "jour" : "prise";
+  } else if (p.info.perM2) {
+    unite = "mgm2";
+    par = p.info.perDose ? "prise" : "jour";
+  } else {
+    unite = "mgkg";
+    par = p.info.perDose ? "prise" : "jour";
+  }
+  iUnite.dataset.prev = unite;
+  iUnite.value = unite;
+  iMode.value = par;
+  iMode.dataset.prev = par;
+  iDose.value = String(p.info.min || "");
+  iFreq.value = String(p.info.freq || "");
+  iCap.value = String(p.info.capMg || "");
+}
+
+/* Conversion de la dose quand l'utilisateur change l'unité */
+function convertUnite() {
+  var iUnite = document.getElementById("calc-unite");
+  var iDose = document.getElementById("calc-dose"), iMode = document.getElementById("calc-mode");
+  var avant = iUnite.dataset.prev || iUnite.value;
+  var apres = iUnite.value;
+  if (avant === apres) return;
+  var v = parseFloat((iDose.value || "").replace(",", "."));
+  if (!isNaN(v) && v > 0) {
+    if (avant === "mgkg" && apres === "ugkg") iDose.value = String(v * 1000);
+    else if (avant === "ugkg" && apres === "mgkg") iDose.value = String(Math.round(v / 1000 * 10000) / 10000);
+    /* mg/m² : pas de conversion numérique (base différente) */
+  }
+  if (apres === "mgm2" && (iMode.value === "h" || iMode.value === "min")) {
+    iMode.value = "jour";
+    toast("mg/m² : répartition ajustée à « par jour » (perfusion en m² non définie)");
+  }
+  if ((apres === "ugkg" || apres === "mgkg") && (iMode.value === "h" || iMode.value === "min") && avant === "mgm2") {
+    iMode.value = "jour";
+  }
+  iUnite.dataset.prev = apres;
+  computeDose();
+}
+
+/* Arrondi propre des doses converties */
+function roundDoseVal(v) {
+  if (!isFinite(v) || v <= 0) return v;
+  var r;
+  if (v >= 10) r = Math.round(v);
+  else if (v >= 1) r = Math.round(v * 10) / 10;
+  else r = Math.round(v * 10000) / 10000;
+  /* Aimant ergonomique : si le resultat tombe juste EN DESSOUS d un multiple de 5
+     (a moins de 2 % de la cible), on l arrondit dessus : 33 x 3 = 99 -> 100.
+     Uniquement vers le haut : jamais de reduction de dose. */
+  var cible = Math.ceil(r / 5) * 5;
+  if (cible > r && cible - r <= 0.02 * cible) r = cible;
+  return r;
+}
+
+/* Conversion de la dose quand l'utilisateur change la répartition */
+function convertRepartition() {
+  var iMode = document.getElementById("calc-mode");
+  var iDose = document.getElementById("calc-dose"), iFreq = document.getElementById("calc-freq");
+  var avant = iMode.dataset.prev || iMode.value;
+  var apres = iMode.value;
+  if (avant === apres) return;
+  var freq = parseInt(iFreq && iFreq.value ? String(iFreq.value).replace(",", ".") : "0", 10);
+  /* facteur de conversion : nouvelle dose = ancienne × facteur */
+  var facteur = null, besoinFreq = false;
+  if (avant === "jour" && apres === "prise") { facteur = freq > 0 ? 1 / freq : null; besoinFreq = true; }
+  else if (avant === "prise" && apres === "jour") { facteur = freq > 0 ? freq : null; besoinFreq = true; }
+  else if (avant === "jour" && apres === "h") facteur = 1 / 24;
+  else if (avant === "h" && apres === "jour") facteur = 24;
+  else if (avant === "h" && apres === "min") facteur = 60;
+  else if (avant === "min" && apres === "h") facteur = 1 / 60;
+  else if (avant === "jour" && apres === "min") facteur = 1 / 1440;
+  else if (avant === "min" && apres === "jour") facteur = 1440;
+  else if (avant === "prise" && apres === "h") { facteur = freq > 0 ? freq / 24 : null; besoinFreq = true; }
+  else if (avant === "h" && apres === "prise") { facteur = freq > 0 ? 24 / freq : null; besoinFreq = true; }
+  else if (avant === "prise" && apres === "min") { facteur = freq > 0 ? freq / 1440 : null; besoinFreq = true; }
+  else if (avant === "min" && apres === "prise") { facteur = freq > 0 ? 1440 / freq : null; besoinFreq = true; }
+  if (facteur === null) {
+    /* conversion impossible sans le nombre de prises/jour : on refuse le changement */
+    iMode.value = avant;
+    toast(besoinFreq ? "⚠️ Indiquez d'abord les prises / jour pour convertir la dose." : "⚠️ Conversion non disponible.");
+    return;
+  }
+  var v = parseFloat((iDose.value || "").replace(",", "."));
+  if (!isNaN(v) && v > 0) iDose.value = String(roundDoseVal(v * facteur));
+  iMode.dataset.prev = apres;
+  computeDose();
+}
+
+function calcModeEffectif() {
+  var iUnite = document.getElementById("calc-unite"), iMode = document.getElementById("calc-mode");
+  if (!iUnite || !iMode) return "jour";
+  var unite = iUnite.value, par = iMode.value;
+  if (unite === "mgm2") return (par === "prise" ? "m2prise" : "m2jour");
+  if (unite === "ugkg") return (par === "jour" ? "ugkgjour" : par === "prise" ? "ugkgdose" : par === "min" ? "ugkgmin" : "ugkgh");
+  return (par === "jour" ? "jour" : par === "prise" ? "prise" : par === "min" ? "mgkgmin" : "mgkgh");
 }
 
 function computeDose() {
@@ -908,10 +1011,10 @@ function computeDose() {
   var dose = parseFloat((document.getElementById("calc-dose").value || "").replace(",", "."));
   var freq = parseInt(document.getElementById("calc-freq").value || "0", 10);
   var cap = parseFloat((document.getElementById("calc-cap").value || "0").replace(",", "."));
-  var mode = document.getElementById("calc-mode").value;
+  var mode = calcModeEffectif();
   var out = document.getElementById("calc-result");
   if (!w || w <= 0) { out.innerHTML = '<div class="warning-box">Saisissez le poids du patient.</div>'; return; }
-  if (!dose || dose <= 0) { out.innerHTML = '<div class="warning-box">Saisissez la dose (mg/kg ou mg/m²).</div>'; return; }
+  if (!dose || dose <= 0) { out.innerHTML = '<div class="warning-box">Saisissez la dose.</div>'; return; }
   var isRate = (mode === "ugkgh" || mode === "mgkgh" || mode === "ugkgmin" || mode === "mgkgmin");
   var isUg = (mode === "ugkgjour" || mode === "ugkgdose");
   var perMin = (mode === "ugkgmin" || mode === "mgkgmin");
@@ -1138,6 +1241,6 @@ if (cfg.autoSync && fiches.length >= 0) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="deo1wnMAl9X33YB5JBhH+A==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="smv51ZMgTsSjOegEFWt1rw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
