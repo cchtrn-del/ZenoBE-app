@@ -4,15 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#1d4ed8" />
-<link rel="apple-touch-icon" href="zenobe-icon.png" />
-<link rel="icon" type="image/png" href="zenobe-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Zénobe" />
-<title>Zénobe — Fiches Médicaments</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20class%3D%22logo-sq%22%20data-x%3D%22favicon%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%20512%20512%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20role%3D%22img%22%20aria-label%3D%22Logo%20ZenoBE%22%3E%20%3Cdefs%3E%20%3ClinearGradient%20id%3D%22f-bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23123E7C%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231E6FBF%22/%3E%20%3C/linearGradient%3E%20%3ClinearGradient%20id%3D%22f-brass%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23E7C55A%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23B8891F%22/%3E%20%3C/linearGradient%3E%20%3CradialGradient%20id%3D%22f-sheen%22%20cx%3D%220.3%22%20cy%3D%220.25%22%20r%3D%220.9%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220.18%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23FFFFFF%22%20stop-opacity%3D%220%22/%3E%20%3C/radialGradient%3E%20%3C/defs%3E%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22480%22%20height%3D%22480%22%20rx%3D%22108%22%20fill%3D%22url%28%23f-bg%29%22/%3E%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22480%22%20height%3D%22480%22%20rx%3D%22108%22%20fill%3D%22url%28%23f-sheen%29%22/%3E%20%3Crect%20x%3D%22136%22%20y%3D%2290%22%20width%3D%22240%22%20height%3D%2234%22%20rx%3D%2217%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Crect%20x%3D%22136%22%20y%3D%22290%22%20width%3D%22240%22%20height%3D%2234%22%20rx%3D%2217%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Cpath%20d%3D%22M%20150%20124%20L%20362%20290%20L%20362%20256%20L%20150%20124%20Z%22%20fill%3D%22%23FFFFFF%22/%3E%20%3Ctext%20x%3D%22256%22%20y%3D%22388%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2C%20Arial%2C%20sans-serif%22%20font-size%3D%2266%22%20font-weight%3D%22bold%22%20letter-spacing%3D%223%22%3E%3Ctspan%20fill%3D%22%23FFFFFF%22%3EZeno%3C/tspan%3E%3Ctspan%20fill%3D%22url%28%23f-brass%29%22%3EBE%3C/tspan%3E%3C/text%3E%20%3Ccircle%20cx%3D%22200%22%20cy%3D%22422%22%20r%3D%229%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.95%22/%3E%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22422%22%20r%3D%226.5%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.75%22/%3E%20%3Ccircle%20cx%3D%22304%22%20cy%3D%22422%22%20r%3D%224.5%22%20fill%3D%22%23FFFFFF%22%20opacity%3D%220.55%22/%3E%20%3C/svg"/>
+<title>ZenoBE — Fiches médicaments pédiatriques (CHC)</title>
 <style>
   * { box-sizing: border-box; }
   :root {
     --bg: #f4f7fb; --card: #ffffff; --ink: #0f172a; --muted: #64748b;
-    --accent: #1d4ed8; --accent-soft: #eff6ff; --border: #e2e8f0;
+    --accent: #1E6FBF; --accent-soft: #eff6ff; --border: #e2e8f0;
     --ok: #047857; --ok-soft: #ecfdf5; --warn: #b45309; --warn-soft: #fffbeb;
     --radius: 14px; --shadow: 0 1px 2px rgba(15,23,42,.05);
   }
@@ -28,21 +26,8 @@
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 14px; padding: 10px 16px; flex-wrap: wrap;
   }
-  .brand { font-weight: 800; color: var(--accent); font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .brand { display: flex; align-items: center; gap: 8px; } .brand .logo-h { height: 42px; width: auto; display: block; }
   .brand .logo { font-size: 20px; }
-  /* ---------- Pictogrammes Zénobe (sections de fiche) ---------- */
-  h2.picto-head, h3.picto-head {
-    display: flex; align-items: center; gap: 10px;
-  }
-  h2.picto-head {
-    font-size: 15px; text-transform: none; letter-spacing: .2px;
-    margin: 22px 0 8px; padding: 7px 14px 7px 10px; background: var(--accent-soft);
-    color: #1e3a8a; border-radius: 10px; border-left: 4px solid var(--accent);
-  }
-  .picto-head svg.zpicto { width: 30px; height: 30px; flex: 0 0 auto; display: block; }
-  /* ---------- Marque Zénobe ---------- */
-  .brand .brand-logo svg { display: block; }
-  .brand .brand-name { color: #B8891F; letter-spacing: 1.5px; }
   .nav { display: flex; gap: 4px; }
   .nav a {
     text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13.5px;
@@ -67,6 +52,16 @@
     margin: 22px 0 8px; padding: 9px 14px; background: var(--accent-soft);
     color: #1e3a8a; border-radius: 10px; border-left: 4px solid var(--accent);
   }
+  /* ---------- Pictogrammes Zénobe (sections de fiche) ---------- */
+  h2.picto-head, h3.picto-head {
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2.picto-head {
+    font-size: 15px; text-transform: none; letter-spacing: .2px;
+    margin: 22px 0 8px; padding: 7px 14px 7px 10px; background: var(--accent-soft);
+    color: #1e3a8a; border-radius: 10px; border-left: 4px solid var(--accent);
+  }
+  .picto-head svg.zpicto { width: 30px; height: 30px; flex: 0 0 auto; display: block; }
   h3 { font-size: 17px; margin: 18px 0 6px; }
   h4 { font-size: 14.5px; margin: 14px 0 6px; color: #334155; }
   p { margin: 8px 0; }
@@ -143,6 +138,7 @@
   .back { text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
   .back:hover { color: var(--accent); }
   /* ---------- Calculateur ---------- */
+/* ---------- Calculateur ---------- */
   .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; }
   .kpi { background: var(--accent-soft); border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; }
   .kpi .v { font-size: 21px; font-weight: 800; color: #1e3a8a; }
@@ -180,7 +176,28 @@
 <body>
 
 <div class="topbar">
-  <div class="brand"><span class="brand-logo"><svg viewBox="0 0 220 220" width="26" height="26" aria-hidden="true"><rect x="0" y="0" width="220" height="220" rx="48" fill="#1E6FBF"/><rect x="56" y="41" width="108" height="16" rx="8" fill="#FFFFFF"/><rect x="56" y="121" width="108" height="16" rx="8" fill="#FFFFFF"/><path d="M 59 57 L 161 121 L 161 107 L 59 57 Z" fill="#FFFFFF"/></svg></span><span class="brand-name">ZENOBE</span></div>
+  <div class="brand" style="padding:4px 0"><svg class="logo-h" width="118" height="59" viewBox="0 0 1024 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ZenoBE">
+              <defs>
+                <linearGradient id="h-bg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/>
+                </linearGradient>
+                <linearGradient id="h-brass" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/>
+                </linearGradient>
+                <radialGradient id="h-sheen" cx="0.3" cy="0.25" r="0.9">
+                  <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-bg)"/>
+              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-sheen)"/>
+              <rect x="86" y="136" width="200" height="30" rx="15" fill="#FFFFFF"/>
+              <rect x="86" y="346" width="200" height="30" rx="15" fill="#FFFFFF"/>
+              <path d="M 98 166 L 274 346 L 274 316 L 98 166 Z" fill="#FFFFFF"/>
+              <text x="330" y="316" font-family="Helvetica, Arial, sans-serif" font-size="138" font-weight="bold" letter-spacing="4"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#h-brass)">BE</tspan></text>
+              <circle cx="578" cy="368" r="11" fill="#FFFFFF" opacity="0.95"/>
+              <circle cx="610" cy="368" r="8" fill="#FFFFFF" opacity="0.75"/>
+              <circle cx="638" cy="368" r="5.5" fill="#FFFFFF" opacity="0.55"/>
+            </svg></div>
   <nav class="nav" id="nav">
     <a href="#/" data-r="/">Fiches</a>
     <a href="#/calculateur">Calculateur</a>
@@ -193,7 +210,8 @@
 </div>
 
 <main id="view"></main>
-<footer>Zénobe — v0.5 · ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
+<footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.6 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -217,7 +235,6 @@ var fiches = loadLs(LS.fiches, []);
 var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, lastSync: null });
 var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
-var EMBEDDED_FICHES = (window.EMBEDDED_FICHES && window.EMBEDDED_FICHES.length) ? window.EMBEDDED_FICHES : [];
 var ui = { q: "", tag: "", favOnly: false };
 
 function persistFiches() { saveLs(LS.fiches, fiches); updateCount(); }
@@ -345,8 +362,6 @@ function renderTable(rows) {
 
 /* ================================================================
    Charte graphique « Zénobe » — pictogrammes de sections
-   Style : tuile bleu médical, trait blanc, un seul accent laiton.
-   Un pictogramme remplace l'emoji des en-têtes canoniques des fiches.
 ================================================================ */
 function zenPictoDefs(uid) {
   return '<defs>' +
@@ -649,8 +664,9 @@ function renderHome() {
 
   var html = "";
   if (!fiches.length) {
-    html += '<div class="card" style="text-align:center"><div class="empty"><div class="big">💊</div>' +
-      "<h1>Bienvenue dans vos Fiches Médicaments</h1>" +
+    html += '<div class="card" style="text-align:center"><div class="empty">' +
+      '<svg class="logo-sq" width="132" height="132" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ZenoBE" style="margin:0 auto 10px"> <defs> <linearGradient id="s-bg" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/> </linearGradient> <linearGradient id="s-brass" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/> </linearGradient> <radialGradient id="s-sheen" cx="0.3" cy="0.25" r="0.9"> <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/> </radialGradient> </defs> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-bg)"/> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-sheen)"/> <rect x="136" y="90" width="240" height="34" rx="17" fill="#FFFFFF"/> <rect x="136" y="290" width="240" height="34" rx="17" fill="#FFFFFF"/> <path d="M 150 124 L 362 290 L 362 256 L 150 124 Z" fill="#FFFFFF"/> <text x="256" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="bold" letter-spacing="3"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#s-brass)">BE</tspan></text> <circle cx="200" cy="422" r="9" fill="#FFFFFF" opacity="0.95"/> <circle cx="256" cy="422" r="6.5" fill="#FFFFFF" opacity="0.75"/> <circle cx="304" cy="422" r="4.5" fill="#FFFFFF" opacity="0.55"/> </svg>' +
+      "<h1>Bienvenue dans ZenoBE</h1>" +
       '<p>Aucune fiche pour le moment.</p>' +
       '<a class="btn btn-primary" href="#/import">📥 Importer mes fiches</a></div></div>';
     view.innerHTML = html; return;
@@ -715,6 +731,8 @@ function renderFiche(slug) {
   var f = fiches.find(function (x) { return x.slug === slug; });
   if (!f) { view.innerHTML = '<div class="empty">Fiche introuvable. <a href="#/">Retour</a></div>'; return; }
   var isFav = favs.indexOf(f.slug) >= 0;
+  recents = [f.slug].concat(recents.filter(function (x) { return x !== f.slug; })).slice(0, 6);
+  saveLs(LS.rec, recents);
   var meta = [];
   if (f.author) meta.push("✍️ " + esc(f.author));
   if (f.created) meta.push("Créée : " + esc(f.created));
@@ -729,11 +747,76 @@ function renderFiche(slug) {
     '<button class="btn" onclick="toggleFavStar(event,\'' + f.slug + '\')">' + (isFav ? "★ Favori" : "☆ Favori") + "</button>" +
     (f.poso.length ? '<a class="btn" href="#/calculateur?f=' + f.slug + '">🧮 Calculateur de dose</a>' : "") +
     '<button class="btn" onclick="window.print()">🖨️ Imprimer</button>' +
+    '<button class="btn" onclick="exportFiche(event, \'' + f.slug + '\')">📤 Exporter</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
   html += f.html;
   html += "</div>";
   view.innerHTML = html;
+}
+
+  /* ---------- Export d'une fiche ---------- */
+function calcBackHtml(preselect, calcFiches) {
+  var f = calcFiches.filter(function (x) { return x.slug === preselect; })[0];
+  if (f) return '<a class="back" href="#/fiche/' + f.slug + '">← Fiche : ' + esc(f.title) + '</a>';
+  return '<a class="back" href="#/">← Toutes les fiches</a>';
+}
+
+function exportFiche(ev, slug) {
+  var old = document.getElementById("zenobe-export-menu");
+  if (old) { old.remove(); return; }
+  var f = fiches.find(function (x) { return x.slug === slug; });
+  if (!f) return;
+  var div = document.createElement("div");
+  div.id = "zenobe-export-menu";
+  div.style.cssText = "position:fixed;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.2);padding:8px;display:flex;flex-direction:column;gap:2px;min-width:260px";
+  if (ev && ev.currentTarget && ev.currentTarget.getBoundingClientRect) {
+    var r = ev.currentTarget.getBoundingClientRect();
+    div.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 280)) + "px";
+    div.style.top = (r.bottom + 6) + "px";
+  }
+  function item(label, fn) {
+    var b = document.createElement("button");
+    b.className = "btn";
+    b.style.cssText = "text-align:left;justify-content:flex-start;border:none;background:transparent;width:100%";
+    b.textContent = label;
+    b.onclick = function () { fn(); if (div.parentNode) div.remove(); };
+    div.appendChild(b);
+  }
+  item("📧 Partager par e-mail (fiche complète)", function () {
+    var body = "FICHE : " + f.title + "\n";
+    if (f.tags && f.tags.length) body += "Catégories : " + f.tags.join(", ") + "\n";
+    if (f.updated || f.created) body += "Dernière mise à jour : " + (f.updated || f.created) + "\n";
+    body += "――――――――――――――――――――\n\n" + (f.md || ("# " + f.title)) +
+      "\n\n――――――――――――――――――――\n⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.\n— Envoyé depuis ZenoBE, fiches médicaments pédiatriques";
+    var href = "mailto:?subject=" + encodeURIComponent("Fiche ZenoBE — " + f.title) + "&body=" + encodeURIComponent(body);
+    if (href.length > 1900) {
+      toast("ℹ️ Fiche longue : certains webmails tronquent les e-mails longs — le PDF ou le fichier .md peut être préférable.");
+    }
+    window.location.href = href;
+  });
+  item("📄 Enregistrer en PDF", function () { window.print(); });
+  item("📋 Copier la fiche (Markdown)", function () {
+    var md = f.md || ("# " + f.title);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(md).then(function () { toast("✅ Fiche copiée dans le presse-papiers"); }, function () { toast("⚠️ Copie impossible sur cet appareil"); });
+    } else { toast("⚠️ Copie impossible sur cet appareil"); }
+  });
+  item("💾 Télécharger le fichier .md", function () {
+    var md = "---\ntitre: " + f.title + "\ntags: [" + f.tags.join(", ") + "]\nupdated: " + (f.updated || f.created || "") + "\nauthor: " + (f.author || "") + "\n---\n\n" + (f.md || ("# " + f.title));
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+    a.download = f.slug + ".md";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+  document.body.appendChild(div);
+  setTimeout(function () {
+    document.addEventListener("click", function closer(e) {
+      if (div.parentNode && !div.contains(e.target)) { div.remove(); document.removeEventListener("click", closer); }
+    });
+  }, 0);
 }
 
 /* ---------- Calculateur ---------- */
@@ -742,7 +825,13 @@ function renderCalculateur() {
   var qi = window.location.hash.indexOf("?f=");
   if (qi >= 0) preselect = decodeURIComponent(window.location.hash.slice(qi + 3));
   var calcFiches = fiches.filter(function (f) { return f.poso.length; });
-  var html = '<a class="back" href="#/">← Toutes les fiches</a>';
+  if (!preselect) {
+    for (var ri = 0; ri < recents.length; ri++) {
+      var rf = calcFiches.filter(function (x) { return x.slug === recents[ri]; })[0];
+      if (rf) { preselect = rf.slug; break; }
+    }
+  }
+  var html = '<div id="calc-back">' + calcBackHtml(preselect, calcFiches) + '</div>';
   html += '<div class="card"><div class="section-title">🧮 Calculateur de doses</div>';
   if (!calcFiches.length) {
     html += '<div class="empty">Aucune fiche ne contient de tableau de posologie exploitable.<br/>' +
@@ -935,19 +1024,6 @@ function renderImport() {
   html += '<div class="log" id="gh-log"></div>';
   html += "</div>";
 
-  /* Version autonome (iPhone) */
-  html += '<div class="card"><div class="section-title">📦 Version autonome (iPhone)</div>';
-  html += "<p style='margin-top:0;color:var(--muted)'>iOS efface parfois le stockage local des apps web (fiches et jeton disparaissent). Deux parades :</p>";
-  html += "<ol><li><strong>App avec fiches intégrées</strong> : le fichier exporté contient vos fiches — il fonctionne toujours, même hors ligne, sans jeton ni synchronisation.</li>" +
-    "<li><strong>Lien de configuration</strong> : le jeton est encodé dans le lien ; recréez l&rsquo;icône iPhone avec ce lien — même après un effacement du stockage, l&rsquo;app se reconfigure et resynchronise seule au lancement.</li></ol>";
-  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-primary" onclick="exportApp()">📤 Exporter l&rsquo;app avec fiches intégrées (index.html)</button>' +
-    '<button class="btn" onclick="makeSetupLink()">🔗 Générer le lien de configuration iPhone</button>' +
-    "</div>";
-  html += '<div id="setup-link-out"></div>';
-  html += "<p class='field-note'>⚠️ Le fichier exporté contient vos fiches : ne le publiez que si elles peuvent être lues publiquement. Publication : sur GitHub (dépôt <em>fiches-app</em>) → <em>Add file → Upload files</em> → remplacer <code>index.html</code> → <em>Commit changes</em> — l&rsquo;URL GitHub Pages reste identique.</p>";
-  html += "</div>";
-
   /* Gestion des données */
   html += '<div class="card"><div class="section-title">🗄️ Données locales</div>';
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
@@ -1033,56 +1109,8 @@ function exportData() {
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "fiches-medicaments-sauvegarde.json";
+  a.download = "zenobe-sauvegarde.json";
   document.body.appendChild(a); a.click(); a.remove();
-}
-
-function exportApp() {
-  if (!fiches.length) { toast("⚠️ Aucune fiche à intégrer — synchronisez d'abord."); return; }
-  var slim = fiches.map(function (f) {
-    var md = "---\n";
-    if (f.title) md += "titre: " + f.title + "\n";
-    if (f.author) md += "author: " + f.author + "\n";
-    if (f.created) md += "created: " + f.created + "\n";
-    if (f.updated) md += "updated: " + f.updated + "\n";
-    if (f.tags.length) { md += "tags:\n"; f.tags.forEach(function (t) { md += "  - " + t + "\n"; }); }
-    md += "---\n" + f.md;
-    return { filename: f.filename || (f.slug + ".md"), md: md };
-  });
-  var clone = document.documentElement.cloneNode(true);
-  var v = clone.querySelector("#view"); if (v) v.innerHTML = "";
-  var tEl = clone.querySelector("#toast"); if (tEl) { tEl.textContent = ""; tEl.style.display = "none"; }
-  var pEl = clone.querySelector("#count-pill"); if (pEl) pEl.textContent = "";
-  var ins = clone.querySelectorAll("input, textarea");
-  for (var i = 0; i < ins.length; i++) { try { ins[i].removeAttribute("value"); } catch (e) {} }
-  var firstScript = clone.querySelector("script");
-  var dataScript = document.createElement("script");
-  dataScript.textContent = "window.EMBEDDED_FICHES = " + JSON.stringify(slim) + ";";
-  if (firstScript && firstScript.parentNode) { firstScript.parentNode.insertBefore(dataScript, firstScript); }
-  else { clone.querySelector("body").appendChild(dataScript); }
-  var htmlOut = "<!doctype html>\n" + clone.outerHTML;
-  var blob = new Blob([htmlOut], { type: "text/html;charset=utf-8" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "index.html";
-  document.body.appendChild(a); a.click(); a.remove();
-  toast("✅ App exportée avec " + slim.length + " fiche(s) intégrée(s)");
-}
-
-function makeSetupLink() {
-  readGhForm();
-  var token = (cfg.token || "").trim();
-  var out = document.getElementById("setup-link-out");
-  if (!out) return;
-  if (!token) {
-    out.innerHTML = "<div class='warning-box'>Renseignez d&rsquo;abord le jeton dans la carte ☁️ ci-dessus.</div>";
-    return;
-  }
-  var base = window.location.href.split("#")[0];
-  var link = base + "#setup=" + encodeURIComponent(token);
-  out.innerHTML = "<label>Lien de configuration (à ouvrir sur iPhone)</label>" +
-    "<input type='text' readonly value='" + esc(link) + "' onclick='this.select()'/>" +
-    "<p class='field-note'>Sur iPhone : ouvrez ce lien dans Safari → l&rsquo;app enregistre le jeton et la synchronisation automatique → puis Safari → Partager → « Sur l&rsquo;écran d&rsquo;accueil » pour recréer l&rsquo;icône. Ce lien contient votre jeton : ne le partagez pas.</p>";
 }
 
 function wipeAll() {
@@ -1102,32 +1130,14 @@ document.getElementById("quick-sync").addEventListener("click", function () {
   setTimeout(runSync, 60);
 });
 window.addEventListener("hashchange", render);
-
-/* Récupération du jeton depuis un lien de configuration (#setup=…) */
-var setupMatch = (window.location.hash || "").match(/^#setup=(.+)$/);
-if (setupMatch) {
-  cfg.token = decodeURIComponent(setupMatch[1]);
-  cfg.autoSync = true;
-  persistCfg();
-  try { window.location.hash = "#/"; } catch (e) {}
-}
-
-/* Fiches intégrées (version autonome) : base hors ligne si stockage vide */
-if (!fiches.length && EMBEDDED_FICHES.length) {
-  for (var ei = 0; ei < EMBEDDED_FICHES.length; ei++) {
-    var recEmb = EMBEDDED_FICHES[ei];
-    importMd(recEmb.filename || "fiche.md", recEmb.md || "");
-  }
-  persistFiches();
-}
-
 render();
 updateCount();
-if (cfg.autoSync) {
+if (cfg.autoSync && fiches.length >= 0) {
   var silentLog = function () {};
   syncGitHub(silentLog, true);
 }
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="hU0dmwWiZhXfOh7Q0diVQg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="deo1wnMAl9X33YB5JBhH+A==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
