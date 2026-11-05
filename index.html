@@ -211,7 +211,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.1 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.2 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -319,6 +319,8 @@ function inlineMd(s) {
   x = x.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
   x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9 ._\-/]+\.(?:pdf|PDF|xlsx|xls|docx|png|jpg|jpeg))\s*\)/g,
     '<a href="#" class="gh-doc" data-doc="$2">$1 📄</a>');
+  x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9 ._\-/]+\.md)\s*\)/g,
+    '<a href="#" class="gh-mddoc" data-doc="$2">$1</a>');
   return x;
 }
 
@@ -715,6 +717,58 @@ document.addEventListener("click", async function (e) {
   if (!a) return;
   e.preventDefault();
   await openGhDoc(a.getAttribute("data-doc") || "", a.textContent.replace(/📄$/, "").trim());
+});
+
+/* ---------- Documents .md liés depuis une fiche (autre dossier GitHub) ----------
+   Convention : [Titre](/dossier/document.md) — le document est téléchargé via
+   l'API GitHub (jeton de la carte ☁️) et affiché dans l'app comme une page
+   Markdown. Si le fichier .md est l'une des fiches déjà synchronisées
+   (même nom de fichier), l'app y navigue directement (vue fiche complète,
+   calculateur inclus). Le lien fonctionne aussi dans Obsidian (note liée). */
+async function openGhMdDoc(path, label) {
+  var basename = (path.split("/").pop() || "").toLowerCase();
+  var f = fiches.find(function (x) { return (x.filename || "").toLowerCase() === basename; });
+  if (f) { window.location.hash = "#/fiche/" + f.slug; return; }
+  var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
+  var branch = (cfg.branch || "main").trim(), folder = (cfg.folder || "").trim();
+  if (!user || !repo || !cfg.token) { toast("⚠️ Renseignez la carte ☁️ Synchronisation (jeton requis)."); return; }
+  var p = path.replace(/^\/+/, "");
+  if (path.indexOf("/") !== 0) p = (folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "") + p;
+  toast("📄 Ouverture de « " + (label || path) + " »…");
+  try {
+    var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
+      { headers: ghHeaders(true) });
+    if (r.status === 404) { toast("❌ Document .md introuvable dans le dépôt : " + p); return; }
+    if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+    if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
+    var md = await r.text();
+    var parts = splitFiche(md);
+    var fmT = parts.fm.titre || parts.fm.title || "";
+    var h1 = parts.body.match(/^#\s+(.+)$/m);
+    var docTitle = (fmT || (h1 ? h1[1].trim() : "") || basename.replace(/\.md$/i, "")).trim();
+    var html = '<a href="#" class="back gh-back">← Retour</a>';
+    html += '<div class="card"><div class="fiche-head"><h1>' + esc(docTitle) + "</h1></div>";
+    html += '<div class="disclaimer">📄 Document lié du dépôt GitHub — affichage lecture seule.</div>';
+    html += mdToHtml(parts.body);
+    html += "</div>";
+    view.innerHTML = html;
+    window.scrollTo(0, 0);
+  } catch (e) {
+    toast("❌ Réseau indisponible ou document inaccessible.");
+  }
+}
+document.addEventListener("click", async function (e) {
+  var a = e.target && e.target.closest ? e.target.closest("a.gh-mddoc") : null;
+  if (!a) return;
+  e.preventDefault();
+  await openGhMdDoc(a.getAttribute("data-doc") || "", a.textContent.trim());
+});
+document.addEventListener("click", function (e) {
+  var b = e.target && e.target.closest ? e.target.closest("a.gh-back") : null;
+  if (!b) return;
+  e.preventDefault();
+  render();
 });
 
 /* ================================================================
@@ -1331,6 +1385,6 @@ if (cfg.autoSync && fiches.length >= 0) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="Df7q723EKt1Xs2mvcEoNcA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="j4owSWZh1vENysj8Juz2mQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
