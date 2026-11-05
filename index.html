@@ -211,7 +211,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.1 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -658,14 +658,54 @@ async function openGhDoc(path, label) {
     var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
       "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
       { headers: ghHeaders(true) });
-    if (r.status === 404) { toast("❌ Document introuvable dans le dépôt : " + p); return; }
+    if (r.status === 404) {
+      /* Fallback : lister le dossier parent et chercher une correspondance
+         insensible à la casse et aux accents (ex. lien "harriet-lane.pdf"
+         vs fichier "Harriet Lane.pdf") */
+      var dir = p.split("/").slice(0, -1).join("/");
+      var file = p.split("/").pop();
+      var rd = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+        "/contents/" + (dir ? dir.split("/").map(encodeURIComponent).join("/") + "/" : "") + "?ref=" + encodeURIComponent(branch),
+        { headers: ghHeaders(false) });
+      if (rd.ok) {
+        var entries = (await rd.json()) || [];
+        var norm = function (s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, "-"); };
+        var target = norm(file);
+        var hit = null, cands = [];
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].type !== "file") continue;
+          cands.push(entries[i].name);
+          if (!hit && norm(entries[i].name) === target) hit = entries[i].path;
+        }
+        if (hit) {
+          r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+            "/contents/" + hit.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
+            { headers: ghHeaders(true) });
+          toast("✅ Fichier trouvé : " + hit.split("/").pop());
+        } else {
+          toast("❌ « " + file + " » introuvable. Fichiers du dossier : " + cands.slice(0, 6).join(", "));
+          return;
+        }
+      } else {
+        toast("❌ Document et dossier introuvables dans le dépôt : " + p);
+        return;
+      }
+    }
     if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
     if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
     var buf = await r.arrayBuffer();
     var blob = new Blob([buf], { type: ghDocMime(p) });
     var url = URL.createObjectURL(blob);
+    /* Ouverture robuste : window.open peut être bloqué (PWA iOS) —
+       on tente window.open, puis un clic programmatique sur un
+       <a target=_blank>, puis la navigation courante. */
     var w = window.open(url, "_blank");
-    if (!w) toast("⚠️ Autorisez les pop-ups pour ouvrir le document.");
+    if (!w) {
+      var aEl = document.createElement("a");
+      aEl.href = url; aEl.target = "_blank"; aEl.rel = "noopener";
+      document.body.appendChild(aEl); aEl.click();
+      setTimeout(function () { document.body.removeChild(aEl); }, 1000);
+    }
   } catch (e) {
     toast("❌ Réseau indisponible ou document inaccessible.");
   }
@@ -1291,6 +1331,6 @@ if (cfg.autoSync && fiches.length >= 0) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="9V26Mw48vDmV1iPburEQJw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="Df7q723EKt1Xs2mvcEoNcA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
