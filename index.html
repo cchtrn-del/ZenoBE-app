@@ -211,7 +211,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.2 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.3 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -649,6 +649,72 @@ function ghDocMime(path) {
   if (e === "jpg" || e === "jpeg") return "image/jpeg";
   return "application/octet-stream";
 }
+/* ---------- Visualiseur de documents intégré ----------
+   iOS PWA (mode standalone) ne permet ni window.open ni target=_blank
+   sur des URLs blob: — on affiche donc le document DANS l'app via un
+   <iframe> plein écran (iOS rend nativement les PDF dans un iframe),
+   avec :
+   - un bouton ⤴️ Partager (Web Share API avec fichier : feuille de
+     partage iOS → Enregistrer dans Fichiers, imprimer, autre app) ;
+   - un bouton ⬇️ Télécharger (attribut download) ;
+   - un bouton ↗ Ouvrir dans le navigateur (utile sur ordinateur,
+     silencieusement sans effet sur iOS PWA). */
+function closeGhDocViewer() {
+  var ov = document.getElementById("ghdocviewer");
+  if (ov) {
+    var u = ov.getAttribute("data-url");
+    if (u) { try { URL.revokeObjectURL(u); } catch (e) {} }
+    ov.remove();
+  }
+}
+function showGhDocViewer(blob, name, mime) {
+  closeGhDocViewer();
+  var url = URL.createObjectURL(blob);
+  var ov = document.createElement("div");
+  ov.id = "ghdocviewer";
+  ov.setAttribute("data-url", url);
+  ov.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#111;display:flex;flex-direction:column;";
+  var bar = document.createElement("div");
+  bar.style.cssText = "display:flex;align-items:center;gap:6px;padding:10px 10px;background:#123E7C;color:#fff;flex:0 0 auto;";
+  var t = document.createElement("div");
+  t.textContent = "📄 " + name;
+  t.style.cssText = "flex:1;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;";
+  bar.appendChild(t);
+  function btn(txt, title, fn) {
+    var b = document.createElement("button");
+    b.textContent = txt; b.title = title;
+    b.style.cssText = "border:0;border-radius:8px;padding:8px 12px;margin-left:4px;font-size:14px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;";
+    b.addEventListener("click", fn);
+    bar.appendChild(b);
+    return b;
+  }
+  var file = new File([blob], name, { type: mime });
+  var canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+  if (canShare) {
+    btn("⤴️", "Partager / Enregistrer dans Fichiers", function () {
+      navigator.share({ files: [file], title: name }).catch(function () {});
+    });
+  }
+  var dl = document.createElement("a");
+  dl.textContent = "⬇️"; dl.title = "Télécharger";
+  dl.href = url; dl.download = name;
+  dl.style.cssText = "text-decoration:none;border-radius:8px;padding:8px 12px;margin-left:4px;font-size:14px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;";
+  bar.appendChild(dl);
+  btn("↗", "Ouvrir dans le navigateur", function () {
+    var w = window.open(url, "_blank");
+    if (!w) toast("⚠️ Non disponible sur iOS en mode app — utilisez ⤴️ ou ⬇️.");
+  });
+  btn("✕", "Fermer", closeGhDocViewer);
+  ov.appendChild(bar);
+  var frame = document.createElement("iframe");
+  frame.src = url;
+  frame.style.cssText = "flex:1;width:100%;border:0;background:#fff;";
+  ov.appendChild(frame);
+  document.body.appendChild(ov);
+  if (!/^application\/pdf|^image\//.test(mime)) {
+    toast("📄 Aperçu non affichable dans l'app — utilisez ⤴️ ou ⬇️ pour l'ouvrir.");
+  }
+}
 async function openGhDoc(path, label) {
   var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
   var branch = (cfg.branch || "main").trim(), folder = (cfg.folder || "").trim();
@@ -697,17 +763,7 @@ async function openGhDoc(path, label) {
     if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
     var buf = await r.arrayBuffer();
     var blob = new Blob([buf], { type: ghDocMime(p) });
-    var url = URL.createObjectURL(blob);
-    /* Ouverture robuste : window.open peut être bloqué (PWA iOS) —
-       on tente window.open, puis un clic programmatique sur un
-       <a target=_blank>, puis la navigation courante. */
-    var w = window.open(url, "_blank");
-    if (!w) {
-      var aEl = document.createElement("a");
-      aEl.href = url; aEl.target = "_blank"; aEl.rel = "noopener";
-      document.body.appendChild(aEl); aEl.click();
-      setTimeout(function () { document.body.removeChild(aEl); }, 1000);
-    }
+    showGhDocViewer(blob, p.split("/").pop() || "document", ghDocMime(p));
   } catch (e) {
     toast("❌ Réseau indisponible ou document inaccessible.");
   }
@@ -1385,6 +1441,6 @@ if (cfg.autoSync && fiches.length >= 0) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="j4owSWZh1vENysj8Juz2mQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="S7bRssdl2DDbNi6+dLtXDw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
