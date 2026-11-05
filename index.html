@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -9,8 +20,9 @@
 <style>
   * { box-sizing: border-box; }
   :root {
-    --bg: #f4f7fb; --card: #ffffff; --ink: #0f172a; --muted: #64748b;
-    --accent: #1E6FBF; --accent-soft: #eff6ff; --border: #e2e8f0;
+    --bg: #eef7f4; --card: #ffffff; --ink: #0f172a; --muted: #64748b;
+    --accent: #0E9488; --accent-soft: #e7f5f1; --border: #dce9e5;
+    --g1: #0F766E; --g2: #14B8A6; --deep: #0F766E;
     --ok: #047857; --ok-soft: #ecfdf5; --warn: #b45309; --warn-soft: #fffbeb;
     --radius: 14px; --shadow: 0 1px 2px rgba(15,23,42,.05);
   }
@@ -22,22 +34,22 @@
   }
   /* ---------- Barre supérieure ---------- */
   .topbar {
-    position: sticky; top: 0; z-index: 30; background: #fff;
-    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 30;
+    background: linear-gradient(135deg, var(--deep), var(--accent)); border-bottom: none;
     display: flex; align-items: center; gap: 14px; padding: 10px 16px; flex-wrap: wrap;
   }
   .brand { display: flex; align-items: center; gap: 8px; } .brand .logo-h { height: 42px; width: auto; display: block; }
-  .brand .logo { font-size: 20px; }
+  .brand .logo { font-size: 20px; color: #fff; }
   .nav { display: flex; gap: 4px; }
   .nav a {
-    text-decoration: none; color: var(--muted); font-weight: 600; font-size: 13.5px;
+    text-decoration: none; color: rgba(255,255,255,.88); font-weight: 600; font-size: 13.5px;
     padding: 7px 12px; border-radius: 10px;
   }
-  .nav a:hover { background: var(--accent-soft); color: var(--accent); }
-  .nav a.on { background: var(--accent-soft); color: var(--accent); }
+  .nav a:hover { background: rgba(255,255,255,.18); color: #fff; }
+  .nav a.on { background: rgba(255,255,255,.24); color: #fff; }
   .top-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .count-pill {
-    background: var(--accent-soft); color: var(--accent); font-weight: 700;
+    background: rgba(255,255,255,.2); color: #fff; font-weight: 700;
     font-size: 12px; padding: 4px 10px; border-radius: 999px;
   }
   main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
@@ -57,11 +69,14 @@
     display: flex; align-items: center; gap: 10px;
   }
   h2.picto-head {
-    font-size: 15px; text-transform: none; letter-spacing: .2px;
-    margin: 22px 0 8px; padding: 7px 14px 7px 10px; background: var(--accent-soft);
-    color: #1e3a8a; border-radius: 10px; border-left: 4px solid var(--accent);
+    font-size: 14px; text-transform: none; letter-spacing: .2px;
+    margin: 16px 0 6px; padding: 4px 12px 4px 8px;
+    background: linear-gradient(180deg, var(--deep), var(--accent));
+    color: #fff; border-radius: 9px; border-left: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,.18);
   }
-  .picto-head svg.zpicto { width: 30px; height: 30px; flex: 0 0 auto; display: block; }
+  h2.picto-head { gap: 8px; }
+  .picto-head svg.zpicto { width: 21px; height: 21px; flex: 0 0 auto; display: block; }
   h3 { font-size: 17px; margin: 18px 0 6px; }
   h4 { font-size: 14.5px; margin: 14px 0 6px; color: #334155; }
   p { margin: 8px 0; }
@@ -77,7 +92,7 @@
   }
   .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #1e40af; color: #fff; }
+  .btn-primary:hover { background: var(--deep); color: #fff; }
   .btn-danger { color: #b91c1c; border-color: #fecaca; }
   .btn[disabled] { opacity: .5; cursor: not-allowed; }
   input[type=text], input[type=number], input[type=password], select, textarea {
@@ -98,6 +113,45 @@
     font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   }
   .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .theme-btn {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;
+    color: var(--ink); background: #fff;
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+    font-family: inherit; box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+  .theme-btn.on { background: var(--accent-soft); color: var(--deep); border-color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .tabbar { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tabbar button {
+    flex: 1; padding: 8px 4px; border: 1.5px solid transparent;
+    background: linear-gradient(180deg, var(--deep), var(--accent)); color: #fff; border-radius: 10px;
+    font-size: 12.5px; font-weight: 700; cursor: pointer; line-height: 1.25;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.22);
+  }
+  .tabbar button.on { background: var(--g2); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  .tabbar .zpicto, .sectp .zpicto { width: 17px; height: 17px; flex: 0 0 auto; display: inline-block; }
+  .sectp .zpicto { width: 15px; height: 15px; vertical-align: -2px; margin-right: 5px; }
+  .dropbar {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--accent);
+    border-radius: 10px; background: #fff; color: var(--accent);
+    font-size: 14px; font-weight: 700; text-align: left; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer;
+  }
+  .dropbar .arrow { transition: transform .15s ease; }
+  .dropbar.open .arrow { transform: rotate(180deg); }
+  .droplist {
+    border: 1.5px solid var(--accent); border-radius: 10px; overflow: hidden;
+    margin-bottom: 14px; background: #fff; max-height: 46vh; overflow-y: auto;
+  }
+  .dropitem {
+    padding: 12px 14px; border-bottom: 1px solid #eef1f5; cursor: pointer;
+    font-weight: 700; font-size: 14px; color: inherit;
+  }
+  .droplist .dropitem:last-child { border-bottom: none; }
+  .dropitem:hover, .dropitem:active { background: #f0f5fc; }
+  .dropitem.on { background: var(--accent); color: #fff; }
+  .dropitem .m { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+  .dropitem.on .m { color: #dbe7f7; }
   .grid-fiches { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
   .fiche-card {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
@@ -120,12 +174,12 @@
   .tbl-wrap { overflow-x: auto; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th {
-    background: #f8fafc; color: #1e40af; text-align: left; font-size: 12px;
+    background: var(--accent-soft); color: var(--deep); text-align: left; font-size: 12px;
     text-transform: uppercase; letter-spacing: .4px; padding: 9px 10px;
     border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  td { border-top: 1px solid #eef2f7; padding: 8px 10px; vertical-align: top; }
-  tbody tr:nth-child(even) { background: #fafcff; }
+  td { border-top: 1px solid var(--border); padding: 8px 10px; vertical-align: top; }
+  tbody tr:nth-child(even) { background: var(--bg); }
   .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
   .b-first { background: var(--ok-soft); color: var(--ok); }
   .b-alt { background: var(--warn-soft); color: var(--warn); }
@@ -133,15 +187,15 @@
   .b-none { background: #f1f5f9; color: var(--muted); }
   /* ---------- Fiche ---------- */
   .fiche-head { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
-  .fiche-head h1 { flex: 1 1 100%; }
+  .fiche-head h1 { flex: 1 1 100%; color: var(--deep); }
   .meta-line { color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
   .back { text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
   .back:hover { color: var(--accent); }
   /* ---------- Calculateur ---------- */
 /* ---------- Calculateur ---------- */
   .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; }
-  .kpi { background: var(--accent-soft); border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; }
-  .kpi .v { font-size: 21px; font-weight: 800; color: #1e3a8a; }
+  .kpi { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .kpi .v { font-size: 21px; font-weight: 800; color: var(--deep); }
   .kpi .l { font-size: 11.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .4px; }
   .warning-box { background: var(--warn-soft); border: 1px solid #fde68a; color: #92400e; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-top: 12px; }
   .formula { font-size: 12.5px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -152,7 +206,7 @@
     max-height: 230px; overflow: auto; white-space: pre-wrap; margin-top: 12px; display: none;
   }
   .dropzone {
-    border: 2px dashed #bfdbfe; border-radius: 12px; padding: 26px; text-align: center;
+    border: 2px dashed var(--border); border-radius: 12px; padding: 26px; text-align: center;
     color: var(--muted); cursor: pointer;
   }
   .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--accent-soft); }
@@ -176,42 +230,20 @@
 <body>
 
 <div class="topbar">
-  <div class="brand" style="padding:4px 0"><svg class="logo-h" width="118" height="59" viewBox="0 0 1024 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ZenoBE">
-              <defs>
-                <linearGradient id="h-bg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/>
-                </linearGradient>
-                <linearGradient id="h-brass" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/>
-                </linearGradient>
-                <radialGradient id="h-sheen" cx="0.3" cy="0.25" r="0.9">
-                  <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-                </radialGradient>
-              </defs>
-              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-bg)"/>
-              <rect x="16" y="16" width="992" height="480" rx="96" fill="url(#h-sheen)"/>
-              <rect x="86" y="136" width="200" height="30" rx="15" fill="#FFFFFF"/>
-              <rect x="86" y="346" width="200" height="30" rx="15" fill="#FFFFFF"/>
-              <path d="M 98 166 L 274 346 L 274 316 L 98 166 Z" fill="#FFFFFF"/>
-              <text x="330" y="316" font-family="Helvetica, Arial, sans-serif" font-size="138" font-weight="bold" letter-spacing="4"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#h-brass)">BE</tspan></text>
-              <circle cx="578" cy="368" r="11" fill="#FFFFFF" opacity="0.95"/>
-              <circle cx="610" cy="368" r="8" fill="#FFFFFF" opacity="0.75"/>
-              <circle cx="638" cy="368" r="5.5" fill="#FFFFFF" opacity="0.55"/>
-            </svg></div>
+  <div class="brand"><span class="logo" style="font-weight:800;font-size:20px;letter-spacing:.4px">Zeno<span style="color:#E7C55A">BE</span></span></div>
   <nav class="nav" id="nav">
     <a href="#/" data-r="/">Fiches</a>
     <a href="#/calculateur">Calculateur</a>
-    <a href="#/import">Import</a>
   </nav>
   <div class="top-right">
     <span class="count-pill" id="count-pill">0 fiche</span>
-    <button class="btn" id="quick-sync" title="Synchroniser depuis GitHub">☁️ Sync</button>
+    <a class="count-pill" href="#/reglages" style="text-decoration:none;display:inline-flex;align-items:center" title="Réglages" aria-label="Réglages"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></a>
   </div>
 </div>
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.3 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.15 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -220,7 +252,7 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2" };
+var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1" };
 
 function loadLs(key, fallback) {
   try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -235,7 +267,37 @@ var fiches = loadLs(LS.fiches, []);
 var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, lastSync: null });
 var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
-var ui = { q: "", tag: "", favOnly: false };
+var ui = { q: "", tag: "", favOnly: false, tab: "", catOpen: false };
+
+/* ================================================================
+   Thèmes (palette de l'interface) — extensible
+================================================================ */
+var THEMES = {
+  bleu: { nom: "Bleu ZenoBE", accent: "#1E6FBF", soft: "#eff6ff", bg: "#f4f7fb", border: "#e2e8f0", g1: "#123E7C", g2: "#1E6FBF", deep: "#123E7C" },
+  emeraude: { nom: "Émeraude", accent: "#10B981", soft: "#ecfdf5", bg: "#f0faf6", border: "#d7ece5", g1: "#065F46", g2: "#34D399", deep: "#065F46" },
+  violette: { nom: "Violette", accent: "#8B5CF6", soft: "#f3f0ff", bg: "#f6f4fd", border: "#e4dcf7", g1: "#5B21B6", g2: "#A78BFA", deep: "#5B21B6" },
+  ambre: { nom: "Ambre & Laiton", accent: "#D97706", soft: "#fef6e7", bg: "#fdf8ef", border: "#f2e6cf", g1: "#92400E", g2: "#F59E0B", deep: "#92400E" },
+  ardoise: { nom: "Ardoise", accent: "#475569", soft: "#eef1f4", bg: "#f4f6f8", border: "#dde3e9", g1: "#1E293B", g2: "#64748B", deep: "#1E293B" },
+};
+var curTheme = loadLs(LS.theme, "bleu");
+function applyTheme(id) {
+  var t = THEMES[id] || THEMES.bleu;
+  curTheme = THEMES[id] ? id : "bleu";
+  var r = document.documentElement.style;
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--accent-soft", t.soft);
+  r.setProperty("--bg", t.bg);
+  r.setProperty("--border", t.border);
+  r.setProperty("--g1", t.g1);
+  r.setProperty("--g2", t.g2);
+  r.setProperty("--deep", t.deep);
+  var s1 = document.getElementById("lg-g1"), s2 = document.getElementById("lg-g2");
+  if (s1) s1.setAttribute("stop-color", t.g1);
+  if (s2) s2.setAttribute("stop-color", t.g2);
+  var mt = document.querySelector('meta[name="theme-color"]');
+  if (mt) mt.setAttribute("content", t.g1);
+  saveLs(LS.theme, curTheme);
+}
 
 function persistFiches() { saveLs(LS.fiches, fiches); updateCount(); }
 function persistCfg() { saveLs(LS.cfg, cfg); }
@@ -368,17 +430,19 @@ function renderTable(rows) {
    Charte graphique « Zénobe » — pictogrammes de sections
 ================================================================ */
 function zenPictoDefs(uid) {
+  var th = THEMES[curTheme] || THEMES.bleu;
   return '<defs>' +
     '<linearGradient id="zt' + uid + '" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0" stop-color="#17497F"/><stop offset="1" stop-color="#1E6FBF"/></linearGradient>' +
+    '<stop offset="0" stop-color="' + th.g1 + '"/><stop offset="1" stop-color="' + th.g2 + '"/></linearGradient>' +
     '<linearGradient id="zb' + uid + '" x1="0" y1="0" x2="0" y2="1">' +
     '<stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/></linearGradient>' +
     '</defs>';
 }
-function zenTile(p) {
+function zenTile(p, bare) {
+  var tile = bare ? "" : '<rect x="0" y="0" width="240" height="240" rx="44" fill="url(#zt' + p.uid + ')"/>';
   return '<svg class="zpicto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true">' +
     zenPictoDefs(p.uid) +
-    '<rect x="0" y="0" width="240" height="240" rx="44" fill="url(#zt' + p.uid + ')"/>' +
+    tile +
     p.icon + '</svg>';
 }
 var ZENOBE_PICTOS = {
@@ -401,6 +465,18 @@ var ZENOBE_PICTOS = {
   "remarques": {
     uid: "re",
     icon: '<g transform="translate(120,120) scale(1.35)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M -44 -34 A 10 10 0 0 1 -34 -44 L 34 -44 A 10 10 0 0 1 44 -34 L 44 12 A 10 10 0 0 1 34 22 L -12 22 L -32 42 L -32 22 L -34 22 A 10 10 0 0 1 -44 12 Z"/><circle cx="-20" cy="-11" r="4.5" fill="url(#zbre)" stroke="none"/><circle cx="0" cy="-11" r="4.5" fill="url(#zbre)" stroke="none" opacity="0.8"/><circle cx="20" cy="-11" r="4.5" fill="url(#zbre)" stroke="none" opacity="0.6"/></g>'
+  },
+  "favoris": {
+    uid: "fa",
+    icon: '<g transform="translate(120,120) scale(1.3)"><path d="M 0 -44 L 13 -13 L 46 -13 L 20 7 L 29 39 L 0 20 L -29 39 L -20 7 L -46 -13 L -13 -13 Z" fill="#FFFFFF"/></g>'
+  },
+  "secteurs": {
+    uid: "se",
+    icon: '<g transform="translate(120,120) scale(1.25)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><rect x="-50" y="-50" width="42" height="42" rx="9"/><rect x="8" y="-50" width="42" height="42" rx="9" fill="url(#zbse)" stroke="none"/><rect x="-50" y="8" width="42" height="42" rx="9"/><rect x="8" y="8" width="42" height="42" rx="9"/></g>'
+  },
+  "recents": {
+    uid: "rc",
+    icon: '<g transform="translate(120,120) scale(1.3)" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><circle cx="0" cy="0" r="42"/><path d="M 0 -24 L 0 2 L 20 14"/><circle cx="0" cy="0" r="5" fill="url(#zbrc)" stroke="none"/></g>'
   },
   "sources": {
     uid: "so",
@@ -433,7 +509,7 @@ function mdToHtml(md) {
       var pk = pictoKeyFor(h[2]);
       if (pk) {
         var clean = h[2].replace(/^[^A-Za-z0-9À-ÿ]+/, "").trim();
-        out += '<h' + lvl + ' class="picto-head">' + zenTile(ZENOBE_PICTOS[pk]) +
+        out += '<h' + lvl + ' class="picto-head">' + zenTile(ZENOBE_PICTOS[pk], true) +
           "<span>" + inlineMd(clean) + "</span></h" + lvl + ">";
         i++; continue;
       }
@@ -675,7 +751,7 @@ function showGhDocViewer(blob, name, mime) {
   ov.setAttribute("data-url", url);
   ov.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#111;display:flex;flex-direction:column;";
   var bar = document.createElement("div");
-  bar.style.cssText = "display:flex;align-items:center;gap:6px;padding:10px 10px;background:#123E7C;color:#fff;flex:0 0 auto;";
+  bar.style.cssText = "display:flex;align-items:center;gap:6px;padding:10px 10px;background:var(--deep);color:#fff;flex:0 0 auto;";
   var t = document.createElement("div");
   t.textContent = "📄 " + name;
   t.style.cssText = "flex:1;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;";
@@ -845,6 +921,7 @@ function render() {
   });
   if (h.indexOf("#/fiche/") === 0) renderFiche(decodeURIComponent(h.slice(8)));
   else if (h.indexOf("#/calculateur") === 0) renderCalculateur();
+  else if (h.indexOf("#/reglages") === 0) renderReglages();
   else if (h.indexOf("#/import") === 0) renderImport();
   else renderHome();
   window.scrollTo(0, 0);
@@ -853,45 +930,86 @@ function render() {
 /* ---------- Accueil / liste ---------- */
 function renderHome() {
   var q = norm(ui.q);
-  var list = fiches.filter(function (f) {
-    if (ui.favOnly && favs.indexOf(f.slug) < 0) return false;
-    if (ui.tag && f.tags.map(norm).indexOf(norm(ui.tag)) < 0) return false;
-    if (q && f.text.indexOf(q) < 0) return false;
-    return true;
-  });
-  var recentList = (q || ui.tag || ui.favOnly) ? [] :
-    recents.map(function (s) { return fiches.find(function (f) { return f.slug === s; }); }).filter(Boolean).slice(0, 4);
-
   var html = "";
   if (!fiches.length) {
     html += '<div class="card" style="text-align:center"><div class="empty">' +
-      '<svg class="logo-sq" width="132" height="132" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ZenoBE" style="margin:0 auto 10px"> <defs> <linearGradient id="s-bg" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#123E7C"/><stop offset="1" stop-color="#1E6FBF"/> </linearGradient> <linearGradient id="s-brass" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/> </linearGradient> <radialGradient id="s-sheen" cx="0.3" cy="0.25" r="0.9"> <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/> </radialGradient> </defs> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-bg)"/> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-sheen)"/> <rect x="136" y="90" width="240" height="34" rx="17" fill="#FFFFFF"/> <rect x="136" y="290" width="240" height="34" rx="17" fill="#FFFFFF"/> <path d="M 150 124 L 362 290 L 362 256 L 150 124 Z" fill="#FFFFFF"/> <text x="256" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="bold" letter-spacing="3"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#s-brass)">BE</tspan></text> <circle cx="200" cy="422" r="9" fill="#FFFFFF" opacity="0.95"/> <circle cx="256" cy="422" r="6.5" fill="#FFFFFF" opacity="0.75"/> <circle cx="304" cy="422" r="4.5" fill="#FFFFFF" opacity="0.55"/> </svg>' +
+      '<svg class="logo-sq" width="132" height="132" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ZenoBE" style="margin:0 auto 10px"> <defs> <linearGradient id="s-bg" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="' + (THEMES[curTheme] || THEMES.bleu).g1 + '"/><stop offset="1" stop-color="' + (THEMES[curTheme] || THEMES.bleu).g2 + '"/> </linearGradient> <linearGradient id="s-brass" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/> </linearGradient> <radialGradient id="s-sheen" cx="0.3" cy="0.25" r="0.9"> <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/> </radialGradient> </defs> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-bg)"/> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-sheen)"/> <rect x="136" y="90" width="240" height="34" rx="17" fill="#FFFFFF"/> <rect x="136" y="290" width="240" height="34" rx="17" fill="#FFFFFF"/> <path d="M 150 124 L 362 290 L 362 256 L 150 124 Z" fill="#FFFFFF"/> <text x="256" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="bold" letter-spacing="3"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#s-brass)">BE</tspan></text> <circle cx="200" cy="422" r="9" fill="#FFFFFF" opacity="0.95"/> <circle cx="256" cy="422" r="6.5" fill="#FFFFFF" opacity="0.75"/> <circle cx="304" cy="422" r="4.5" fill="#FFFFFF" opacity="0.55"/> </svg>' +
       "<h1>Bienvenue dans ZenoBE</h1>" +
       '<p>Aucune fiche pour le moment.</p>' +
       '<a class="btn btn-primary" href="#/import">📥 Importer mes fiches</a></div></div>';
     view.innerHTML = html; return;
   }
   html += '<div class="searchbar"><input type="text" id="search" placeholder="🔎 Rechercher un médicament, une indication, une dose…" value="' + esc(ui.q) + '"/></div>';
-  var tags = allTags();
-  if (tags.length) {
-    html += '<div class="chips">';
-    if (ui.favOnly || ui.tag || ui.q) html += '<span class="chip" onclick="clearFilters()">✕ Réinitialiser</span>';
-    html += '<span class="chip' + (ui.favOnly ? " on" : "") + '" onclick="toggleFav()">★ Favoris</span>';
-    tags.forEach(function (t) {
-      html += '<span class="chip' + (norm(ui.tag) === norm(t) ? " on" : "") + '" onclick="setTag(\'' + esc(t) + '\')">' + esc(t) + "</span>";
+  html += '<div class="tabbar">' +
+    '<button class="' + (ui.tab === "fav" ? "on" : "") + '" onclick="setTab(\'fav\')">' + zenTile(ZENOBE_PICTOS.favoris, true) + 'Favoris</button>' +
+    '<button class="' + (ui.tab === "cats" ? "on" : "") + '" onclick="setTab(\'cats\')">' + zenTile(ZENOBE_PICTOS.secteurs, true) + 'Secteurs</button>' +
+    '<button class="' + (ui.tab === "recent" ? "on" : "") + '" onclick="setTab(\'recent\')">' + zenTile(ZENOBE_PICTOS.recents, true) + 'Récents</button>' +
+    "</div>";
+
+  if (q) html += '<span class="chip on" onclick="clearFilters()" style="margin-bottom:10px">✕ Réinitialiser la recherche</span>';
+
+  var sect = function (title, cardsHtml) {
+    return "<p class='sectp' style='font-size:12.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px'>" + title + "</p>" + cardsHtml + "<div style='height:16px'></div>";
+  };
+
+  /* --- Section ⭐ Favoris (uniquement si l'onglet est actif) --- */
+  if (ui.tab === "fav") {
+    var favList = fiches.filter(function (f) {
+      return favs.indexOf(f.slug) >= 0 && (!q || f.text.indexOf(q) >= 0);
     });
-    html += "</div>";
+    html += favList.length ? sect(zenTile(ZENOBE_PICTOS.favoris) + "Mes favoris · " + favList.length,
+      '<div class="droplist" style="margin-bottom:0">' + favList.map(function (f) {
+        return '<div class="dropitem" onclick="openFiche(\'' + f.slug + '\')">★ ' + esc(f.title) +
+          '<span class="m" style="float:right;margin-top:2px">' + (f.updated ? "MAJ : " + esc(f.updated) : "") + "</span></div>";
+      }).join("") + "</div>")
+      : sect(zenTile(ZENOBE_PICTOS.favoris) + "Mes favoris", '<div class="empty">Aucun favori — touchez l\'étoile ☆ d\'une fiche pour l\'ajouter.</div>');
   }
-  if (recentList.length) {
-    html += "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>Récemment consultées</p>";
-    html += '<div class="grid-fiches">' + recentList.map(cardHtml).join("") + "</div>";
-    html += "<div style='height:14px'></div>";
+
+  /* --- Section 🕘 Récents (uniquement si l'onglet est actif) --- */
+  if (ui.tab === "recent") {
+    var recs = recents.map(function (s) { return fiches.find(function (f) { return f.slug === s; }); })
+      .filter(Boolean).filter(function (f) { return !q || f.text.indexOf(q) >= 0; })
+      .slice(0, 6);
+    if (recs.length) {
+      html += sect(zenTile(ZENOBE_PICTOS.recents) + "Récemment consultées",
+        '<div class="droplist" style="margin-bottom:0">' + recs.map(function (f, i) {
+          return '<div class="dropitem" onclick="openFiche(\'' + f.slug + '\')">' +
+            (i === 0 ? "▸ " : "· ") + esc(f.title) +
+            '<span class="m" style="float:right;margin-top:2px">' + (i === 0 ? "la plus récente" : (f.updated ? "MAJ : " + esc(f.updated) : "")) + "</span></div>";
+        }).join("") + "</div>");
+    } else {
+      html += sect(zenTile(ZENOBE_PICTOS.recents) + "Récemment consultées", '<div class="empty">Aucune fiche consultée récemment.</div>');
+    }
   }
+
+  /* --- Liste déroulante des catégories (uniquement si l'onglet est actif et ouvert) --- */
+  if (ui.tab === "cats") {
+    if (ui.catOpen) {
+      var tags = allTags();
+      html += '<div class="droplist">';
+      html += '<div class="dropitem' + (!ui.tag ? " on" : "") + '" onclick="setTag(\'\')">Tous les secteurs</div>';
+      tags.forEach(function (t) {
+        html += '<div class="dropitem' + (norm(ui.tag) === norm(t) ? " on" : "") + '" onclick="setTag(\'' + esc(t) + '\')">' +
+          esc(t) + '<span class="m" style="float:right;margin-top:2px">' +
+          fiches.filter(function (f) { return f.tags.map(norm).indexOf(norm(t)) >= 0; }).length + " fiche(s)</span></div>";
+      });
+      html += "</div>";
+    }
+  }
+
+  /* --- Liste principale : toutes les fiches (filtrée par catégorie si sélectionnée) --- */
+  var list = fiches.filter(function (f) {
+    if (ui.tag && f.tags.map(norm).indexOf(norm(ui.tag)) < 0) return false;
+    if (q && f.text.indexOf(q) < 0) return false;
+    return true;
+  });
+  var label = ui.tag ? ui.tag : "Toutes les fiches";
   if (list.length) {
-    html += (recentList.length ? "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>Toutes les fiches</p>" : "");
+    html += "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>" + esc(label) + " · " + list.length + "</p>";
     html += '<div class="grid-fiches">' + list.map(cardHtml).join("") + "</div>";
   } else {
-    html += '<div class="empty">Aucune fiche ne correspond à la recherche.</div>';
+    var emptyMsg = q || ui.tag ? "Aucune fiche ne correspond." : "Aucune fiche.";
+    html += '<div class="empty">' + emptyMsg + "</div>";
   }
   view.innerHTML = html;
   var s = document.getElementById("search");
@@ -922,9 +1040,17 @@ function toggleFavStar(ev, slug) {
   saveLs(LS.fav, favs);
   render();
 }
-function toggleFav() { ui.favOnly = !ui.favOnly; renderHome(); }
-function setTag(t) { ui.tag = (norm(ui.tag) === norm(t)) ? "" : t; renderHome(); }
-function clearFilters() { ui.q = ""; ui.tag = ""; ui.favOnly = false; renderHome(); }
+function setTab(t) {
+  if (t === "cats") {
+    if (ui.tab === "cats") { ui.catOpen = !ui.catOpen; }
+    else { ui.tab = "cats"; ui.catOpen = true; }
+  } else {
+    ui.tab = (ui.tab === t) ? "" : t;
+  }
+  renderHome();
+}
+function setTag(t) { ui.tag = t || ""; ui.catOpen = false; renderHome(); }
+function clearFilters() { ui.q = ""; renderHome(); }
 
 /* ---------- Fiche ---------- */
 function renderFiche(slug) {
@@ -1285,6 +1411,34 @@ function computeDose() {
 }
 
 /* ---------- Import ---------- */
+function renderReglages() {
+  var html = '<div class="card"><div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Réglages</div>';
+  html += "<h3>📥 Import / Sauvegarde</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Importer des fiches (fichiers, presse-papiers), gérer la synchronisation GitHub et les données locales.</p>";
+  html += '<a class="btn btn-primary" href="#/import" style="text-decoration:none">Ouvrir la page Import</a>';
+  html += "<div style='height:18px'></div><h3>☁️ Synchronisation GitHub</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Télécharger les dernières fiches du dépôt Compendium (ouvre la page Import et lance la synchronisation).</p>";
+  html += '<button class="btn btn-primary" onclick="syncFromReglages()">☁️ Synchroniser maintenant</button>';
+  html += "<div style='height:18px'></div><h3>Couleur de l'interface</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Choisissez la palette de ZenoBE. Le choix est mémorisé sur cet appareil. D'autres réglages s'ajouteront ici par la suite.</p>";
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+  Object.keys(THEMES).forEach(function (id) {
+    var t = THEMES[id];
+    var actif = curTheme === id;
+    html += '<button class="theme-btn' + (actif ? " on" : "") + '" onclick="setTheme(\'' + id + '\')" ' +
+      'style="display:flex;align-items:center;gap:8px;font-size:14px">' +
+      '<span style="display:inline-flex;gap:2px">' +
+      [t.g1, t.g2, "#E7C55A"].map(function (c) {
+        return '<span style="width:15px;height:15px;border-radius:5px;background:' + c + ';border:1px solid rgba(0,0,0,.15);display:inline-block"></span>';
+      }).join("") + "</span>" +
+      (actif ? "✓ " : "") + t.nom + "</button>";
+  });
+  html += "</div>";
+  html += "</div>";
+  view.innerHTML = html;
+}
+function setTheme(id) { applyTheme(id); render(); }
+
 function renderImport() {
   var lastSync = cfg.lastSync ? new Date(cfg.lastSync).toLocaleString("fr-BE") : "jamais";
   var html = '<div class="card"><div class="section-title">📥 Importer des fiches</div>';
@@ -1428,11 +1582,12 @@ function wipeAll() {
 /* ================================================================
    Démarrage
 ================================================================ */
-document.getElementById("quick-sync").addEventListener("click", function () {
+function syncFromReglages() {
   window.location.hash = "#/import";
   setTimeout(runSync, 60);
-});
+}
 window.addEventListener("hashchange", render);
+applyTheme(curTheme);
 render();
 updateCount();
 if (cfg.autoSync && fiches.length >= 0) {
@@ -1440,7 +1595,6 @@ if (cfg.autoSync && fiches.length >= 0) {
   syncGitHub(silentLog, true);
 }
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="IIsFFlZQRuKnhpu63RFznw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="S7bRssdl2DDbNi6+dLtXDw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="Rkah59Aucf1jTHdcms9qWA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
