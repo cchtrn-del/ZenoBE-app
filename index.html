@@ -9,6 +9,7 @@
 
 
 
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -243,7 +244,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.15 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.16 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -258,12 +259,23 @@ function loadLs(key, fallback) {
   try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch (e) { return fallback; }
 }
+var lsErrShown = false;
+function lsFullError() {
+  if (lsErrShown) return; lsErrShown = true;
+  toast("\u26a0\ufe0f Stockage local satur\u00e9 \u2014 rien n'est enregistr\u00e9. Ouvrez \u2699\ufe0f R\u00e9glages \u2192 Nettoyer le stockage.");
+}
 function saveLs(key, val) {
   try { window.localStorage.setItem(key, JSON.stringify(val)); return true; }
-  catch (e) { toast("⚠️ Stockage local saturé — impossible d'enregistrer."); return false; }
+  catch (e) { lsFullError(); return false; }
 }
 
-var fiches = loadLs(LS.fiches, []);
+function slimFiche(f) { var c = {}; for (var k in f) c[k] = f[k]; c.html = ""; c.text = ""; return c; }
+function hydrateFiche(f) {
+  f.html = f.html || mdToHtml(f.md || "");
+  f.text = f.text || norm(f.title + " " + (f.tags || []).join(" ") + " " + (f.md || ""));
+  return f;
+}
+var fiches = (loadLs(LS.fiches, [])).map(hydrateFiche);
 var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, lastSync: null });
 var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
@@ -299,8 +311,23 @@ function applyTheme(id) {
   saveLs(LS.theme, curTheme);
 }
 
-function persistFiches() { saveLs(LS.fiches, fiches); updateCount(); }
+function persistFiches() { saveLs(LS.fiches, fiches.map(slimFiche)); updateCount(); }
 function persistCfg() { saveLs(LS.cfg, cfg); }
+function lsBytes() {
+  var t = 0;
+  try { for (var k in window.localStorage) { if (Object.prototype.hasOwnProperty.call(window.localStorage, k)) t += k.length + (window.localStorage.getItem(k) || "").length; } } catch (e) {}
+  return t * 2;
+}
+function repairStorage() {
+  fiches.forEach(hydrateFiche);
+  persistFiches(); persistCfg(); saveLs(LS.fav, favs); saveLs(LS.rec, recents);
+  try {
+    window.localStorage.setItem("fm.test", "1"); window.localStorage.removeItem("fm.test");
+    lsErrShown = false;
+    toast("\u2705 Stockage compact\u00e9 \u2014 " + Math.round(lsBytes() / 1024) + " Ko utilis\u00e9s");
+  } catch (e) { toast("\u274c Stockage toujours satur\u00e9 \u2014 exportez (Importer) puis effacez les donn\u00e9es."); }
+  renderReglages();
+}
 
 /* ================================================================
    Utilitaires
@@ -1419,6 +1446,9 @@ function renderReglages() {
   html += "<div style='height:18px'></div><h3>☁️ Synchronisation GitHub</h3>";
   html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Télécharger les dernières fiches du dépôt Compendium (ouvre la page Import et lance la synchronisation).</p>";
   html += '<button class="btn btn-primary" onclick="syncFromReglages()">☁️ Synchroniser maintenant</button>';
+  html += "<div style='height:18px'></div><h3>💾 Stockage local</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Occupation : <b>" + Math.round(lsBytes() / 1024) + " Ko</b> · " + fiches.length + " fiche(s). Si l'app signale un stockage saturé, compacter réécrit les données en format léger (fiches conservées).</p>";
+  html += '<button class="btn btn-primary" onclick="repairStorage()">Nettoyer / compacter le stockage</button>';
   html += "<div style='height:18px'></div><h3>Couleur de l'interface</h3>";
   html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Choisissez la palette de ZenoBE. Le choix est mémorisé sur cet appareil. D'autres réglages s'ajouteront ici par la suite.</p>";
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
@@ -1474,7 +1504,7 @@ function renderImport() {
   html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px">' +
     '<button class="btn btn-primary" id="gh-sync-btn" onclick="runSync()">☁️ Synchroniser maintenant</button>' +
     '<label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;cursor:pointer">' +
-    '<input type="checkbox" id="gh-auto"' + (cfg.autoSync ? " checked" : "") + ' style="width:auto"/> Synchroniser au démarrage</label>' +
+    '<input type="checkbox" id="gh-auto"' + (cfg.autoSync ? " checked" : "") + ' style="width:auto"/> Synchroniser au démarrage (ignorée si la dernière synchro date de moins de 24 h)</label>' +
     '<span style="font-size:12px;color:var(--muted)">Dernière synchro : ' + esc(lastSync) + "</span></div>";
   html += '<label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;cursor:pointer">' +
     '<input type="checkbox" id="gh-replace" style="width:auto"/> Remplacer toute la collection (sinon, fusion par nom de fiche)</label>';
@@ -1590,11 +1620,12 @@ window.addEventListener("hashchange", render);
 applyTheme(curTheme);
 render();
 updateCount();
-if (cfg.autoSync && fiches.length >= 0) {
+var lastSyncAge = cfg.lastSync ? (Date.now() - new Date(cfg.lastSync).getTime()) : Infinity;
+if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
   var silentLog = function () {};
   syncGitHub(silentLog, true);
 }
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="Rkah59Aucf1jTHdcms9qWA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="8Fi1VBeTMhbR2uXLQ9EHJA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
