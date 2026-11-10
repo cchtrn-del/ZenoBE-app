@@ -266,7 +266,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.41 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.45 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -275,7 +275,7 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1" };
+var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1" };
 
 function loadLs(key, fallback) {
   try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -972,6 +972,10 @@ function render() {
   else if (h.indexOf("#/calculateur") === 0) renderCalculateur();
   else if (h.indexOf("#/biometrie/percentiles") === 0) renderPercentiles();
   else if (h.indexOf("#/biometrie/hemodynamique") === 0) renderHemodynamique();
+  else if (h.indexOf("#/laboratoire/view/") === 0) renderDocView("labo", decodeURIComponent(h.slice("#/laboratoire/view/".length)));
+  else if (h.indexOf("#/laboratoire") === 0) renderDocsPage("labo");
+  else if (h.indexOf("#/scores/view/") === 0) renderDocView("scores", decodeURIComponent(h.slice("#/scores/view/".length)));
+  else if (h.indexOf("#/scores") === 0) renderDocsPage("scores");
   else if (h.indexOf("#/biometrie") === 0) renderBiometrie();
   else if (h.indexOf("#/reglages") === 0) renderReglages();
   else if (h.indexOf("#/import") === 0) renderImport();
@@ -2025,6 +2029,24 @@ function nmUpdate() {
   if (nmPageHook) nmPageHook();
 }
 
+
+var hubBtn = function (opt) {
+  var inner = '<div style="width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none"><span style="filter:brightness(0) invert(1)">' + opt.icon + '</span></div>' +
+    '<div style="flex:1">' +
+    '<div style="font-size:16px;font-weight:800;color:var(--deep)">' + opt.t + '</div>' +
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:2px">' + opt.d + '</div>' +
+    '</div>' +
+    (opt.soon
+      ? '<div style="align-self:center"><span class="badge b-none">Bientôt</span></div>'
+      : '<div style="align-self:center;color:var(--accent);font-size:22px;font-weight:800">›</div>');
+  var style = 'display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
+    'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
+    'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)';
+  return opt.soon
+    ? '<div style="' + style + ';opacity:.6">' + inner + '</div>'
+    : '<a href="' + opt.href + '" style="text-decoration:none"><div style="' + style + '">' + inner + '</div></a>';
+};
+
 function renderBiometrie() {
   var view = document.getElementById("view");
   var item = function (opt) {
@@ -2038,28 +2060,13 @@ function renderBiometrie() {
       '<div class="fiche-card">' + inner +
       '<div style="position:absolute;top:10px;right:10px;color:var(--accent);font-weight:800">›</div></div></a>';
   };
-  var hubBtn = function (opt) {
-    var inner = '<div style="width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none"><span style="filter:brightness(0) invert(1)">' + opt.icon + '</span></div>' +
-      '<div style="flex:1">' +
-      '<div style="font-size:16px;font-weight:800;color:var(--deep)">' + opt.t + '</div>' +
-      '<div style="font-size:12.5px;color:var(--muted);margin-top:2px">' + opt.d + '</div>' +
-      '</div>' +
-      (opt.soon
-        ? '<div style="align-self:center"><span class="badge b-none">Bientôt</span></div>'
-        : '<div style="align-self:center;color:var(--accent);font-size:22px;font-weight:800">›</div>');
-    var style = 'display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
-      'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
-      'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)';
-    return opt.soon
-      ? '<div style="' + style + ';opacity:.6">' + inner + '</div>'
-      : '<a href="' + opt.href + '" style="text-decoration:none"><div style="' + style + '">' + inner + '</div></a>';
-  };
   view.innerHTML = '<h1 style="margin-bottom:2px">Normes et mesures</h1>' +
     nmBandHtml() +
     '<div style="margin-top:12px">' +
     hubBtn({ icon: "📏", t: "Biométrie", d: "Poids, taille/longueur, IMC et périmètre crânien — percentiles, z-scores et seuils OMS 2006/2007.", href: "#/biometrie/percentiles" }) +
     hubBtn({ icon: "🫀", t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
-    hubBtn({ icon: "🧪", t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", soon: true }) +
+    hubBtn({ icon: "🧪", t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", href: "#/laboratoire" }) +
+    hubBtn({ icon: "🩺", t: "Scores cliniques", d: "Scores et repères cliniques : développement pubertaire (Tanner), et plus à venir.", href: "#/scores" }) +
     '</div>';
   nmPageHook = null;
   nmBind();
@@ -2306,6 +2313,282 @@ function hmUpdate() {
     hmCard(4, "ℹ️ Formules et références", "", body4, hmOpen[4], { bg: "var(--accent-soft)", bd: "var(--accent)" });
 }
 
+/* ================================================================
+   Laboratoire — normes biologiques
+================================================================ */
+/* Harriet Lane Handbook, 23e éd. (2024), table 14.1 « Age-Specific
+   Blood Cell Indices » : [âge, Hb (g/dL)*, Hte (%)*, VCM (fL)*,
+   CHCM (g/dL)*, réticulocytes, leucocytes (×10³/mm³)†,
+   plaquettes (×10³/mm³)†] */
+var HL_CBC = [
+  ["26–30 sem. de gestation ‡", "13,4 (11)", "41,5 (34,9)", "118,2 (106,7)", "37,9 (30,6)", "—", "4,4 (2,7)", "254 (180–327)"],
+  ["28 sem. de gestation", "14,5", "45", "120", "31", "(5–10)", "—", "275"],
+  ["32 sem. de gestation", "15", "47", "118", "32", "(3–10)", "—", "290"],
+  ["À terme (cordon) §", "16,5 (13,5)", "51 (42)", "108 (98)", "33 (30)", "(3–7)", "18,1 (9–30)‖", "290"],
+  ["1–3 jours", "18,5 (14,5)", "56 (45)", "108 (95)", "33 (29)", "(1,8–4,6)", "18,9 (9,4–34)", "192"],
+  ["2 semaines", "16,6 (13,4)", "53 (41)", "105 (88)", "31,4 (28,1)", "—", "11,4 (5–20)", "252"],
+  ["1 mois", "13,9 (10,7)", "44 (33)", "101 (91)", "31,8 (28,1)", "(0,1–1,7)", "10,8 (4–19,5)", "—"],
+  ["2 mois", "11,2 (9,4)", "35 (28)", "95 (84)", "31,8 (28,3)", "—", "—", "—"],
+  ["6 mois", "12,6 (11,1)", "36 (31)", "76 (68)", "35 (32,7)", "(0,7–2,3)", "11,9 (6–17,5)", "—"],
+  ["6 mois–2 ans", "12 (10,5)", "36 (33)", "78 (70)", "33 (30)", "—", "10,6 (6–17)", "(150–350)"],
+  ["2–6 ans", "12,5 (11,5)", "37 (34)", "81 (75)", "34 (31)", "(0,5–1,0)", "8,5 (5–15,5)", "(150–350)"],
+  ["6–12 ans", "13,5 (11,5)", "40 (35)", "86 (77)", "34 (31)", "(0,5–1,0)", "8,1 (4,5–13,5)", "(150–350)"],
+  ["12–18 ans — garçon", "14,5 (13)", "43 (36)", "88 (78)", "34 (31)", "(0,5–1,0)", "7,8 (4,5–13,5)", "(150–350)"],
+  ["12–18 ans — fille", "14 (12)", "41 (37)", "90 (78)", "34 (31)", "(0,5–1,0)", "7,8 (4,5–13,5)", "(150–350)"],
+  ["Adulte — homme", "15,5 (13,5)", "47 (41)", "90 (80)", "34 (31)", "(0,8–2,5)", "7,4 (4,5–11)", "(150–350)"],
+  ["Adulte — femme", "14 (12)", "41 (36)", "90 (80)", "34 (31)", "(0,8–4,1)", "7,4 (4,5–11)", "(150–350)"]
+];
+/* Index de la ligne HL_CBC applicable selon l'âge (jours) et le sexe.
+   Retourne -1 si âge inconnu, -2 si > 18 ans. */
+function cbcRowFor(days, sexe) {
+  if (days == null || isNaN(days)) return -1;
+  if (days > 6574) return -2;
+  if (days < 2) return 3;
+  if (days < 8) return 4;
+  if (days < 21) return 5;
+  if (days < 46) return 6;
+  if (days < 136) return 7;
+  if (days < 270) return 8;
+  if (days < 731) return 9;
+  if (days < 2192) return 10;
+  if (days < 4383) return 11;
+  return (sexe === "F") ? 13 : 12;
+}
+
+/* ================================================================
+   Pages « Laboratoire » / « Scores cliniques » — fichiers markdown
+   stockés sur GitHub (dossier _7.scores_et_labos du dépôt, p. ex.
+   « Compendium »). Le jeton de la carte ☁️ Synchronisation donne
+   accès au dépôt privé. Contenu mis en cache localement (hors ligne).
+   Frontmatter : titre, partie (labo|scores ; absent = les deux),
+   description.
+================================================================ */
+var DOCS_CACHE = loadLs(LS.docs, { folder: null, files: {}, ts: 0 });
+function docsPersist() { saveLs(LS.docs, DOCS_CACHE); }
+function docsNorm(s) { return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, ""); }
+function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? normKey(String(v[0] || "")) : normKey(String(v || "")); }
+
+function docsShowList(kind) {
+  var list = document.getElementById("docs-list");
+  if (!list) return;
+  var names = Object.keys(DOCS_CACHE.files).sort();
+  var html = "";
+  for (var i = 0; i < names.length; i++) {
+    var parts = splitFiche(DOCS_CACHE.files[names[i]].md);
+    var part = docsPartie(parts.fm);
+    if (part && part !== kind) continue;
+    html += hubBtn({ icon: "\U0001F4C4", t: parts.fm.titre || names[i].replace(/\.md$/i, ""), d: parts.fm.description || names[i], href: "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]) });
+  }
+  if (!html) html = '<div class="warning-box">Aucun fichier .md pour cette partie dans le dossier « _7.scores_et_labos » du dépôt. Utilisez 🔄 Actualiser après avoir ajouté vos fichiers.</div>';
+  list.innerHTML = html;
+}
+
+function docsStatus(m) { var s = document.getElementById("docs-status"); if (s) s.innerHTML = m; }
+
+async function docsFetch(kind) {
+  var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
+  var branch = (cfg.branch || "main").trim();
+  if (!user || !repo) { docsStatus("⚠️ Renseignez l'utilisateur et le dépôt dans la carte ☁️ Synchronisation (Réglages)."); return; }
+  if (!cfg.token) { docsStatus("⚠️ Jeton GitHub requis (dépôt privé) — carte ☁️ Synchronisation (Réglages)."); return; }
+  docsStatus("☁️ Synchronisation depuis GitHub…");
+  try {
+    var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/?ref=" + encodeURIComponent(branch), { headers: ghHeaders(false) });
+    if (r.status === 401 || r.status === 403) { docsStatus("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+    if (r.status === 404) { docsStatus("❌ Dépôt ou branche introuvable."); return; }
+    if (!r.ok) { docsStatus("❌ Erreur GitHub " + r.status + "."); return; }
+    var entries = await r.json();
+    var folder = null;
+    for (var i = 0; i < (entries || []).length; i++) {
+      if (entries[i].type !== "dir") continue;
+      var n = docsNorm(entries[i].name);
+      if (n.indexOf("scores") >= 0 && n.indexOf("labo") >= 0) { folder = entries[i].path; break; }
+    }
+    if (!folder) { docsStatus("❌ Dossier « _7.scores_et_labos » introuvable à la racine du dépôt (" + repo + ")."); return; }
+    var rd = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/" + folder.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(false) });
+    if (!rd.ok) { docsStatus("❌ Impossible de lister le dossier " + folder + "."); return; }
+    var files = (await rd.json()) || [];
+    var newFiles = {}, count = 0;
+    for (var j = 0; j < files.length; j++) {
+      if (files[j].type !== "file" || !/\.md$/i.test(files[j].name)) continue;
+      var rf = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+        "/contents/" + files[j].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(true) });
+      if (!rf.ok) { docsStatus("⚠️ Échec : " + files[j].name); continue; }
+      newFiles[files[j].name] = { path: files[j].path, md: await rf.text() };
+      count++;
+    }
+    if (!count) { docsStatus("❌ Aucun fichier .md dans " + folder + "."); return; }
+    DOCS_CACHE.folder = folder;
+    DOCS_CACHE.files = newFiles;
+    DOCS_CACHE.ts = Date.now();
+    docsPersist();
+    docsStatus("✅ " + count + " fichier(s) synchronisé(s) — " + folder + " (affichage hors ligne disponible).");
+    docsShowList(kind);
+  } catch (e) {
+    docsStatus("❌ Réseau indisponible ou GitHub inaccessible — contenu en cache affiché le cas échéant.");
+  }
+}
+
+function docsRefreshPage(kind) {
+  var list = document.getElementById("docs-list");
+  if (list) list.innerHTML = '<p class="meta-line">Chargement…</p>';
+  docsFetch(kind);
+}
+
+function renderDocsPage(kind) {
+  var view = document.getElementById("view");
+  var titre = kind === "labo" ? "Laboratoire" : "Scores cliniques";
+  view.innerHTML = '<h1 style="margin-bottom:2px">' + titre + '</h1>' +
+    '<p class="meta-line">Pages issues des fichiers markdown du dossier « _7.scores_et_labos » du dépôt GitHub « ' + esc((cfg.repo || "").trim()) + ' » (jeton ☁️ Synchronisation requis — dépôt privé). Le contenu est mis en cache pour un accès hors ligne.</p>' +
+    '<div style="margin:10px 0 0"><button class="btn" onclick="docsRefreshPage(\'' + kind + '\')">🔄 Actualiser depuis GitHub</button></div>' +
+    '<div id="docs-status" class="field-note" style="margin:6px 0 0"></div>' +
+    '<div id="docs-list" style="margin-top:12px"></div>';
+  var names = Object.keys(DOCS_CACHE.files);
+  if (names.length) {
+    docsShowList(kind);
+    docsStatus("📋 " + names.length + " fichier(s) en cache — 🔄 pour actualiser.");
+  } else {
+    docsFetch(kind);
+  }
+}
+
+function renderDocView(kind, name) {
+  var view = document.getElementById("view");
+  var base = kind === "labo" ? "laboratoire" : "scores";
+  var titrePage = kind === "labo" ? "Laboratoire" : "Scores cliniques";
+  view.innerHTML = '<a class="back" href="#/' + base + '">‹ ' + titrePage + '</a>' +
+    '<div id="doc-body"></div>';
+  var f = DOCS_CACHE.files[name];
+  if (f && f.md) { docsRenderBody(name); return; }
+  document.getElementById("doc-body").innerHTML = '<p class="meta-line">Chargement depuis GitHub…</p>';
+  docsFetchOne(kind, name);
+}
+
+function docsRenderBody(name) {
+  var f = DOCS_CACHE.files[name];
+  if (!f) return;
+  var parts = splitFiche(f.md);
+  var body = document.getElementById("doc-body");
+  if (!body) return;
+  body.innerHTML = '<h1 style="margin-bottom:2px">' + esc(parts.fm.titre || name.replace(/\.md$/i, "")) + '</h1>' +
+    (parts.fm.description ? '<p class="meta-line">' + esc(parts.fm.description) + '</p>' : "") +
+    '<div class="card" style="padding:14px">' + mdToHtml(parts.body) + '</div>' +
+    '<p class="meta-line" style="font-size:11px;margin:8px 2px 0">Source : ' + esc(f.path) + ' — dépôt GitHub « ' + esc((cfg.repo || "").trim()) + ' ».</p>';
+  docsPersist();
+}
+
+async function docsFetchOne(kind, name) {
+  var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
+  var branch = (cfg.branch || "main").trim();
+  var fail = function (m) { var b = document.getElementById("doc-body"); if (b) b.innerHTML = '<div class="warning-box">' + m + '</div>'; };
+  if (!user || !repo || !cfg.token) { fail("Jeton GitHub requis — carte ☁️ Synchronisation (Réglages)."); return; }
+  try {
+    var folder = DOCS_CACHE.folder;
+    if (!folder) {
+      var rr = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+        "/contents/?ref=" + encodeURIComponent(branch), { headers: ghHeaders(false) });
+      if (!rr.ok) { fail("❌ Accès GitHub impossible (erreur " + rr.status + ")."); return; }
+      var es = await rr.json();
+      for (var i = 0; i < (es || []).length; i++) {
+        if (es[i].type !== "dir") continue;
+        var n = docsNorm(es[i].name);
+        if (n.indexOf("scores") >= 0 && n.indexOf("labo") >= 0) { folder = es[i].path; break; }
+      }
+      if (!folder) { fail("❌ Dossier « _7.scores_et_labos » introuvable."); return; }
+    }
+    var rd = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/" + folder.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(false) });
+    if (!rd.ok) { fail("❌ Impossible de lister le dossier."); return; }
+    var files = (await rd.json()) || [];
+    var target = docsNorm(name);
+    var hit = null;
+    for (var j = 0; j < files.length; j++) {
+      if (files[j].type !== "file" || !/\.md$/i.test(files[j].name)) continue;
+      if (docsNorm(files[j].name) === target) { hit = files[j]; break; }
+    }
+    if (!hit) { fail("❌ Fichier « " + name + " » introuvable dans " + folder + "."); return; }
+    var rf = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+      "/contents/" + hit.path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(true) });
+    if (!rf.ok) { fail("❌ Téléchargement impossible (erreur " + rf.status + ")."); return; }
+    DOCS_CACHE.folder = folder;
+    if (!DOCS_CACHE.files) DOCS_CACHE.files = {};
+    DOCS_CACHE.files[hit.name] = { path: hit.path, md: await rf.text() };
+    docsPersist();
+    docsRenderBody(hit.name);
+  } catch (e) {
+    fail("❌ Réseau indisponible — réessayez, ou ouvrez une autre page en cache.");
+  }
+}
+
+function renderLaboratoire() { renderDocsPage("labo"); }
+function renderScores() { renderDocsPage("scores"); }
+
+function renderScoresPuberte() {
+  var view = document.getElementById("view");
+  view.innerHTML = '<a class="back" href="#/scores">‹ Scores cliniques</a>' +
+    '<h1 style="margin-bottom:2px">Développement pubertaire</h1>' +
+    '<p class="meta-line">Stades de Tanner et repères de puberté précoce / retard pubertaire.</p>' +
+    nmBandHtml() +
+    '<div id="sc-out" style="margin-top:10px"></div>';
+  nmPageHook = scPubUpdate;
+  nmBind();
+  nmUpdate();
+}
+
+function scPubUpdate() {
+  var st = percState; /* bandeau partagé */
+  saveLs(PERC_LS, st);
+  var out = document.getElementById("sc-out");
+  if (!out) return;
+  var today = new Date().toISOString().slice(0, 10);
+  var age = ageDetail(st.dob, st.dom || today);
+  var note;
+  if (!age) {
+    note = '<div class="field-note" style="margin:0 0 10px">Renseignez la date de naissance et le sexe dans le bandeau ci-dessus pour contextualiser les seuils.</div>';
+  } else if (age.days > 6574) {
+    note = '<div class="field-note" style="margin:0 0 10px">Âge : ' + ageFr(age.days) + ' — au-delà de 18 ans, hors champ de ces seuils pédiatriques.</div>';
+  } else {
+    var ans = age.days / 365.25;
+    var seuilBas = st.sexe === "F" ? 8 : 9;
+    var seuilHaut = st.sexe === "F" ? 13 : 14;
+    if (ans < seuilBas) {
+      note = '<div class="warning-box" style="margin:0 0 10px">' + (st.sexe === "F" ? "Fille" : "Garçon") + ' de ' + ageFr(age.days) + ' : tout signe pubertaire (M2 ou G2, poils pubiens) avant ' + seuilBas + ' ans impose une évaluation — puberté précoce.</div>';
+    } else if (ans < seuilHaut) {
+      note = '<div class="field-note" style="margin:0 0 10px">' + (st.sexe === "F" ? "Fille" : "Garçon") + ' de ' + ageFr(age.days) + ' : fenêtre physiologique — ' + (st.sexe === "F" ? "thélarche (M2) attendue entre 8 et 13 ans" : "croissance testiculaire (G2) attendue entre 9 et 14 ans") + '.</div>';
+    } else {
+      note = '<div class="warning-box" style="margin:0 0 10px">' + (st.sexe === "F" ? "Fille" : "Garçon") + ' de ' + ageFr(age.days) + ' : absence de ' + (st.sexe === "F" ? "thélarche (M2) à 13 ans" : "G2 à 14 ans") + ' = retard pubertaire — bilan indiqué.</div>';
+    }
+  }
+  var card = function (titre, lignes) {
+    var li = "";
+    for (var i = 0; i < lignes.length; i++) li += "<li>" + lignes[i] + "</li>";
+    return '<div class="card" style="background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);padding:10px 14px;margin:10px 0 0">' +
+      '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">' + titre + '</h3><ul style="margin:0;padding-left:18px;font-size:13px">' + li + '</ul></div>';
+  };
+  out.innerHTML = note +
+    '<h2 style="font-size:15px;margin:14px 0 2px;color:var(--deep)">Stades de Tanner</h2>' +
+    tannerTable("G — Développement génital", "garçons", TAN_G) +
+    tannerTable("M — Développement mammaire", "filles", TAN_M) +
+    tannerTable("P — Poils pubiens", "les deux sexes", TAN_P) +
+    '<div class="field-note" style="margin-top:8px">Volume testiculaire : orchidomètre de Prader (1–25 mL) ; G2 (≥ 4 mL) marque le début de la puberté chez le garçon. Ménarche : en moyenne 2–3 ans après la thélarche (souvent M3–M4).</div>' +
+    '<div style="margin-top:10px"><a class="gh-doc" data-doc="/_7.Images/scorestanner.png" href="#" style="font-size:13.5px;font-weight:700;color:var(--accent);text-decoration:underline">🖼️ Illustration des stades de Tanner</a>' +
+    '<div class="field-note">Image « scorestanner.png » du dépôt GitHub « Compendium » — ouverture dans l’app (jeton ☁️ Synchronisation requis, dépôt privé).</div>' +
+    card("Puberté précoce — seuils d\'évaluation", [
+      "<b>Fille</b> : développement mammaire (M2) ou poils pubiens <b>avant 8 ans</b>.",
+      "<b>Garçon</b> : volume testiculaire ≥ 4 mL (G2) <b>avant 9 ans</b>.",
+      "Pubarché précoce isolé (poils seuls) : origine surrénalienne à évaluer.",
+      "Thélarche précoce isolée : le plus souvent bénigne — surveiller."
+    ]) +
+    card("Retard pubertaire — seuils d\'évaluation", [
+      "<b>Fille</b> : absence de thélarche (M2) <b>à 13 ans</b> ; aménorrhée primaire si ménarche absente à 15 ans.",
+      "<b>Garçon</b> : absence de G2 <b>à 14 ans</b>.",
+      "Retard constitutionnel : cause la plus fréquente (antécédents familiaux, âge osseux retardé).",
+      "Signes d\'alerte : petite taille, anosmie, signes neurologiques → bilan étiologique."
+    ]) +
+    '<p class="meta-line" style="font-size:11px;margin:10px 2px 0"><b>Sources :</b> Marshall WA, Tanner JM. Variations in pattern of pubertal changes in girls. <i>Arch Dis Child</i> 1969;44:291-303 ; Marshall WA, Tanner JM. Variations in pattern of pubertal changes in boys. <i>Arch Dis Child</i> 1970;45:13-23 ; Hughes HK, Kahl LK, éd. <i>The Harriet Lane Handbook</i>, 23e éd. Elsevier ; 2024 (chapitre Endocrinologie) ; Palmert MR, Dunkel L. Delayed puberty. <i>N Engl J Med</i> 2012;366:443-53.</p>';
+}
+
 function renderPercentiles() {
   var view = document.getElementById("view");
   var st = percState;
@@ -2459,6 +2742,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="5DN3YnJ5fFzuylhnHYphOg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="cYNvapSjBSEgLkbNFVNUMw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
