@@ -60,6 +60,15 @@
     font-size: 12px; padding: 4px 10px; border-radius: 999px;
   }
   main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
+  /* iOS Safari zoome automatiquement au focus d'un input < 16px → forcer 16px */
+  input, select, textarea { font-size: 16px !important; }
+  input { max-width: 100%; }
+  @media (max-width: 480px) {
+    main { padding: 14px 10px 60px; }
+    h1 { font-size: 20px; }
+    .card { padding: 12px; }
+    .nm-band { padding: 6px 10px !important; }
+  }
   /* ---------- Composants ---------- */
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
@@ -187,6 +196,12 @@
   }
   td { border-top: 1px solid var(--border); padding: 8px 10px; vertical-align: top; }
   tbody tr:nth-child(even) { background: var(--bg); }
+  .hm-tbl { background: #ffffff; }
+  .hm-tbl tbody tr:nth-child(even) td { background: var(--bg); }
+  .hm-tbl td:not(:first-child) { font-weight: 800; color: var(--deep); font-size: 14.5px; }
+  .hm-tbl tbody tr.hm-hl td { background: var(--accent-soft); font-weight: 800; color: var(--deep); }
+  .hm-tbl tbody tr.hm-hl td:first-child { border-left: 4px solid var(--accent); padding-left: 6px; }
+  .hm-tbl tbody tr:last-child td { border-bottom: none; }
   .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
   .b-first { background: var(--ok-soft); color: var(--ok); }
   .b-alt { background: var(--warn-soft); color: var(--warn); }
@@ -251,7 +266,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.32 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.41 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1870,13 +1885,43 @@ function percBar(p) {
 ================================================================ */
 var nmPageHook = null;
 
+/* Saisie date de naissance en clair : chiffres uniquement, séparateurs ajoutés
+   automatiquement (jj → jj/mm → jj/mm/aaaa). percState.dob reste au format ISO. */
+function nmDobFr(iso) {
+  if (!iso || iso.length !== 10) return "";
+  return iso.slice(8, 10) + "/" + iso.slice(5, 7) + "/" + iso.slice(0, 4);
+}
+function nmDobFormat(txt) {
+  var d = String(txt).replace(/\D/g, "").slice(0, 8);
+  if (d.length > 4) return d.slice(0, 2) + "/" + d.slice(2, 4) + "/" + d.slice(4);
+  if (d.length > 2) return d.slice(0, 2) + "/" + d.slice(2);
+  return d;
+}
+function nmDobIso(txt) {
+  var d = String(txt).replace(/\D/g, "");
+  if (d.length !== 8) return "";
+  var jj = parseInt(d.slice(0, 2), 10), mm = parseInt(d.slice(2, 4), 10), aa = parseInt(d.slice(4), 10);
+  if (mm < 1 || mm > 12 || jj < 1 || jj > 31) return "";
+  var dt = new Date(aa, mm - 1, jj);
+  if (dt.getFullYear() !== aa || dt.getMonth() !== mm - 1 || dt.getDate() !== jj) return "";
+  var iso = aa + "-" + String(mm).padStart(2, "0") + "-" + String(jj).padStart(2, "0");
+  var today = new Date().toISOString().slice(0, 10);
+  if (iso > today) return ""; /* date dans le futur : invalide */
+  return iso;
+}
+function nmDobKey() {
+  var el = document.getElementById("nm-dob");
+  el.value = nmDobFormat(el.value);
+  nmUpdate();
+}
+
 function nmBandHtml() {
   var st = percState;
   var today = new Date().toISOString().slice(0, 10);
   return '<div class="card nm-band" style="padding:8px 12px">' +
     '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">' +
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Date de naissance</label>' +
-    '<input type="date" id="nm-dob" title="Date de naissance" style="width:145px;padding:6px" value="' + esc(st.dob) + '" max="' + today + '"></div>' +
+    '<input type="text" id="nm-dob" inputmode="numeric" autocomplete="off" title="Date de naissance (jj/mm/aaaa)" placeholder="jj/mm/aaaa" maxlength="10" style="width:145px;padding:6px" value="' + esc(nmDobFr(st.dob)) + '"></div>' +
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Sexe</label>' +
     '<div id="nm-sex" style="display:inline-flex;border:1.5px solid var(--muted);border-radius:999px;overflow:hidden;user-select:none">' +
     '<span id="nm-sex-m" onclick="nmSexe(\'M\')" style="padding:5px 16px;font-weight:800;font-size:14px;cursor:pointer">M</span>' +
@@ -1888,10 +1933,10 @@ function nmBandHtml() {
     '<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-top:6px">' +
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Poids (kg)</label>' +
     '<input type="number" id="nm-poids" title="Poids (kg)" inputmode="decimal" step="0.01" min="0" max="300" placeholder="kg" style="width:95px;padding:6px" value="' + esc(st.poids) + '">' +
-    '<div id="nm-p-ctxt" style="font-size:12.5px;color:var(--deep);margin-top:2px;min-width:150px"></div></div>' +
+    '<div id="nm-p-ctxt" style="font-size:12.5px;color:var(--deep);margin-top:2px"></div></div>' +
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Taille (cm)</label>' +
     '<input type="number" id="nm-taille" title="Taille (cm)" inputmode="decimal" step="0.1" min="0" max="230" placeholder="cm" style="width:95px;padding:6px" value="' + esc(st.taille) + '">' +
-    '<div id="nm-t-ctxt" style="font-size:12.5px;color:var(--deep);margin-top:2px;min-width:150px"></div></div>' +
+    '<div id="nm-t-ctxt" style="font-size:12.5px;color:var(--deep);margin-top:2px"></div></div>' +
     '</div>' +
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:13px">' +
     '<span id="nm-sc" style="font-weight:700;color:var(--deep)"></span>' +
@@ -1902,10 +1947,12 @@ function nmBandHtml() {
 }
 
 function nmBind() {
-  ["nm-dob", "nm-poids", "nm-taille"].forEach(function (id) {
+  ["nm-poids", "nm-taille"].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener("input", nmUpdate);
   });
+  var elDob = document.getElementById("nm-dob");
+  if (elDob) elDob.addEventListener("input", nmDobKey);
 }
 
 function nmSexe(s) {
@@ -1925,7 +1972,9 @@ function nmReset() {
 
 function nmUpdate() {
   var st = percState;
-  st.dob = document.getElementById("nm-dob").value;
+  var dobDigits = String(document.getElementById("nm-dob").value).replace(/\D/g, "");
+  st.dob = nmDobIso(document.getElementById("nm-dob").value);
+  var dobInvalid = dobDigits.length === 8 && !st.dob;
   st.poids = document.getElementById("nm-poids").value;
   st.taille = document.getElementById("nm-taille").value;
   saveLs(PERC_LS, st);
@@ -1948,7 +1997,7 @@ function nmUpdate() {
   var today = new Date().toISOString().slice(0, 10);
   var age = ageDetail(st.dob, st.dom || today);
   var fmtZ = function (z) { return (z > 0 ? "+" : "") + fr(Math.round(z * 100) / 100); };
-  elAge.textContent = age && !age.over ? ageFr(age.days) : "";
+  elAge.textContent = dobInvalid ? "⚠️ date invalide" : (age && !age.over ? ageFr(age.days) : "");
   var pctxt = "", tctxt = "", sctxt = "";
   if (age && !age.over && (poids || taille)) {
     if (poids) {
@@ -1989,13 +2038,29 @@ function renderBiometrie() {
       '<div class="fiche-card">' + inner +
       '<div style="position:absolute;top:10px;right:10px;color:var(--accent);font-weight:800">›</div></div></a>';
   };
+  var hubBtn = function (opt) {
+    var inner = '<div style="width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none"><span style="filter:brightness(0) invert(1)">' + opt.icon + '</span></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:16px;font-weight:800;color:var(--deep)">' + opt.t + '</div>' +
+      '<div style="font-size:12.5px;color:var(--muted);margin-top:2px">' + opt.d + '</div>' +
+      '</div>' +
+      (opt.soon
+        ? '<div style="align-self:center"><span class="badge b-none">Bientôt</span></div>'
+        : '<div style="align-self:center;color:var(--accent);font-size:22px;font-weight:800">›</div>');
+    var style = 'display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
+      'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
+      'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)';
+    return opt.soon
+      ? '<div style="' + style + ';opacity:.6">' + inner + '</div>'
+      : '<a href="' + opt.href + '" style="text-decoration:none"><div style="' + style + '">' + inner + '</div></a>';
+  };
   view.innerHTML = '<h1 style="margin-bottom:2px">Normes et mesures</h1>' +
     nmBandHtml() +
-    '<div class="grid-fiches" style="margin-top:10px">' +
-    item({ icon: "📏", t: "Biométrie — Poids · Taille · PC", d: "Poids, taille/longueur, IMC et périmètre crânien sur les courbes OMS 2006 (0–5 ans) et OMS 2007 (5–19 ans) : percentiles, z-scores et seuils OMS.", href: "#/biometrie/percentiles" }) +
-    item({ icon: "🫀", t: "Paramètres hémodynamiques", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
-    item({ icon: "🧪", t: "Normes biologiques", d: "Valeurs de référence biologiques pédiatriques.", href: "#", soon: true }) +
-    "</div>";
+    '<div style="margin-top:12px">' +
+    hubBtn({ icon: "📏", t: "Biométrie", d: "Poids, taille/longueur, IMC et périmètre crânien — percentiles, z-scores et seuils OMS 2006/2007.", href: "#/biometrie/percentiles" }) +
+    hubBtn({ icon: "🫀", t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
+    hubBtn({ icon: "🧪", t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", soon: true }) +
+    '</div>';
   nmPageHook = null;
   nmBind();
   nmUpdate();
@@ -2113,8 +2178,9 @@ function epalsFormules(mois) {
 
 var hmOpen = { 1: true, 2: false, 3: false, 4: false };
 
-function hmCard(n, title, summary, body, open) {
-  return '<div class="card" style="background:var(--accent-soft)">' +
+function hmCard(n, title, summary, body, open, col) {
+  var cs = 'background:' + col.bg + ';border:1px solid ' + col.bd + ';border-left:5px solid ' + col.bd;
+  return '<div class="card" style="' + cs + '">' +
     '<div style="display:flex;align-items:baseline;gap:8px;cursor:pointer" onclick="hmToggle(' + n + ')">' +
     '<h2 style="font-size:15px;margin:0;color:var(--deep);flex:1">' + title + '</h2>' +
     '<span style="font-size:12px;color:var(--muted);white-space:nowrap">' + (summary || "") + '</span>' +
@@ -2127,7 +2193,7 @@ function renderHemodynamique() {
   var view = document.getElementById("view");
   view.innerHTML = '<a class="back" href="#/biometrie">‹ Normes et mesures</a>' +
     '<h1 style="margin-bottom:2px">Paramètres hémodynamiques</h1>' +
-    '<p class="meta-line">Normes attendues selon l\'âge — Harriet Lane (p. 1, tables 19.5/19.6) et formules EPALS.</p>' +
+    '<p class="meta-line">Normes attendues selon l\'âge.</p>' +
     nmBandHtml() +
     '<div id="hm-out" style="margin-top:10px"></div>';
   nmPageHook = hmUpdate;
@@ -2154,15 +2220,15 @@ function hmUpdate() {
   /* --- Item 1 : Parametres de base selon l'age (Harriet Lane p. 1) --- */
   var bi = hlVitalsBracket(mois);
   var body1 = '<div style="margin-top:10px">' +
-    '<div class="tbl-wrap"><table><thead>' +
+    '<div class="tbl-wrap"><table class="hm-tbl"><thead>' +
     '<tr><th rowspan="2">Âge</th><th rowspan="2">FC (bpm)</th><th colspan="2">Tension artérielle (mmHg)</th><th rowspan="2">FR (/min)</th></tr>' +
     '<tr><th>TA diastolique</th><th>TA systolique</th></tr>' +
     '</thead><tbody>';
   for (var i = 0; i < HL_VITALS.length; i++) {
     var v = HL_VITALS[i];
-    body1 += '<tr' + (i === bi ? ' style="background:#fff;font-weight:800;color:var(--deep)"' : "") + '><td>' + v[0] + '</td><td>' + v[3] + '</td><td>' + v[5] + '</td><td>' + v[4] + '</td><td>' + v[6] + '</td></tr>';
+    body1 += '<tr' + (i === bi ? ' class="hm-hl"' : "") + '><td>' + v[0] + '</td><td>' + v[3] + '</td><td>' + v[5] + '</td><td>' + v[4] + '</td><td>' + v[6] + '</td></tr>';
   }
-  body1 += '</tbody></table></div><div class="field-note">Ligne en gras : tranche applicable à l\'enfant. Prématuré : âge gestationnel ≈ MAP normale.</div></div>';
+  body1 += '</tbody></table></div><div class="field-note">Ligne en gras : tranche applicable à l\'enfant. Prématuré : âge gestationnel ≈ TA moyenne normale.</div></div>';
 
   /* --- Item 2 : Estimation des limites TA moyennes et inferieures (EPALS) --- */
   var ep = epalsFormules(mois);
@@ -2171,8 +2237,8 @@ function hmUpdate() {
     kpi("TA systolique normale (P50)", ep.pasNormale, ep.pasNormaleTxt) +
     kpi("TA systolique inférieure (P5)", ep.pasMin, ep.pasMinTxt) +
     '</div><div class="kpi-row">' +
-    kpi("TA moyenne — MAP (P50)", ep.mapMoy, "55 + 1,5 × âge(ans)") +
-    kpi("TA moyenne — MAP (P5)", ep.mapMin, "40 + 1,5 × âge(ans)") +
+    kpi("TA moyenne (P50)", ep.mapMoy, "55 + 1,5 × âge(ans)") +
+    kpi("TA moyenne (P5)", ep.mapMin, "40 + 1,5 × âge(ans)") +
     '</div>' +
     '<div class="warning-box" style="margin-bottom:0">La <b>TA diastolique est habituellement égale aux 2/3 de la TA systolique</b> (Harriet Lane p. 1).</div>' +
     '</div>';
@@ -2188,11 +2254,11 @@ function hmUpdate() {
     var a = Math.min(ans, 17);
     var noteAge = ans > 17 ? " — valeurs à 17 ans" : "";
     var mkBpTable = function (s, d) {
-      return '<div class="tbl-wrap"><table style="margin:0"><thead><tr><th>Percentile TA</th><th>PAS (mmHg)</th><th>PAD (mmHg)</th></tr></thead><tbody>' +
-        '<tr><td>P50 — médiane</td><td>' + s[0] + '</td><td>' + d[0] + '</td></tr>' +
-        '<tr><td>P90 — TA élevée</td><td>' + s[1] + '</td><td>' + d[1] + '</td></tr>' +
-        '<tr><td><b>P95 — HTA si TA ≥</b></td><td><b>' + s[2] + '</b></td><td><b>' + d[2] + '</b></td></tr>' +
-        '<tr><td>P95 + 12 mmHg — HTA sévère si TA ≥</td><td>' + s[3] + '</td><td>' + d[3] + '</td></tr>' +
+      return '<div class="tbl-wrap"><table class="hm-tbl" style="margin:0"><thead><tr><th>Percentile TA</th><th>TA diastolique (mmHg)</th><th>TA systolique (mmHg)</th></tr></thead><tbody>' +
+        '<tr><td>P50 — médiane</td><td>' + d[0] + '</td><td>' + s[0] + '</td></tr>' +
+        '<tr><td>P90 — TA élevée</td><td>' + d[1] + '</td><td>' + s[1] + '</td></tr>' +
+        '<tr class="hm-hl"><td><b>P95 — HTA si TA ≥</b></td><td><b>' + d[2] + '</b></td><td><b>' + s[2] + '</b></td></tr>' +
+        '<tr><td>P95 + 12 mmHg — HTA sévère si TA ≥</td><td>' + d[3] + '</td><td>' + s[3] + '</td></tr>' +
         '</tbody></table></div>';
     };
     if (tailleTxt) {
@@ -2200,22 +2266,21 @@ function hmUpdate() {
       var bp = hlBpAt((isF ? HL_BPG : HL_BPB)[a], tailleVal);
       sum3 = "P95 ajusté : " + bp.s[2] + "/" + bp.d[2];
       body3 = '<div style="margin-top:10px">' +
-        '<div style="background:' + (isF ? "#ffe9f3" : "#e8f1ff") + ';border:1px solid ' + (isF ? "#f3b8d3" : "#b9cff2") + ';border-radius:10px;padding:10px 12px">' +
-        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">' + (isF ? "👧 Fille" : "👦 Garçon") + ' — ' + ans + ' ans, taille ' + tailleTxt + ' cm (≈ P' + bp.hpct + ' de taille' + (bp.note ? " ; " + bp.note : "") + ')' + noteAge + '</h3>' +
+        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">' + (isF ? "Fille" : "Garçon") + ' — ' + ans + ' ans, taille ' + tailleTxt + ' cm (≈ P' + bp.hpct + ' de taille' + (bp.note ? " ; " + bp.note : "") + ')' + noteAge + '</h3>' +
         mkBpTable(bp.s, bp.d) +
         '<div class="field-note">Normes ajustées à la taille mesurée' + noteAge + ' (interpolation entre les percentiles de taille des tables Harriet Lane 19.5/19.6).</div>' +
-        '</div></div>';
+        '</div>';
     } else {
       var fg = hlBpMed(HL_BPG[a]), bg2 = hlBpMed(HL_BPB[a]);
       var mine = st.sexe === "F" ? fg : bg2;
       sum3 = "P95 taille méd. : " + mine.s[2] + "/" + mine.d[2];
       body3 = '<div style="margin-top:10px">' +
-        '<div class="warning-box">Taille non encodée : les normes ci-dessous sont celles d\'un enfant de <b>taille médiane (P50)</b>' + noteAge + '. Chiffres <b>fille sur fond rose</b>, <b>garçon sur fond bleu</b>. Encodez la taille dans le bandeau ci-dessus pour ajuster au percentile de taille.</div>' +
+        '<div class="warning-box">Taille non encodée : les normes ci-dessous sont celles d\'un enfant de <b>taille médiane (P50)</b>' + noteAge + '. Encodez la taille dans le bandeau ci-dessus pour ajuster au percentile de taille.</div>' +
         '<div class="grid2">' +
-        '<div style="background:#ffe9f3;border:1px solid #f3b8d3;border-radius:10px;padding:10px 12px">' +
-        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">👧 Fille — taille médiane (P50)</h3>' + mkBpTable(fg.s, fg.d) + '</div>' +
-        '<div style="background:#e8f1ff;border:1px solid #b9cff2;border-radius:10px;padding:10px 12px">' +
-        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">👦 Garçon — taille médiane (P50)</h3>' + mkBpTable(bg2.s, bg2.d) + '</div>' +
+        '<div>' +
+        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">Fille — taille médiane (P50)</h3>' + mkBpTable(fg.s, fg.d) + '</div>' +
+        '<div>' +
+        '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">Garçon — taille médiane (P50)</h3>' + mkBpTable(bg2.s, bg2.d) + '</div>' +
         '</div></div>';
     }
   }
@@ -2224,11 +2289,10 @@ function hmUpdate() {
   var body4 = '<div style="margin-top:10px;font-size:12.5px;color:var(--muted)">' +
     '<b>Formules utilisées :</b>' +
     '<ul style="margin:6px 0 4px">' +
-    '<li><b>PAS normale (P50)</b> : 90 + 2 × âge (ans) (1–10 ans, EPALS / Harriet Lane p. 1) ; > 60 (néonate) ; > 80 (1–12 mois) ; 110–130 (> 10 ans)</li>' +
-    '<li><b>PAS inférieure (P5)</b> : 70 + 2 × âge (ans) (2–10 ans) ; 50 (néonate) ; 70 (1 mois–1 an) ; 90 (> 10 ans)</li>' +
-    '<li><b>MAP</b> : P50 = 55 + 1,5 × âge (ans) ; P5 = 40 + 1,5 × âge (ans) — Harriet Lane p. 1</li>' +
-    '<li><b>PAD</b> ≈ 2/3 de la PAS — Harriet Lane p. 1</li>' +
-    '<li><b>Limites supérieures</b> : tables Harriet Lane 19.5 (filles) / 19.6 (garçons) — PAS et PAD aux percentiles TA P50, P90, P95 et P95 + 12 mmHg selon l\'âge (1–17 ans) et le percentile de taille ; HTA si TA ≥ P95, HTA sévère (stade 2) si TA ≥ P95 + 12 mmHg</li>' +
+    '<li><b>TA systolique normale (P50)</b> : 90 + 2 × âge (ans) (1–10 ans, EPALS / Harriet Lane p. 1) ; > 60 (néonate) ; > 80 (1–12 mois) ; 110–130 (> 10 ans)</li>' +
+    '<li><b>TA systolique inférieure (P5)</b> : 70 + 2 × âge (ans) (2–10 ans) ; 50 (néonate) ; 70 (1 mois–1 an) ; 90 (> 10 ans)</li>' +
+    '<li><b>TA diastolique</b> ≈ 2/3 de la TA systolique — Harriet Lane p. 1</li>' +
+    '<li><b>Limites supérieures</b> : tables Harriet Lane 19.5 (filles) / 19.6 (garçons) — TA systolique et diastolique aux percentiles TA P50, P90, P95 et P95 + 12 mmHg selon l\'âge (1–17 ans) et le percentile de taille ; HTA si TA ≥ P95, HTA sévère (stade 2) si TA ≥ P95 + 12 mmHg</li>' +
     '<li><b>Âge</b> : (date de mesure − date de naissance) en jours / 30,4375 = mois</li>' +
     '</ul>' +
     '<b>Références :</b> The Harriet Lane Handbook, 23e éd. (p. 1 « Normal Vital Signs by Age », « Estimated Blood Pressure by Age », tables 19.5/19.6) ; normes EPALS « Paramètres vitaux » — Vade-Mecum Urgences et soins intensifs pédiatriques, Cliniques universitaires Saint-Luc (p. 9). ' +
@@ -2236,48 +2300,31 @@ function hmUpdate() {
     '</div>';
 
   out.innerHTML =
-    hmCard(1, "1️⃣ Paramètres de base selon l'âge", HL_VITALS[bi][0], body1, hmOpen[1]) +
-    hmCard(2, "2️⃣ Estimation des limites TA moyennes et inférieures", "PAS P50 " + ep.pasNormale + " · P5 " + ep.pasMin, body2, hmOpen[2]) +
-    hmCard(3, "3️⃣ Estimation des limites TA supérieures", sum3, body3, hmOpen[3]) +
-    hmCard(4, "ℹ️ Formules et références", "", body4, hmOpen[4]);
+    hmCard(1, "Paramètres de base selon l'âge", HL_VITALS[bi][0], body1, hmOpen[1], { bg: "var(--accent-soft)", bd: "var(--accent)" }) +
+    hmCard(2, "Estimation des limites TA moyennes et inférieures", "TA syst. P50 " + ep.pasNormale + " · P5 " + ep.pasMin, body2, hmOpen[2], { bg: "var(--accent-soft)", bd: "var(--accent)" }) +
+    hmCard(3, "Estimation des limites TA supérieures", sum3, body3, hmOpen[3], { bg: "var(--accent-soft)", bd: "var(--accent)" }) +
+    hmCard(4, "ℹ️ Formules et références", "", body4, hmOpen[4], { bg: "var(--accent-soft)", bd: "var(--accent)" });
 }
 
 function renderPercentiles() {
   var view = document.getElementById("view");
   var st = percState;
-  var today = new Date().toISOString().slice(0, 10);
-  var dom = st.dom || today;
   var html = '<a class="back" href="#/biometrie">‹ Normes et mesures</a>' +
     '<h1 style="margin-bottom:2px">Biométrie</h1>' +
     nmBandHtml() +
-    '<p class="meta-line" style="margin-top:8px">Poids, taille/longueur, IMC et périmètre crânien sur les courbes <b>OMS 2006</b> (0–5 ans) et <b>OMS 2007</b> (5–19 ans) — tables LMS officielles, percentiles et z-scores. Poids/âge au-delà de 10 ans : référence <b>CDC 2000</b>.</p>' +
-    '<div class="card" style="margin-top:10px">' +
-    '<div style="max-width:280px"><label>Périmètre crânien (cm) — 0–5 ans</label><input type="number" id="pc-pc" inputmode="decimal" step="0.1" min="28" max="60" style="width:100%" placeholder="ex. 44,2" value="' + esc(st.pc) + '"><div class="field-note">Même date de mesure que le poids et la taille (bandeau ci-dessus).</div></div>' +
-    '<label style="margin-top:10px">Mesure de la taille</label>' +
-    '<div class="chips" style="margin-bottom:4px">' +
-    '<span class="chip' + (st.tailleDebout === false ? " on" : "") + '" data-mode="L" onclick="pcTailleMode(false)">📏 Couchée (longueur)</span>' +
-    '<span class="chip' + (st.tailleDebout ? " on" : "") + '" data-mode="H" onclick="pcTailleMode(true)">📐 Debout (taille)</span>' +
+    '<div class="card" style="margin-top:10px;padding:6px 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+    '<label style="font-size:13px;font-weight:700;color:var(--muted)">Périmètre crânien (cm) — 0–5 ans</label>' +
+    '<input type="number" id="pc-pc" inputmode="decimal" step="0.1" min="28" max="60" placeholder="ex. 44,2" style="width:95px;padding:5px 6px" value="' + esc(st.pc) + '">' +
+    '<span id="nm-p-pc" style="font-size:12.5px;color:var(--deep)"></span>' +
     '</div>' +
-    '<div class="field-note">L\'OMS utilise la longueur couchée avant 24 mois et la taille debout après. Si le mode de mesure diffère de la référence à l\'âge de l\'enfant, une correction de ±0,7 cm est appliquée automatiquement.</div>' +
-    '<div id="pc-out"></div>' +
-    '</div>' +
-    '<div class="card" style="font-size:12.5px;color:var(--muted)">' +
-    '<b>Références :</b> OMS (WHO Multicentre Growth Reference Study Group), <i>WHO Child Growth Standards 2006</i> — poids/âge, taille ou longueur/âge et périmètre crânien/âge, 0–5 ans, tables LMS officielles. OMS, <i>WHO Growth Reference 2007</i> (5–19 ans : taille/âge et IMC/âge ; poids/âge jusqu\'à 10 ans) — de Onis et al., Bull WHO 2007;85:660-7, base NCHS : population de référence nord-américaine majoritairement caucasienne, standard international. Percentile = fonction de répartition du z-score LMS. Poids/âge au-delà de 10 ans : CDC 2000 (<i>CDC Growth Charts for the United States</i>, Vital Health Stat 11(246), 2002 — base NCHS, population nord-américaine majoritairement caucasienne). ' +
-    'Courbes caucasiennes alternatives : AFPA – CRESS/INSERM – CompuGroup Medical, 2018 (nouvelles courbes françaises, enfants ≥ 2 500 g, France métropolitaine, 0–18 ans). ' +
-    '<span style="color:#92400e">⚠️ Aide à la décision : un paramètre isolé hors normes ne suffit pas — apprécier la dynamique de croissance et le contexte clinique.</span>' +
-    '</div>';
+    '<div id="pc-out" style="margin-top:10px"></div>' +
+    '<p class="meta-line" style="font-size:11px;margin:2px 2px 0">Références : OMS, <i>WHO Child Growth Standards 2006</i> (poids/âge, taille ou longueur/âge, PC/âge : 0–5 ans) et <i>WHO Growth Reference 2007</i> (taille/âge et IMC/âge : 5–19 ans ; poids/âge ≤ 10 ans) — tables LMS officielles, de Onis et al., Bull WHO 2007;85:660-7, base NCHS majoritairement caucasienne. Poids/âge au-delà de 10 ans : CDC 2000 (<i>CDC Growth Charts for the United States</i>, Vital Health Stat 11(246), 2002 — base NCHS). Percentile = Φ(z-score LMS). Courbes caucasiennes alternatives : AFPA – CRESS/INSERM 2018 (0–18 ans). ⚠️ Aide à la décision : un paramètre isolé hors normes ne suffit pas — apprécier la dynamique de croissance et le contexte clinique.</p>';
   view.innerHTML = html;
   document.getElementById("pc-pc").addEventListener("input", pcUpdate);
   if (st.tailleDebout === "" || st.tailleDebout === null) { st.tailleDebout = true; }
   nmPageHook = pcUpdate;
   nmBind();
-  nmUpdate(); /* remplit le bandeau (âge, percentiles, SC) puis déclenche pcUpdate via le hook */
-}
-
-function nmDomUpdate() {
-  percState.dom = document.getElementById("pc-dom").value;
-  saveLs(PERC_LS, percState);
-  nmUpdate();
+  nmUpdate(); /* remplit le bandeau puis déclenche pcUpdate via le hook */
 }
 
 function pcTailleMode(debout) {
@@ -2294,63 +2341,103 @@ function pcUpdate() {
   st.pc = document.getElementById("pc-pc").value;
   saveLs(PERC_LS, st);
   var out = document.getElementById("pc-out");
-  var note = document.getElementById("pc-taille-note");
-  if (note) note.textContent = "";
   if (!out) return;
-
   var today = new Date().toISOString().slice(0, 10);
   var age = ageDetail(st.dob, st.dom || today);
+  var fr = function (v) { return String(v).replace(".", ","); };
+  var fz = function (z) { return (z > 0 ? "+" : "") + fr(Math.round(z * 100) / 100); };
+  var poids = st.poids ? parseFloat(st.poids.replace(",", ".")) : null;
+  var taille = st.taille ? parseFloat(st.taille.replace(",", ".")) : null;
+
+  /* Encart PC : percentile affiché à côté du champ, dès l'encodage */
+  var elPc = document.getElementById("nm-p-pc");
+  if (elPc) {
+    var pcTxt = "";
+    if (st.pc && age && !age.over) {
+      var pcV = parseFloat(String(st.pc).replace(",", "."));
+      if (pcV > 0) {
+        if (age.days <= 1856) {
+          var rp = percResult("hcfa", st.sexe, age.days, pcV, "cm", 0);
+          if (rp) pcTxt = "Percentile : <b>" + pctLabel(rp.p) + "</b> (z " + fz(rp.z) + ")";
+        } else pcTxt = "— pas de norme PC au-delà de 5 ans (OMS)";
+      }
+    }
+    elPc.innerHTML = pcTxt;
+  }
+
   if (!age) { out.innerHTML = '<div class="warning-box">Renseignez la date de naissance dans le bandeau ci-dessus.</div>'; return; }
   if (age.over) {
     out.innerHTML = '<div class="warning-box">Âge : ' + ageFr(age.days) + ' (' + age.days + ' jours). Au-delà de 19 ans — hors références OMS (2006 : 0–5 ans ; 2007 : 5–19 ans).</div>';
     return;
   }
+  if (!poids && !taille) { out.innerHTML = '<div class="warning-box">Encodez le poids et/ou la taille dans le bandeau ci-dessus.</div>'; return; }
 
-  var fr = function (v) { return String(v).replace(".", ","); };
-  var poids = st.poids ? parseFloat(st.poids.replace(",", ".")) : null;
-  var taille = st.taille ? parseFloat(st.taille.replace(",", ".")) : null;
-  var pc = st.pc ? parseFloat(st.pc.replace(",", ".")) : null;
+  var cut24 = age.days >= 731; /* OMS : taille debout à partir de 24 mois */
+  var nomTaille = cut24 ? "Taille" : "Longueur";
 
-  var r = interpPerc(st.sexe, age.days, poids, taille, pc, st.tailleDebout);
-  if (!r.items.length) { out.innerHTML = '<div class="warning-box">Encodez le poids et/ou la taille dans le bandeau ci-dessus (et le périmètre crânien si pertinent).</div>'; return; }
-
-  var cut24 = r.cut24;
-  if (note) {
-    if (st.tailleDebout === null) note.textContent = cut24 ? "≥ 24 mois : référence OMS en taille debout" : "< 24 mois : référence OMS en longueur couchée";
-    else if (!cut24 && st.tailleDebout) note.textContent = "Correction +0,7 cm appliquée (debout → longueur)";
-    else if (cut24 && !st.tailleDebout) note.textContent = "Correction −0,7 cm appliquée (couchée → taille)";
-  }
-
-  var html = '<div class="kpi-row"><div class="kpi"><div class="l">Âge</div><div class="v">' + ageFr(age.days) + '</div><div class="field-note">' + age.days + ' jours</div></div>' +
-    '<div class="kpi"><div class="l">Sexe</div><div class="v">' + (st.sexe === "F" ? "👧 Fille" : "👦 Garçon") + '</div></div></div>' +
-    '<a class="btn" href="#/biometrie/hemodynamique" style="margin-bottom:6px">🫀 Normes hémodynamiques pour cet âge</a>';
-  r.items.forEach(function (it) {
-    if (!it.r || it.r.p === null) {
-      html += '<div class="warning-box">' + (it.noref || it.rec || "Valeur invalide pour " + it.nom + ".") + '</div>';
-      return;
+  var row = function (nom, val, unit, r, interp, src, withMed) {
+    var pTxt;
+    if (r && r.p !== null) {
+      pTxt = "Percentile : <b>" + pctLabel(r.p) + "</b> <span style=\"color:var(--muted)\">(z " + fz(r.z) + ")</span>" + (src ? " — " + src : "") + (withMed ? " · P50 : " + fr(Math.round(r.med * 10) / 10) + " " + unit : "");
+    } else {
+      pTxt = '<span style="color:var(--muted)">Percentile : pas de référence à cet âge</span>';
     }
-    var z = it.r.z, p = it.r.p;
-    var interp = percInterpretation(it.key, z);
-    var cls = z >= -2 && z <= 2 ? "b-first" : (z >= -3 && z <= 3 ? "b-alt" : "b-none");
-    html += '<div class="card" style="background:var(--accent-soft)">' +
-      '<div class="fiche-head" style="align-items:center"><h2 style="font-size:16px;margin:0;color:var(--deep);flex:1">' + it.nom + ' — ' + fr(Math.round(it.val * (it.key === "bfa" ? 10 : 100) / (it.key === "bfa" ? 10 : 100))) + ' ' + it.unit + (it.corr ? ' <span class="meta-line">(+' + fr(it.corr) + ' cm)</span>' : "") + (it.src ? ' <span class="meta-line">— ' + it.src + '</span>' : "") + '</h2>' +
-      '<span class="badge ' + cls + '">' + interp.txt + '</span></div>' +
-      '<div class="kpi-row">' +
-      '<div class="kpi"><div class="l">Percentile</div><div class="v">' + pctLabel(p) + '</div><div class="field-note">' + bande(p) + '</div></div>' +
-      '<div class="kpi"><div class="l">Z-score (DS)</div><div class="v">' + (z >= 0 ? "+" : "") + fr(Math.round(z * 100) / 100) + '</div><div class="field-note">±2 DS = P3–P97</div></div>' +
-      '<div class="kpi"><div class="l">P50 (référence)</div><div class="v">' + fr(Math.round(it.r.med * 10) / 10) + ' ' + it.unit + '</div><div class="field-note">P3–P97 : ' + fr(Math.round(lmsFromZ(it.r.L, -1.881) * 10) / 10) + '–' + fr(Math.round(lmsFromZ(it.r.L, 1.881) * 10) / 10) + ' ' + it.unit + '</div></div>' +
-      '</div>' + percBar(p) + (it.key === "bfa" && it.rec ? '<div class="field-note" style="margin-top:2px">' + it.rec + '</div>' : "") + '</div>';
+    return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px dashed var(--border)">' +
+      '<span style="font-weight:800;color:var(--deep);min-width:96px">' + nom + '</span>' +
+      '<span style="font-weight:700">' + fr(Math.round(val * 100) / 100) + ' ' + unit + '</span>' +
+      (r && r.p !== null && interp ? '<span class="badge ' + interp.cls + '">' + interp.txt + '</span>' : "") +
+      '<span style="flex:1"></span>' +
+      '<span style="font-size:13px;color:var(--deep)">' + pTxt + '</span>' +
+      '</div>';
+  };
+
+  var html = '<div class="card" style="padding:4px 14px">';
+  var r = interpPerc(st.sexe, age.days, poids, taille, null, st.tailleDebout);
+  r.items.forEach(function (it) {
+    if (it.key === "hcfa") return; /* PC : encart dédié au-dessus */
+    var interp = it.r && it.r.p !== null ? percInterpretation(it.key, it.r.z) : null;
+    if (it.key === "lhfa") {
+      html += row(nomTaille, it.val, it.unit, it.r, interp, "", true);
+      /* Case taille debout/couché juste sous la ligne de la taille */
+      var corrTxt = !cut24 && st.tailleDebout ? "Correction +0,7 cm appliquée (debout → longueur)"
+        : (cut24 && !st.tailleDebout ? "Correction −0,7 cm appliquée (couché → taille)"
+        : (cut24 ? "Référence OMS en taille debout" : "Référence OMS en longueur couchée"));
+      html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:2px 0 8px;border-bottom:1px dashed var(--border)">' +
+        '<div class="chips" style="margin:0">' +
+        '<span class="chip' + (st.tailleDebout === false ? " on" : "") + '" data-mode="L" onclick="pcTailleMode(false)">📏 Couchée (longueur)</span>' +
+        '<span class="chip' + (st.tailleDebout ? " on" : "") + '" data-mode="H" onclick="pcTailleMode(true)">📐 Debout (taille)</span>' +
+        '</div>' +
+        '<span id="pc-taille-note" style="font-size:11.5px;color:var(--muted)">' + corrTxt + '</span>' +
+        '</div>';
+    } else if (it.key === "bfa") {
+      html += row("IMC (BMI)", it.val, it.unit, it.r, interp, "");
+      var cuts = "";
+      if (it.r && it.r.p !== null) {
+        var v1 = lmsFromZ(it.r.L, 1), v2 = lmsFromZ(it.r.L, 2), v3 = lmsFromZ(it.r.L, 3), vm2 = lmsFromZ(it.r.L, -2);
+        if (age.days < 1857) {
+          cuts = " À cet âge : risque de surpoids si IMC > " + fr(Math.round(v1 * 10) / 10) + " (+1 DS), surpoids si > " + fr(Math.round(v2 * 10) / 10) + " (+2 DS), obésité si > " + fr(Math.round(v3 * 10) / 10) + " (+3 DS), ébagrissement si < " + fr(Math.round(vm2 * 10) / 10) + " (−2 DS).";
+        } else {
+          cuts = " À cet âge : surpoids si IMC > " + fr(Math.round(v1 * 10) / 10) + " (+1 DS), obésité si > " + fr(Math.round(v2 * 10) / 10) + " (+2 DS), insuffisance pondérale si < " + fr(Math.round(vm2 * 10) / 10) + " (−2 DS).";
+        }
+      }
+      if (it.rec) html += '<div style="font-size:11.5px;color:var(--muted);padding:0 0 8px;margin-top:-4px"><b>Normes OMS :</b> ' + it.rec + cuts + '</div>';
+    } else {
+      html += row(it.nom, it.val, it.unit, it.r, interp, it.src || "", it.key === "wfa");
+    }
   });
-  if (poids && taille && taille > 0) {
-    var bsaM = Math.sqrt(taille * poids / 3600);
+
+  /* Surface corporelle */
+  if (poids && taille && poids > 0 && taille > 0) {
+    var bsaM = Math.sqrt(poids * taille / 3600);
     var bsaH = 0.024265 * Math.pow(taille, 0.3964) * Math.pow(poids, 0.5378);
-    html += '<div class="card" style="background:var(--accent-soft)">' +
-      '<div class="fiche-head" style="align-items:center"><h2 style="font-size:16px;margin:0;color:var(--deep);flex:1">Surface corporelle (SC)</h2></div>' +
-      '<div class="kpi-row">' +
-      '<div class="kpi"><div class="l">Mosteller</div><div class="v">' + fr(Math.round(bsaM * 100) / 100) + ' m²</div><div class="formula">√(H×P/3600)</div></div>' +
-      '<div class="kpi"><div class="l">Haycock</div><div class="v">' + fr(Math.round(bsaH * 100) / 100) + ' m²</div><div class="formula">0,024265×H^0,3964×P^0,5378</div></div>' +
-      '</div><div class="field-note">Formules pédiatriques usuelles pour le calcul de dose (H en cm, P en kg). En cas de doute, utiliser la formule recommandée par le protocole local.</div></div>';
+    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0">' +
+      '<span style="font-weight:800;color:var(--deep);min-width:96px">Surface corporelle</span>' +
+      '<span style="font-weight:700">' + fr(Math.round(bsaM * 100) / 100) + ' m²</span>' +
+      '<span style="flex:1"></span>' +
+      '<span style="font-size:13px;color:var(--deep)">Mosteller √(P×T/3600) <span style="color:var(--muted)">· Haycock 0,024265 × T^0,3964 × P^0,5378 : ' + fr(Math.round(bsaH * 100) / 100) + ' m²</span></span>' +
+      '</div>';
   }
+  html += '</div>';
   out.innerHTML = html;
 }
 
@@ -2372,6 +2459,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="4CRl1AbpSWz/7bOcwjl1kQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="5DN3YnJ5fFzuylhnHYphOg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
