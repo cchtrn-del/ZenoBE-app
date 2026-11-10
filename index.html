@@ -266,7 +266,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.45 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.46 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -751,7 +751,37 @@ async function syncGitHub(logFn, silent) {
   persistFiches();
   cfg.lastSync = new Date().toISOString();
   persistCfg();
-  logFn("Synchronisation terminée : " + ok + " fiche(s) (" + replaced + " mise(s) à jour).");
+  /* — Dossier « _7.scores_et_labos » (pages Laboratoire / Scores cliniques) — */
+  var dok = 0;
+  try {
+    var dFolder = null;
+    for (var k = 0; k < tree.length; k++) {
+      if (tree[k].type === "tree" && tree[k].path.indexOf("/") < 0) {
+        var dn = docsNorm(tree[k].path);
+        if (dn.indexOf("scores") >= 0 && dn.indexOf("labo") >= 0) { dFolder = tree[k].path; break; }
+      }
+    }
+    if (dFolder) {
+      var dFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(dFolder + "/") === 0; });
+      var dNew = {};
+      for (var m = 0; m < dFiles.length; m++) {
+        var rdoc = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+          "/contents/" + dFiles[m].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
+          { headers: ghHeaders(true) });
+        if (!rdoc.ok) { logFn("⚠️ Échec : " + dFiles[m].path); continue; }
+        dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
+        dok++;
+      }
+      if (dok) {
+        DOCS_CACHE.folder = dFolder;
+        DOCS_CACHE.files = dNew;
+        DOCS_CACHE.ts = Date.now();
+        docsPersist();
+        logFn("✅ " + dok + " fichier(s) Laboratoire / Scores synchronisé(s) — " + dFolder);
+      }
+    }
+  } catch (e) { logFn("⚠️ Dossier Laboratoire / Scores non synchronisé."); }
+  logFn("Synchronisation terminée : " + ok + " fiche(s) (" + replaced + " mise(s) à jour)." + (dok ? " " + dok + " fichier(s) Labo/Scores." : ""));
   if (ok > 0 && !silent) toast("☁️ " + ok + " fiche(s) synchronisée(s)");
   render();
 }
@@ -2368,6 +2398,14 @@ function docsPersist() { saveLs(LS.docs, DOCS_CACHE); }
 function docsNorm(s) { return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, ""); }
 function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? normKey(String(v[0] || "")) : normKey(String(v || "")); }
 
+function docCard(t, href) {
+  return '<a href="' + href + '" style="text-decoration:none"><div style="display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
+    'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
+    'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)">' +
+    '<div style="flex:1;font-size:16px;font-weight:800;color:var(--deep)">' + esc(t) + '</div>' +
+    '<div style="color:var(--accent);font-size:22px;font-weight:800">\u203a</div></div></a>';
+}
+
 function docsShowList(kind) {
   var list = document.getElementById("docs-list");
   if (!list) return;
@@ -2377,7 +2415,7 @@ function docsShowList(kind) {
     var parts = splitFiche(DOCS_CACHE.files[names[i]].md);
     var part = docsPartie(parts.fm);
     if (part && part !== kind) continue;
-    html += hubBtn({ icon: "\U0001F4C4", t: parts.fm.titre || names[i].replace(/\.md$/i, ""), d: parts.fm.description || names[i], href: "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]) });
+    html += docCard(parts.fm.titre || names[i].replace(/\.md$/i, ""), "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]));
   }
   if (!html) html = '<div class="warning-box">Aucun fichier .md pour cette partie dans le dossier « _7.scores_et_labos » du dépôt. Utilisez 🔄 Actualiser après avoir ajouté vos fichiers.</div>';
   list.innerHTML = html;
@@ -2440,7 +2478,6 @@ function renderDocsPage(kind) {
   var view = document.getElementById("view");
   var titre = kind === "labo" ? "Laboratoire" : "Scores cliniques";
   view.innerHTML = '<h1 style="margin-bottom:2px">' + titre + '</h1>' +
-    '<p class="meta-line">Pages issues des fichiers markdown du dossier « _7.scores_et_labos » du dépôt GitHub « ' + esc((cfg.repo || "").trim()) + ' » (jeton ☁️ Synchronisation requis — dépôt privé). Le contenu est mis en cache pour un accès hors ligne.</p>' +
     '<div style="margin:10px 0 0"><button class="btn" onclick="docsRefreshPage(\'' + kind + '\')">🔄 Actualiser depuis GitHub</button></div>' +
     '<div id="docs-status" class="field-note" style="margin:6px 0 0"></div>' +
     '<div id="docs-list" style="margin-top:12px"></div>';
@@ -2742,6 +2779,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="cYNvapSjBSEgLkbNFVNUMw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="RHGphCwj1qoiEzOVoXscQg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
