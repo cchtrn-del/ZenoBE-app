@@ -267,18 +267,19 @@
   <div class="brand"><span class="logo" style="font-weight:800;font-size:20px;letter-spacing:.4px">Zeno<span style="color:#E7C55A">BE</span></span></div>
   <nav class="nav" id="nav">
     <a href="#/" data-r="/">Fiches</a>
-    <a href="#/calculateur">Calculateur</a>
+    <a href="#/guidelines" data-r="/guidelines">Guidelines</a>
     <a href="#/biometrie">Normes et mesures</a>
   </nav>
   <div class="top-right">
     <span class="count-pill" id="count-pill">0 fiche</span>
+    <a class="count-pill" href="#/calculateur" style="text-decoration:none;display:inline-flex;align-items:center" title="Calculateur de doses" aria-label="Calculateur de doses"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg></a>
     <a class="count-pill" href="#/reglages" style="text-decoration:none;display:inline-flex;align-items:center" title="Réglages" aria-label="Réglages"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></a>
   </div>
 </div>
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.3.3 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.1 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -287,7 +288,8 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1" };
+var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1",
+  gl: "fm.guides.v1", glfav: "fm.glfav.v1", glrec: "fm.glrec.v1", glfolder: "fm.glfolder.v1" };
 
 function loadLs(key, fallback) {
   try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -315,6 +317,37 @@ var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
 var darkMode = loadLs(LS.dark, false);
 var fontScale = loadLs(LS.font, 100);
+var glUi = { q: "", tag: "", tab: "", catOpen: false };
+function glHydrate(g) {
+  g.html = g.html || mdToHtml(g.md || "");
+  g.text = g.text || norm(g.title + " " + (g.tags || []).join(" ") + " " + (g.md || ""));
+  return g;
+}
+var guides = (loadLs(LS.gl, [])).map(glHydrate);
+var glFavs = loadLs(LS.glfav, []);
+var glRecents = loadLs(LS.glrec, []);
+var glFolder = loadLs(LS.glfolder, "");
+function persistGuides() {
+  saveLs(LS.gl, guides.map(function (g) { var c = {}; for (var k in g) c[k] = g[k]; c.html = ""; c.text = ""; return c; }));
+}
+function importGuide(filename, md) {
+  var parts = splitFiche(md);
+  var fm = parts.fm, body = parts.body;
+  var title = fm.titre || fm.title || filename.replace(/\.(md|markdown)$/i, "").trim();
+  var h1 = body.match(/^#\s+(.+)$/m);
+  if ((!fm.titre && !fm.title) && h1) title = h1[1].trim();
+  var tags = Array.isArray(fm.tags) ? fm.tags.slice() : [];
+  var g = {
+    slug: slugify(title), title: title, filename: filename,
+    tags: tags, author: fm.author || "", created: fm.created || "", updated: fm.updated || "",
+    md: body, html: mdToHtml(body), text: norm(title + " " + tags.join(" ") + " " + body)
+  };
+  var rep = false;
+  for (var i = 0; i < guides.length; i++) if (guides[i].slug === g.slug) { guides[i] = g; rep = true; break; }
+  if (!rep) guides.push(g);
+  guides.sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
+  return { guide: g, replaced: rep };
+}
 var ui = { q: "", tag: "", favOnly: false, tab: "", catOpen: false };
 
 /* ================================================================
@@ -362,7 +395,7 @@ function setDark(v) { darkMode = !!v; saveLs(LS.dark, darkMode); applyTheme(curT
 function setFont(v) { fontScale = v; saveLs(LS.font, v); applyFont(); renderReglages(); }
 function applyFont() { try { document.body.style.zoom = fontScale / 100; } catch (e) {} }
 function exportData() {
-  var data = { app: "ZenoBE", v: 1, date: new Date().toISOString(), fiches: fiches.map(slimFiche), favs: favs, recents: recents, theme: curTheme, dark: darkMode, font: fontScale, cfg: { user: cfg.user, repo: cfg.repo, branch: cfg.branch, folder: cfg.folder } };
+  var data = { app: "ZenoBE", v: 1, date: new Date().toISOString(), fiches: fiches.map(slimFiche), favs: favs, recents: recents, guides: guides, glFavs: glFavs, glRecents: glRecents, theme: curTheme, dark: darkMode, font: fontScale, cfg: { user: cfg.user, repo: cfg.repo, branch: cfg.branch, folder: cfg.folder } };
   var a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
   a.download = "ZenoBE-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".json";
@@ -384,6 +417,13 @@ function importData() {
     fiches.sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
     if (Array.isArray(d.favs)) { favs = d.favs; saveLs(LS.fav, favs); }
     if (Array.isArray(d.recents)) { recents = d.recents; saveLs(LS.rec, recents); }
+    if (Array.isArray(d.guides)) {
+      guides = d.guides.map(glHydrate);
+      guides.sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
+      persistGuides();
+    }
+    if (Array.isArray(d.glFavs)) { glFavs = d.glFavs; saveLs(LS.glfav, glFavs); }
+    if (Array.isArray(d.glRecents)) { glRecents = d.glRecents; saveLs(LS.glrec, glRecents); }
     if (d.cfg) { cfg.user = d.cfg.user || cfg.user; cfg.repo = d.cfg.repo || cfg.repo; cfg.branch = d.cfg.branch || cfg.branch; cfg.folder = d.cfg.folder || cfg.folder; persistCfg(); }
     persistFiches();
     if (d.theme && THEMES[d.theme]) applyTheme(d.theme);
@@ -612,6 +652,11 @@ function mdToHtml(md) {
       while (i < lines.length && lines[i].trim().indexOf("|") === 0) { tbl.push(parseTableRow(lines[i])); i++; }
       out += renderTable(tbl);
       continue;
+    }
+    var im = t.match(/^!\[([^\]]*)\]\(([^)\s]+)\)\s*$/);
+    if (im) {
+      out += '<img alt="' + esc(im[1]) + '" data-glsrc="' + esc(im[2]) + '" style="max-width:100%;border-radius:10px;border:1px solid var(--border);margin:8px 0;display:block">';
+      i++; continue;
     }
     var h = t.match(/^(#{1,6})\s+(.*)$/);
     if (h) {
@@ -842,7 +887,35 @@ async function syncGitHub(logFn, silent) {
       }
     }
   } catch (e) { logFn("⚠️ Dossier Laboratoire / Scores non synchronisé."); }
-  logFn("Synchronisation terminée : " + ok + " fiche(s) (" + replaced + " mise(s) à jour)." + (dok ? " " + dok + " fichier(s) Labo/Scores." : ""));
+  /* — Dossier « _4.fichesguidelines » (partie Guidelines) — */
+  var gok = 0;
+  try {
+    var gFolder = null;
+    for (var q2 = 0; q2 < tree.length; q2++) {
+      if (tree[q2].type === "tree" && tree[q2].path.indexOf("/") < 0) {
+        var gn = docsNorm(tree[q2].path);
+        if (gn.indexOf("fichesguidelines") >= 0 || (gn.indexOf("guideline") >= 0 && gn.indexOf("fiche") >= 0)) { gFolder = tree[q2].path; break; }
+      }
+    }
+    if (gFolder) {
+      var gFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(gFolder + "/") === 0; });
+      for (var q3 = 0; q3 < gFiles.length; q3++) {
+        var rgd = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
+          "/contents/" + gFiles[q3].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
+          { headers: ghHeaders(true) });
+        if (!rgd.ok) { logFn("⚠️ Échec : " + gFiles[q3].path); continue; }
+        importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
+        gok++;
+      }
+      if (gok) {
+        glFolder = gFolder;
+        saveLs(LS.glfolder, gFolder);
+        persistGuides();
+        logFn("✅ " + gok + " fiche(s) guideline synchronisée(s) — " + gFolder);
+      }
+    }
+  } catch (e) { logFn("⚠️ Dossier Guidelines non synchronisé."); }
+  logFn("Synchronisation terminée : " + ok + " fiche(s) (" + replaced + " mise(s) à jour)." + (dok ? " " + dok + " fichier(s) Labo/Scores." : "") + (gok ? " " + gok + " fiche(s) guideline." : ""));
   if (ok > 0 && !silent) toast("☁️ " + ok + " fiche(s) synchronisée(s)");
   render();
 }
@@ -1067,6 +1140,8 @@ function render() {
   else if (h.indexOf("#/laboratoire") === 0) renderDocsPage("labo");
   else if (h.indexOf("#/scores/view/") === 0) renderDocView("scores", decodeURIComponent(h.slice("#/scores/view/".length)));
   else if (h.indexOf("#/scores") === 0) renderDocsPage("scores");
+  else if (h.indexOf("#/guideline/") === 0) renderGuideView(decodeURIComponent(h.slice("#/guideline/".length)));
+  else if (h.indexOf("#/guidelines") === 0) renderGuidelines();
   else if (h.indexOf("#/biometrie") === 0) renderBiometrie();
   else if (h.indexOf("#/reglages") === 0) renderReglages();
   else if (h.indexOf("#/import") === 0) renderImport();
@@ -1171,6 +1246,9 @@ function renderHome() {
       { t: "Laboratoire", d: "Valeurs biologiques de référence", href: "#/laboratoire", kw: "laboratoire labo nfs formule sanguine hemoglobine hte plaquettes leucocytes vcm biologie sang" },
       { t: "Scores cliniques", d: "Scores et repères cliniques", href: "#/scores", kw: "scores cliniques tanner puberte developpement glasgow" }
     ];
+    guides.filter(function (g) { return g.text.indexOf(q) >= 0; }).slice(0, 3).forEach(function (g) {
+      glob.push({ t: g.title, d: "Guidelines", href: "#/guideline/" + encodeURIComponent(g.slug) });
+    });
     NORMES_PAGES.forEach(function (p) {
       if (norm(p.t + " " + p.kw).indexOf(q) >= 0) glob.push({ t: p.t, d: p.d, href: p.href });
     });
@@ -1228,6 +1306,148 @@ function setTab(t) {
 }
 function setTag(t) { ui.tag = t || ""; ui.catOpen = false; renderHome(); }
 function clearFilters() { ui.q = ""; renderHome(); }
+
+/* ================================================================
+   Guidelines — 4e partie : fiches de recommandations cliniques
+================================================================ */
+function openGuide(slug) {
+  glRecents = [slug].concat(glRecents.filter(function (s) { return s !== slug; })).slice(0, 6);
+  saveLs(LS.glrec, glRecents);
+  window.location.hash = "#/guideline/" + encodeURIComponent(slug);
+}
+function toggleGlFavStar(ev, slug) {
+  ev.stopPropagation();
+  var i = glFavs.indexOf(slug);
+  if (i >= 0) glFavs.splice(i, 1); else glFavs.push(slug);
+  saveLs(LS.glfav, glFavs);
+  render();
+}
+function setGlTab(t) {
+  if (t === "cats") {
+    if (glUi.tab === "cats") { glUi.catOpen = !glUi.catOpen; }
+    else { glUi.tab = "cats"; glUi.catOpen = true; }
+  } else {
+    glUi.tab = (glUi.tab === t) ? "" : t;
+  }
+  renderGuidelines();
+}
+function setGlTag(t) { glUi.tag = t || ""; glUi.catOpen = false; renderGuidelines(); }
+function clearGlFilters() { glUi.q = ""; renderGuidelines(); }
+function glTags(g) { return g.tags.filter(function (t) { return normKey(t) !== "guidelines"; }); }
+function glCard(g) {
+  var isFav = glFavs.indexOf(g.slug) >= 0;
+  var tags = glTags(g).slice(0, 3).map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
+  return '<div class="fiche-card" onclick="openGuide(\'' + g.slug + '\')">' +
+    '<button class="star" title="Favori" onclick="toggleGlFavStar(event,\'' + g.slug + '\')">' + (isFav ? "★" : "☆") + "</button>" +
+    '<p class="t">' + esc(g.title) + "</p>" + tags + "<div></div></div>";
+}
+function renderGuidelines() {
+  var view = document.getElementById("view");
+  var q = norm(glUi.q);
+  var html = "";
+  if (!guides.length) {
+    html += '<div class="card" style="text-align:center"><h1>Guidelines</h1>' +
+      "<div class='empty'>Aucune fiche guideline pour le moment.<br/>" +
+      "Utilisez <a href='#/reglages'>Réglages → ☁️ Synchroniser</a> pour télécharger le dossier « _4.fichesguidelines » du dépôt Compendium.</div></div>";
+    view.innerHTML = html; return;
+  }
+  html += '<div class="searchbar"><input type="text" id="gl-search" placeholder="🔎 Rechercher une guideline, un secteur, un sujet…" value="' + esc(glUi.q) + '"/></div>';
+  html += '<div class="tabbar">' +
+    '<button class="' + (glUi.tab === "fav" ? "on" : "") + '" onclick="setGlTab(\'fav\')">★ Favoris</button>' +
+    '<button class="' + (glUi.tab === "cats" ? "on" : "") + '" onclick="setGlTab(\'cats\')">Secteurs</button>' +
+    '<button class="' + (glUi.tab === "recent" ? "on" : "") + '" onclick="setGlTab(\'recent\')">🕘 Récents</button>' +
+    "</div>";
+  if (q) html += '<span class="chip on" onclick="clearGlFilters()" style="margin-bottom:10px">✕ Réinitialiser la recherche</span>';
+  var sect = function (title, cardsHtml) {
+    return "<p class='sectp' style='font-size:12.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px'>" + title + "</p>" + cardsHtml + "<div style='height:16px'></div>";
+  };
+  if (glUi.tab === "fav") {
+    var favList = guides.filter(function (g) { return glFavs.indexOf(g.slug) >= 0 && (!q || g.text.indexOf(q) >= 0); });
+    html += favList.length
+      ? sect("Mes favoris · " + favList.length, '<div class="grid-fiches">' + favList.map(glCard).join("") + "</div>")
+      : sect("Mes favoris", '<div class="empty">Aucune fiche guideline en favori — touchez l\'étoile ☆ d\'une fiche pour l\'ajouter.</div>');
+  }
+  if (glUi.tab === "recent") {
+    var recs = glRecents.map(function (s) { return guides.find(function (g) { return g.slug === s; }); })
+      .filter(Boolean).filter(function (g) { return !q || g.text.indexOf(q) >= 0; }).slice(0, 6);
+    html += recs.length
+      ? sect("Récemment consultées", '<div class="grid-fiches">' + recs.map(glCard).join("") + "</div>")
+      : sect("Récemment consultées", '<div class="empty">Aucune fiche guideline consultée récemment.</div>');
+  }
+  if (glUi.tab === "cats") {
+    if (glUi.catOpen) {
+      var tags = [];
+      guides.forEach(function (g) { glTags(g).forEach(function (t) { if (tags.indexOf(t) < 0) tags.push(t); }); });
+      tags.sort(function (a, b) { return a.localeCompare(b, "fr"); });
+      html += '<div class="droplist">';
+      html += '<div class="dropitem' + (!glUi.tag ? " on" : "") + '" onclick="setGlTag(\'\')">Tous les secteurs</div>';
+      tags.forEach(function (t) {
+        html += '<div class="dropitem' + (glUi.tag === t ? " on" : "") + '" onclick="setGlTag(\'' + esc(t) + '\')">' + esc(t) +
+          '<span class="m" style="float:right;margin-top:2px">' +
+          guides.filter(function (g) { return glTags(g).indexOf(t) >= 0; }).length + " fiche(s)</span></div>";
+      });
+      html += "</div>";
+    }
+  }
+  var list = guides.filter(function (g) {
+    if (glUi.tag && glTags(g).indexOf(glUi.tag) < 0) return false;
+    if (q && g.text.indexOf(q) < 0) return false;
+    return true;
+  });
+  var label = glUi.tag || "Toutes les guidelines";
+  if (list.length) {
+    html += "<p style='font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px'>" + esc(label) + " · " + list.length + "</p>";
+    html += '<div class="grid-fiches">' + list.map(glCard).join("") + "</div>";
+  } else if (!glUi.tab || glUi.tab === "cats") {
+    html += '<div class="empty">' + (q || glUi.tag ? "Aucune fiche guideline ne correspond." : "Aucune fiche guideline.") + "</div>";
+  }
+  view.innerHTML = html;
+  var s = document.getElementById("gl-search");
+  if (s) {
+    s.addEventListener("input", function () { glUi.q = s.value; renderGuidelines(); var s2 = document.getElementById("gl-search"); if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); } });
+  }
+}
+function renderGuideView(slug) {
+  var view = document.getElementById("view");
+  var g = guides.find(function (x) { return x.slug === slug; });
+  if (!g) { view.innerHTML = '<div class="empty">Fiche guideline introuvable. <a href="#/guidelines">Retour</a></div>'; return; }
+  glRecents = [g.slug].concat(glRecents.filter(function (x) { return x !== g.slug; })).slice(0, 6);
+  saveLs(LS.glrec, glRecents);
+  var isFav = glFavs.indexOf(g.slug) >= 0;
+  var meta = [];
+  if (g.author) meta.push("✍️ " + esc(g.author));
+  if (g.created) meta.push("Créée : " + esc(g.created));
+  if (g.updated) meta.push("MAJ : " + esc(g.updated));
+  var tags = g.tags.map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
+  var html = '<a class="back" href="#/guidelines">← Guidelines</a>';
+  html += '<div class="card">';
+  html += '<div class="fiche-head"><h1>' + esc(g.title) + "</h1></div>";
+  if (tags) html += "<div>" + tags + "</div>";
+  if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
+  html += '<div class="fiche-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">' +
+    '<button class="btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')">' + (isFav ? "★ Favori" : "☆ Favori") + "</button>" +
+    '<button class="btn" onclick="window.print()">🖨️ Imprimer</button>' +
+    "</div>";
+  html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
+  html += g.html || mdToHtml(g.md || "");
+  html += "</div>";
+  view.innerHTML = html;
+  glHydrateImages();
+}
+function glHydrateImages() {
+  var imgs = document.querySelectorAll("#view img[data-glsrc]") || [];
+  Array.prototype.forEach.call(imgs, function (im) {
+    var p = im.getAttribute("data-glsrc");
+    if (!p) return;
+    var url = /^https?:/i.test(p) ? p
+      : "https://raw.githubusercontent.com/" + encodeURIComponent((cfg.user || "").trim()) + "/" + encodeURIComponent((cfg.repo || "").trim()) + "/" + encodeURIComponent((cfg.branch || "main").trim()) + "/" +
+        (glFolder ? glFolder.split("/").map(encodeURIComponent).join("/") + "/" : "") + p.split("/").map(encodeURIComponent).join("/");
+    fetch(url, { headers: ghHeaders(false) })
+      .then(function (r) { return r.ok ? r.blob() : null; })
+      .then(function (b) { if (b) { im.src = URL.createObjectURL(b); } im.removeAttribute("data-glsrc"); })
+      .catch(function () { im.removeAttribute("data-glsrc"); });
+  });
+}
 
 /* ---------- Fiche ---------- */
 function renderFiche(slug) {
@@ -2937,6 +3157,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="zuK9B31xZgOTfEWyiSYB2g==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="UXGJ/23/hzbIBDzbJn/iZw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
