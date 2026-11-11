@@ -278,7 +278,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.3.2 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.3.3 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -350,6 +350,8 @@ function applyTheme(id) {
     r.setProperty("--bg", "#0c1322"); r.setProperty("--card", "#141d2f"); r.setProperty("--ink", "#e7eef8");
     r.setProperty("--muted", "#94a8c2"); r.setProperty("--border", "#29364e");
     r.setProperty("--deep", "#eef4fb"); r.setProperty("--accent-soft", t.accent + "24");
+  } else {
+    r.removeProperty("--card"); r.removeProperty("--ink"); r.removeProperty("--muted");
   }
   var mt = document.querySelector('meta[name="theme-color"]');
   if (mt) mt.setAttribute("content", t.g1);
@@ -1252,14 +1254,25 @@ function renderFiche(slug) {
     "</div>";
   html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
   var fHtml = mdToHtml(f.md || "");
+  var SOM_MAP = [
+    { t: "Mode d'action", l: "Mode d'action" },
+    { t: "Noms commerciaux", l: "Noms comm." },
+    { t: "Indications et doses", l: "Indic. & doses" },
+    { t: "Effets secondaires", l: "Effets second." },
+    { t: "Remarques", l: "Remarques" }
+  ];
   var somItems = [], re = /<h([234])[^>]*\bid="fh-(\d+)"[^>]*>([\s\S]*?)<\/h\1>/g, ms;
   while ((ms = re.exec(fHtml))) {
     var stxt = ms[3].replace(/<[^>]+>/g, "").trim();
-    if (stxt) somItems.push({ id: "fh-" + ms[2], lvl: ms[1], t: stxt });
+    if (!stxt) continue;
+    var nk = normKey(stxt);
+    for (var si = 0; si < SOM_MAP.length; si++) {
+      if (nk === normKey(SOM_MAP[si].t)) { somItems.push({ id: "fh-" + ms[2], l: SOM_MAP[si].l }); break; }
+    }
   }
-  if (somItems.length >= 3) {
-    html += '<div class="chips" style="margin:10px 0 0">' + somItems.map(function (it) {
-      return '<span class="chip" onclick="jumpTo(\'' + it.id + '\')" style="font-weight:' + (it.lvl === "2" ? "700" : "500") + '">' + esc(it.t) + "</span>";
+  if (somItems.length) {
+    html += '<div class="chips" style="margin:10px 0 0;flex-wrap:nowrap;overflow-x:auto">' + somItems.map(function (it) {
+      return '<span class="chip" onclick="jumpTo(\'' + it.id + '\')" style="white-space:nowrap;flex:0 0 auto">' + esc(it.l) + "</span>";
     }).join("") + "</div>";
   }
   html += fHtml;
@@ -2924,6 +2937,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="qetMATaCu5K+BI2yfQ7sJA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="zuK9B31xZgOTfEWyiSYB2g==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
