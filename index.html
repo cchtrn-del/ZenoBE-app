@@ -36,7 +36,7 @@
   /* ---------- Barre supérieure ---------- */
   .topbar {
     position: sticky; top: 0; z-index: 30;
-    background: linear-gradient(135deg, var(--deep), var(--accent)); border-bottom: none;
+    background: linear-gradient(135deg, var(--g1), var(--accent)); border-bottom: none;
     display: flex; align-items: center; gap: 14px; padding: 10px 16px; flex-wrap: wrap;
   }
   .brand { display: flex; align-items: center; gap: 8px; } .brand .logo-h { height: 42px; width: auto; display: block; }
@@ -87,7 +87,7 @@
   h2.picto-head {
     font-size: 14px; text-transform: none; letter-spacing: .2px;
     margin: 16px 0 6px; padding: 4px 12px 4px 8px;
-    background: linear-gradient(180deg, var(--deep), var(--accent));
+    background: linear-gradient(180deg, var(--g1), var(--accent));
     color: #fff; border-radius: 9px; border-left: none;
     box-shadow: 0 1px 4px rgba(0,0,0,.18);
   }
@@ -139,7 +139,7 @@
   .tabbar { display: flex; gap: 6px; margin-bottom: 12px; }
   .tabbar button {
     flex: 1; padding: 8px 4px; border: 1.5px solid transparent;
-    background: linear-gradient(180deg, var(--deep), var(--accent)); color: #fff; border-radius: 10px;
+    background: linear-gradient(180deg, var(--g1), var(--accent)); color: #fff; border-radius: 10px;
     font-size: 12.5px; font-weight: 700; cursor: pointer; line-height: 1.25;
     display: flex; align-items: center; justify-content: center; gap: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,.22);
@@ -196,7 +196,7 @@
   }
   td { border-top: 1px solid var(--border); padding: 8px 10px; vertical-align: top; }
   tbody tr:nth-child(even) { background: var(--bg); }
-  .hm-tbl { background: #ffffff; }
+  .hm-tbl { background: var(--card); }
   .hm-tbl tbody tr:nth-child(even) td { background: var(--bg); }
   .hm-tbl td:not(:first-child) { font-weight: 800; color: var(--deep); font-size: 14.5px; }
   .hm-tbl tbody tr.hm-hl td { background: var(--accent-soft); font-weight: 800; color: var(--deep); }
@@ -220,6 +220,18 @@
   .kpi .v { font-size: 21px; font-weight: 800; color: var(--deep); }
   .kpi .l { font-size: 11.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .4px; }
   .warning-box { background: var(--warn-soft); border: 1px solid #fde68a; color: #92400e; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-top: 12px; }
+  /* ---------- Mode nuit ---------- */
+  html.dark { --ok: #34d399; --ok-soft: rgba(52,211,153,.13); --warn: #fbbf24; --warn-soft: rgba(251,191,36,.10); }
+  html.dark .btn, html.dark .chip, html.dark .theme-btn, html.dark .dropbar, html.dark .droplist { background: var(--card); }
+  html.dark .chip { color: var(--ink); }
+  html.dark .chip.on { background: var(--accent); color: #fff; }
+  html.dark input[type=text], html.dark input[type=number], html.dark input[type=password], html.dark select, html.dark textarea { background: var(--card); color: var(--ink); }
+  html.dark code { background: rgba(255,255,255,.08); }
+  html.dark label, html.dark h4 { color: var(--muted); }
+  html.dark h2.f-section { color: var(--deep); }
+  html.dark .dropitem { border-bottom: 1px solid var(--border); }
+  html.dark .dropitem:hover, html.dark .dropitem:active { background: rgba(255,255,255,.06); }
+  html.dark .warning-box { border-color: rgba(251,191,36,.35); color: #fcd34d; }
   .formula { font-size: 12.5px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   /* ---------- Import / GitHub ---------- */
   .log {
@@ -266,7 +278,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.9.46 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.3.2 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -275,7 +287,7 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1" };
+var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1" };
 
 function loadLs(key, fallback) {
   try { var v = window.localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -301,6 +313,8 @@ var fiches = (loadLs(LS.fiches, [])).map(hydrateFiche);
 var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, lastSync: null });
 var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
+var darkMode = loadLs(LS.dark, false);
+var fontScale = loadLs(LS.font, 100);
 var ui = { q: "", tag: "", favOnly: false, tab: "", catOpen: false };
 
 /* ================================================================
@@ -309,8 +323,12 @@ var ui = { q: "", tag: "", favOnly: false, tab: "", catOpen: false };
 var THEMES = {
   bleu: { nom: "Bleu ZenoBE", accent: "#1E6FBF", soft: "#eff6ff", bg: "#f4f7fb", border: "#e2e8f0", g1: "#123E7C", g2: "#1E6FBF", deep: "#123E7C" },
   emeraude: { nom: "Émeraude", accent: "#10B981", soft: "#ecfdf5", bg: "#f0faf6", border: "#d7ece5", g1: "#065F46", g2: "#34D399", deep: "#065F46" },
-  violette: { nom: "Violette", accent: "#8B5CF6", soft: "#f3f0ff", bg: "#f6f4fd", border: "#e4dcf7", g1: "#5B21B6", g2: "#A78BFA", deep: "#5B21B6" },
-  ambre: { nom: "Ambre & Laiton", accent: "#D97706", soft: "#fef6e7", bg: "#fdf8ef", border: "#f2e6cf", g1: "#92400E", g2: "#F59E0B", deep: "#92400E" },
+  forêt: { nom: "Forêt (nature)", accent: "#337A56", soft: "#eef6f0", bg: "#f3f8f4", border: "#d9e9de", g1: "#1E4D38", g2: "#5CA87F", deep: "#1E4D38" },
+  christmas: { nom: "Christmas (guirlande)", accent: "#DC2626", soft: "#eafaf0", bg: "#f6faf7", border: "#d5e5da", g1: "#14532D", g2: "#F87171", deep: "#14532D" },
+  printemps: { nom: "Printemps (cerisier)", accent: "#D96C94", soft: "#fdf2f6", bg: "#fbf5f7", border: "#f2dbe3", g1: "#9D3A5C", g2: "#F08FB0", deep: "#9D3A5C" },
+  été: { nom: "Été (turquoise)", accent: "#0FA3B1", soft: "#e8f8fa", bg: "#f2fafb", border: "#d5edf0", g1: "#0B5F6C", g2: "#38C6D4", deep: "#0B5F6C" },
+  automne: { nom: "Automne (terracotta)", accent: "#C65D3B", soft: "#faf1ec", bg: "#f8f2ee", border: "#ecdcd2", g1: "#7A3B1E", g2: "#E08A5C", deep: "#7A3B1E" },
+  hiver: { nom: "Hiver (glacier)", accent: "#4E8FB0", soft: "#eef5f9", bg: "#f4f8fa", border: "#dbe7ee", g1: "#33566B", g2: "#8FBBD4", deep: "#33566B" },
   ardoise: { nom: "Ardoise", accent: "#475569", soft: "#eef1f4", bg: "#f4f6f8", border: "#dde3e9", g1: "#1E293B", g2: "#64748B", deep: "#1E293B" },
 };
 var curTheme = loadLs(LS.theme, "bleu");
@@ -328,9 +346,50 @@ function applyTheme(id) {
   var s1 = document.getElementById("lg-g1"), s2 = document.getElementById("lg-g2");
   if (s1) s1.setAttribute("stop-color", t.g1);
   if (s2) s2.setAttribute("stop-color", t.g2);
+  if (darkMode) {
+    r.setProperty("--bg", "#0c1322"); r.setProperty("--card", "#141d2f"); r.setProperty("--ink", "#e7eef8");
+    r.setProperty("--muted", "#94a8c2"); r.setProperty("--border", "#29364e");
+    r.setProperty("--deep", "#eef4fb"); r.setProperty("--accent-soft", t.accent + "24");
+  }
   var mt = document.querySelector('meta[name="theme-color"]');
   if (mt) mt.setAttribute("content", t.g1);
+  try { document.documentElement.classList.toggle("dark", !!darkMode); } catch (e) {}
   saveLs(LS.theme, curTheme);
+}
+function setDark(v) { darkMode = !!v; saveLs(LS.dark, darkMode); applyTheme(curTheme); renderReglages(); }
+function setFont(v) { fontScale = v; saveLs(LS.font, v); applyFont(); renderReglages(); }
+function applyFont() { try { document.body.style.zoom = fontScale / 100; } catch (e) {} }
+function exportData() {
+  var data = { app: "ZenoBE", v: 1, date: new Date().toISOString(), fiches: fiches.map(slimFiche), favs: favs, recents: recents, theme: curTheme, dark: darkMode, font: fontScale, cfg: { user: cfg.user, repo: cfg.repo, branch: cfg.branch, folder: cfg.folder } };
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
+  a.download = "ZenoBE-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 800);
+  toast("📤 Sauvegarde exportée (" + fiches.length + " fiche(s))");
+}
+function importData() {
+  var raw = (document.getElementById("imp-json").value || "").trim();
+  if (!raw) { toast("Collez d'abord le contenu du fichier de sauvegarde."); return; }
+  try {
+    var d = JSON.parse(raw);
+    if (d.app !== "ZenoBE" || !Array.isArray(d.fiches)) throw new Error("format");
+    (d.fiches || []).forEach(function (sf) {
+      var f = hydrateFiche(sf);
+      var ex = fiches.find(function (x) { return x.slug === f.slug; });
+      if (ex) fiches[fiches.indexOf(ex)] = f; else fiches.push(f);
+    });
+    fiches.sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
+    if (Array.isArray(d.favs)) { favs = d.favs; saveLs(LS.fav, favs); }
+    if (Array.isArray(d.recents)) { recents = d.recents; saveLs(LS.rec, recents); }
+    if (d.cfg) { cfg.user = d.cfg.user || cfg.user; cfg.repo = d.cfg.repo || cfg.repo; cfg.branch = d.cfg.branch || cfg.branch; cfg.folder = d.cfg.folder || cfg.folder; persistCfg(); }
+    persistFiches();
+    if (d.theme && THEMES[d.theme]) applyTheme(d.theme);
+    if (d.dark !== undefined) setDark(!!d.dark);
+    if (d.font) setFont(d.font);
+    toast("✅ " + d.fiches.length + " fiche(s) restaurée(s)");
+    render();
+  } catch (e) { toast("❌ Sauvegarde invalide — vérifiez le contenu collé."); }
 }
 
 function persistFiches() { saveLs(LS.fiches, fiches.map(slimFiche)); updateCount(); }
@@ -542,7 +601,7 @@ function pictoKeyFor(headingText) {
 
 function mdToHtml(md) {
   var lines = decodeEnt(md).split("\n");
-  var out = "", i = 0;
+  var out = "", i = 0, fhN = 0;
   while (i < lines.length) {
     var t = lines[i].trim();
     if (!t) { i++; continue; }
@@ -558,12 +617,12 @@ function mdToHtml(md) {
       var pk = pictoKeyFor(h[2]);
       if (pk) {
         var clean = h[2].replace(/^[^A-Za-z0-9À-ÿ]+/, "").trim();
-        out += '<h' + lvl + ' class="picto-head">' + zenTile(ZENOBE_PICTOS[pk], true) +
+        out += '<h' + lvl + ' class="picto-head" id="fh-' + (fhN++) + '">' + zenTile(ZENOBE_PICTOS[pk], true) +
           "<span>" + inlineMd(clean) + "</span></h" + lvl + ">";
         i++; continue;
       }
-      if (lvl === 1) { out += "<h1>" + inlineMd(h[2]) + "</h1>"; }
-      else { out += "<h" + lvl + ">" + inlineMd(h[2]) + "</h" + lvl + ">"; }
+      if (lvl === 1) { out += '<h1 id="fh-' + (fhN++) + '">' + inlineMd(h[2]) + "</h1>"; }
+      else { out += '<h' + lvl + ' id="fh-' + (fhN++) + '">' + inlineMd(h[2]) + "</h" + lvl + ">"; }
       i++; continue;
     }
     if (/^(-{3,}|\*{3,})$/.test(t)) { out += "<hr/>"; i++; continue; }
@@ -1097,6 +1156,36 @@ function renderHome() {
     var emptyMsg = q || ui.tag ? "Aucune fiche ne correspond." : "Aucune fiche.";
     html += '<div class="empty">' + emptyMsg + "</div>";
   }
+
+  /* --- Recherche globale : calculateur + pages « Normes et mesures » + fichiers Labo/Scores --- */
+  if (q) {
+    var glob = [];
+    fiches.filter(function (f) { return f.poso.length && f.text.indexOf(q) >= 0; }).slice(0, 3).forEach(function (f) {
+      glob.push({ t: f.title, d: "Calculateur de dose", href: "#/calculateur?f=" + encodeURIComponent(f.slug) });
+    });
+    var NORMES_PAGES = [
+      { t: "Biométrie", d: "Poids, taille, IMC, PC — percentiles OMS / CDC", href: "#/biometrie/percentiles", kw: "poids taille imc percentile perimetre cranien croissance oms cdc z score surface corporelle sc" },
+      { t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque selon l'âge", href: "#/biometrie/hemodynamique", kw: "tension arterielle ta fc frequence cardiaque hemodynamique pouls hta map epals signes vitaux" },
+      { t: "Laboratoire", d: "Valeurs biologiques de référence", href: "#/laboratoire", kw: "laboratoire labo nfs formule sanguine hemoglobine hte plaquettes leucocytes vcm biologie sang" },
+      { t: "Scores cliniques", d: "Scores et repères cliniques", href: "#/scores", kw: "scores cliniques tanner puberte developpement glasgow" }
+    ];
+    NORMES_PAGES.forEach(function (p) {
+      if (norm(p.t + " " + p.kw).indexOf(q) >= 0) glob.push({ t: p.t, d: p.d, href: p.href });
+    });
+    Object.keys(DOCS_CACHE.files || {}).forEach(function (n) {
+      var parts = splitFiche(DOCS_CACHE.files[n].md);
+      var txt = norm((parts.fm.titre || "") + " " + (parts.fm.description || "") + " " + parts.body);
+      if (txt.indexOf(q) < 0) return;
+      var part = docsPartie(parts.fm);
+      glob.push({ t: parts.fm.titre || n.replace(/\.md$/i, ""), d: part === "scores" ? "Scores cliniques" : "Laboratoire", href: "#/" + (part === "scores" ? "scores" : "laboratoire") + "/view/" + encodeURIComponent(n) });
+    });
+    if (glob.length) {
+      html += sect("🔎 Aussi dans ZenoBE", '<div class="droplist" style="margin-bottom:0">' + glob.slice(0, 8).map(function (g) {
+        return '<div class="dropitem" onclick="window.location.hash=\'' + g.href + '\">' + esc(g.t) +
+          '<span class="m" style="float:right;margin-top:2px">' + esc(g.d) + "</span></div>";
+      }).join("") + "</div>");
+    }
+  }
   view.innerHTML = html;
   var s = document.getElementById("search");
   if (s) {
@@ -1162,10 +1251,22 @@ function renderFiche(slug) {
     '<button class="btn" onclick="exportFiche(event, \'' + f.slug + '\')">📤 Exporter</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
-  html += f.html;
+  var fHtml = mdToHtml(f.md || "");
+  var somItems = [], re = /<h([234])[^>]*\bid="fh-(\d+)"[^>]*>([\s\S]*?)<\/h\1>/g, ms;
+  while ((ms = re.exec(fHtml))) {
+    var stxt = ms[3].replace(/<[^>]+>/g, "").trim();
+    if (stxt) somItems.push({ id: "fh-" + ms[2], lvl: ms[1], t: stxt });
+  }
+  if (somItems.length >= 3) {
+    html += '<div class="chips" style="margin:10px 0 0">' + somItems.map(function (it) {
+      return '<span class="chip" onclick="jumpTo(\'' + it.id + '\')" style="font-weight:' + (it.lvl === "2" ? "700" : "500") + '">' + esc(it.t) + "</span>";
+    }).join("") + "</div>";
+  }
+  html += fHtml;
   html += "</div>";
   view.innerHTML = html;
 }
+function jumpTo(id) { var el = document.getElementById(id); if (el) { try { el.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { el.scrollIntoView(); } } }
 
   /* ---------- Export d'une fiche ---------- */
 function calcBackHtml(preselect, calcFiches) {
@@ -1284,6 +1385,7 @@ function renderCalculateur() {
     if (iModeSel) iModeSel.addEventListener("change", convertRepartition);
     fillSchema();
   }
+  if (percState.poids) { var cpw = document.getElementById("calc-poids"); if (cpw) cpw.value = percState.poids; }
 }
 
 function fillSchema() {
@@ -1523,6 +1625,20 @@ function renderReglages() {
       (actif ? "✓ " : "") + t.nom + "</button>";
   });
   html += "</div>";
+  html += "<div style='height:18px'></div><h3>🌙 Mode nuit</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Affichage sombre — confort des gardes de nuit. Mémorisé sur cet appareil.</p>";
+  html += '<button class="btn' + (darkMode ? "" : " btn-primary") + '" onclick="setDark(false)">☀️ Jour</button> <button class="btn' + (darkMode ? " btn-primary" : "") + '" onclick="setDark(true)">🌙 Nuit</button>';
+  html += "<div style='height:18px'></div><h3>🔤 Taille du texte</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Agrandit tout l'affichage (100 / 110 / 120 %).</p>";
+  html += [100, 110, 120].map(function (v) {
+    return '<button class="btn' + (fontScale === v ? " btn-primary" : "") + '" onclick="setFont(' + v + ')">' + (v === 100 ? "A" : v === 110 ? "A+" : "A++") + " · " + v + " %</button>";
+  }).join(" ");
+  html += "<div style='height:18px'></div><h3>📤 Sauvegarde de mes données</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Exporte fiches, favoris, récents, thème et réglages (sans le jeton GitHub) dans un fichier à conserver. Sur un nouvel appareil : copiez le contenu du fichier et collez-le ci-dessous.</p>";
+  html += '<button class="btn btn-primary" onclick="exportData()">📤 Exporter la sauvegarde</button>';
+  html += "<div style='height:10px'></div>";
+  html += '<textarea id="imp-json" placeholder="Collez ici le contenu d\'un fichier de sauvegarde ZenoBE…" style="min-height:90px;font-size:12px;font-family:monospace"></textarea>';
+  html += '<button class="btn" style="margin-top:8px" onclick="importData()">📥 Restaurer depuis une sauvegarde</button>';
   html += "</div>";
   view.innerHTML = html;
 }
@@ -1694,7 +1810,7 @@ var WHO_LMS = {
   },
 };
 var PERC_LS = "fm.perc.v1";
-var percState = { dob: "", dom: "", sexe: "M", poids: "", taille: "", pc: "", tailleDebout: true };
+var percState = { dob: "", dom: "", sexe: "", poids: "", taille: "", pc: "", tailleDebout: true };
 try { window.localStorage.removeItem(PERC_LS); } catch (e) {} /* remise à zéro à chaque démarrage */
 
 /* Référence OMS 2007 « Growth reference 5-19 years » (de Onis et al., Bull WHO 2007;85:660-7).
@@ -1959,6 +2075,7 @@ function nmBandHtml() {
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Sexe</label>' +
     '<div id="nm-sex" style="display:inline-flex;border:1.5px solid var(--muted);border-radius:999px;overflow:hidden;user-select:none">' +
     '<span id="nm-sex-m" onclick="nmSexe(\'M\')" style="padding:5px 16px;font-weight:800;font-size:14px;cursor:pointer">M</span>' +
+    '<span id="nm-sex-n" onclick="nmSexe(\'\')" style="padding:5px 10px;font-weight:800;font-size:14px;cursor:pointer">/</span>' +
     '<span id="nm-sex-f" onclick="nmSexe(\'F\')" style="padding:5px 16px;font-weight:800;font-size:14px;cursor:pointer">F</span>' +
     '</div></div>' +
     '<div>' + '<label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px">Âge</label>' +
@@ -2018,11 +2135,15 @@ function nmUpdate() {
   var elT = document.getElementById("nm-t-ctxt");
   var elSc = document.getElementById("nm-sc");
   var elM = document.getElementById("nm-sex-m");
+  var elN = document.getElementById("nm-sex-n");
   var elF = document.getElementById("nm-sex-f");
   if (elM) {
     var on = "padding:5px 16px;font-weight:800;font-size:14px;cursor:pointer;background:var(--accent);color:#fff";
     var off = "padding:5px 16px;font-weight:800;font-size:14px;cursor:pointer";
-    elM.setAttribute("style", st.sexe !== "F" ? on : off);
+    var onN = "padding:5px 10px;font-weight:800;font-size:14px;cursor:pointer;background:var(--accent);color:#fff";
+    var offN = "padding:5px 10px;font-weight:800;font-size:14px;cursor:pointer";
+    elM.setAttribute("style", st.sexe === "M" ? on : off);
+    if (elN) elN.setAttribute("style", st.sexe === "" ? onN : offN);
     elF.setAttribute("style", st.sexe === "F" ? on : off);
   }
   if (!elAge || !elP) return;
@@ -2035,18 +2156,24 @@ function nmUpdate() {
   var pctxt = "", tctxt = "", sctxt = "";
   if (age && !age.over && (poids || taille)) {
     if (poids) {
-      var pw = percResult("wfa", st.sexe, age.days, poids, "kg", 0);
-      if (pw) pctxt = "Percentile : <b>" + pctLabel(pw.p) + "</b> (z " + fmtZ(pw.z) + ")" + (age.days > 3683 ? " — CDC 2000" : "");
+      if (!st.sexe) pctxt = "Percentile : <span style=\"color:var(--muted)\">sélectionnez M ou F</span>";
+      else {
+        var pw = percResult("wfa", st.sexe, age.days, poids, "kg", 0);
+        if (pw) pctxt = "Percentile : <b>" + pctLabel(pw.p) + "</b> (z " + fmtZ(pw.z) + ")" + (age.days > 3683 ? " — CDC 2000" : "");
+      }
     }
     if (taille) {
-      var cut24b = age.days >= 731; /* OMS : taille debout à partir de 24 mois */
-      var corrT = 0;
-      if (st.tailleDebout !== "" && st.tailleDebout !== null) {
-        if (!cut24b && st.tailleDebout) corrT = 0.7;     /* mesuré debout → référence en longueur : +0,7 cm */
-        if (cut24b && !st.tailleDebout) corrT = -0.7;    /* mesuré couché → référence en taille : −0,7 cm */
+      if (!st.sexe) tctxt = "Percentile : <span style=\"color:var(--muted)\">sélectionnez M ou F</span>";
+      else {
+        var cut24b = age.days >= 731; /* OMS : taille debout à partir de 24 mois */
+        var corrT = 0;
+        if (st.tailleDebout !== "" && st.tailleDebout !== null) {
+          if (!cut24b && st.tailleDebout) corrT = 0.7;     /* mesuré debout → référence en longueur : +0,7 cm */
+          if (cut24b && !st.tailleDebout) corrT = -0.7;    /* mesuré couché → référence en taille : −0,7 cm */
+        }
+        var tl = percResult("lhfa", st.sexe, age.days, taille, "cm", corrT);
+        if (tl) tctxt = "Percentile : <b>" + pctLabel(tl.p) + "</b> (z " + fmtZ(tl.z) + ")";
       }
-      var tl = percResult("lhfa", st.sexe, age.days, taille, "cm", corrT);
-      if (tl) tctxt = "Percentile : <b>" + pctLabel(tl.p) + "</b> (z " + fmtZ(tl.z) + ")";
     }
     if (poids && taille && poids > 0 && taille > 0) {
       var sc = Math.sqrt(poids * taille / 3600);
@@ -2070,7 +2197,7 @@ var hubBtn = function (opt) {
       ? '<div style="align-self:center"><span class="badge b-none">Bientôt</span></div>'
       : '<div style="align-self:center;color:var(--accent);font-size:22px;font-weight:800">›</div>');
   var style = 'display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
-    'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
+    'background:linear-gradient(135deg,var(--accent-soft) 0%,var(--card) 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
     'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)';
   return opt.soon
     ? '<div style="' + style + ';opacity:.6">' + inner + '</div>'
@@ -2298,7 +2425,7 @@ function hmUpdate() {
         '<tr><td>P95 + 12 mmHg — HTA sévère si TA ≥</td><td>' + d[3] + '</td><td>' + s[3] + '</td></tr>' +
         '</tbody></table></div>';
     };
-    if (tailleTxt) {
+    if (tailleTxt && st.sexe) {
       var isF = st.sexe === "F";
       var bp = hlBpAt((isF ? HL_BPG : HL_BPB)[a], tailleVal);
       sum3 = "P95 ajusté : " + bp.s[2] + "/" + bp.d[2];
@@ -2310,9 +2437,9 @@ function hmUpdate() {
     } else {
       var fg = hlBpMed(HL_BPG[a]), bg2 = hlBpMed(HL_BPB[a]);
       var mine = st.sexe === "F" ? fg : bg2;
-      sum3 = "P95 taille méd. : " + mine.s[2] + "/" + mine.d[2];
+      sum3 = !st.sexe ? ("Fille " + fg.s[2] + "/" + fg.d[2] + " · Garçon " + bg2.s[2] + "/" + bg2.d[2]) : ("P95 taille méd. : " + mine.s[2] + "/" + mine.d[2]);
       body3 = '<div style="margin-top:10px">' +
-        '<div class="warning-box">Taille non encodée : les normes ci-dessous sont celles d\'un enfant de <b>taille médiane (P50)</b>' + noteAge + '. Encodez la taille dans le bandeau ci-dessus pour ajuster au percentile de taille.</div>' +
+        '<div class="warning-box">' + (!st.sexe ? "Sélectionnez le sexe (M/F) dans le bandeau ci-dessus — les normes de TA supérieures diffèrent entre filles et garçons. " : "") + (!tailleTxt ? "Taille non encodée : les normes ci-dessous sont celles d\'un enfant de <b>taille médiane (P50)</b>' + noteAge + '. Encodez la taille dans le bandeau ci-dessus pour ajuster au percentile de taille." : "") + '</div>' +
         '<div class="grid2">' +
         '<div>' +
         '<h3 style="font-size:14px;margin:0 0 6px;color:var(--deep)">Fille — taille médiane (P50)</h3>' + mkBpTable(fg.s, fg.d) + '</div>' +
@@ -2400,7 +2527,7 @@ function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? nor
 
 function docCard(t, href) {
   return '<a href="' + href + '" style="text-decoration:none"><div style="display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
-    'background:linear-gradient(135deg,var(--accent-soft) 0%,#ffffff 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
+    'background:linear-gradient(135deg,var(--accent-soft) 0%,var(--card) 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
     'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)">' +
     '<div style="flex:1;font-size:16px;font-weight:800;color:var(--deep)">' + esc(t) + '</div>' +
     '<div style="color:var(--accent);font-size:22px;font-weight:800">\u203a</div></div></a>';
@@ -2583,6 +2710,8 @@ function scPubUpdate() {
   var note;
   if (!age) {
     note = '<div class="field-note" style="margin:0 0 10px">Renseignez la date de naissance et le sexe dans le bandeau ci-dessus pour contextualiser les seuils.</div>';
+  } else if (!st.sexe) {
+    note = '<div class="warning-box" style="margin:0 0 10px">Sélectionnez le sexe (M ou F) dans le bandeau ci-dessus pour contextualiser les seuils pubertaires.</div>';
   } else if (age.days > 6574) {
     note = '<div class="field-note" style="margin:0 0 10px">Âge : ' + ageFr(age.days) + ' — au-delà de 18 ans, hors champ de ces seuils pédiatriques.</div>';
   } else {
@@ -2676,7 +2805,8 @@ function pcUpdate() {
     if (st.pc && age && !age.over) {
       var pcV = parseFloat(String(st.pc).replace(",", "."));
       if (pcV > 0) {
-        if (age.days <= 1856) {
+        if (!st.sexe) pcTxt = "Percentile : sélectionnez M ou F";
+        else if (age.days <= 1856) {
           var rp = percResult("hcfa", st.sexe, age.days, pcV, "cm", 0);
           if (rp) pcTxt = "Percentile : <b>" + pctLabel(rp.p) + "</b> (z " + fz(rp.z) + ")";
         } else pcTxt = "— pas de norme PC au-delà de 5 ans (OMS)";
@@ -2691,6 +2821,7 @@ function pcUpdate() {
     return;
   }
   if (!poids && !taille) { out.innerHTML = '<div class="warning-box">Encodez le poids et/ou la taille dans le bandeau ci-dessus.</div>'; return; }
+  if (!st.sexe) { out.innerHTML = '<div class="warning-box">Sélectionnez le sexe de l\'enfant (M ou F) dans le bandeau ci-dessus — les courbes de croissance sont spécifiques du sexe.</div>'; return; }
 
   var cut24 = age.days >= 731; /* OMS : taille debout à partir de 24 mois */
   var nomTaille = cut24 ? "Taille" : "Longueur";
@@ -2768,8 +2899,22 @@ function syncFromReglages() {
   window.location.hash = "#/import";
   setTimeout(runSync, 60);
 }
+document.addEventListener("keydown", function (e) {
+  var tag = (e.target && e.target.tagName) || "";
+  var typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+  if (e.key === "/" && !typing) {
+    e.preventDefault();
+    var s = document.getElementById("search");
+    if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+    else { window.location.hash = "#/"; setTimeout(function () { var s2 = document.getElementById("search"); if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); } }, 90); }
+  } else if (e.key === "Escape" && !typing) {
+    var h = window.location.hash || "#/";
+    if (h !== "#/" && h !== "#") window.history.back();
+  }
+});
 window.addEventListener("hashchange", render);
 applyTheme(curTheme);
+applyFont();
 render();
 updateCount();
 var lastSyncAge = cfg.lastSync ? (Date.now() - new Date(cfg.lastSync).getTime()) : Infinity;
@@ -2779,6 +2924,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="RHGphCwj1qoiEzOVoXscQg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="qetMATaCu5K+BI2yfQ7sJA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
