@@ -281,6 +281,8 @@
   .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--accent-soft); }
   .ok-note { color: var(--ok); font-weight: 700; }
   .section-title { font-size: 16px; font-weight: 800; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .page-title { font-size: 21px; font-weight: 800; color: var(--accent); margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
   .toast {
     position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
     background: #0f172a; color: #fff; font-size: 13.5px; font-weight: 600;
@@ -306,7 +308,7 @@
     <a href="#/biometrie">Normes et mesures</a>
   </nav>
   <div class="top-right">
-    <a class="count-pill" href="#/import" id="sync-pill" onclick="syncFromTop();return false;" style="text-decoration:none;display:inline-flex;align-items:center" title="Synchroniser (GitHub)" aria-label="Synchroniser"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 14.99 20 13.55 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 9.01 4 10.45 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></a>
+    <a class="count-pill" href="#/reglages/import" id="sync-pill" onclick="syncFromTop();return false;" style="text-decoration:none;display:inline-flex;align-items:center" title="Synchroniser (GitHub)" aria-label="Synchroniser"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 14.99 20 13.55 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 9.01 4 10.45 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></a>
     <a class="count-pill" href="#/calculateur" style="text-decoration:none;display:inline-flex;align-items:center" title="Calculateur de doses" aria-label="Calculateur de doses"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg></a>
     <a class="count-pill" href="#/reglages" style="text-decoration:none;display:inline-flex;align-items:center" title="Réglages" aria-label="Réglages"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></a>
   </div>
@@ -314,7 +316,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.8 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.9 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -392,13 +394,13 @@ var ui = { q: "", tag: "", favOnly: false, tab: "", catOpen: false };
 var THEMES = {
   bleu: { nom: "Bleu ZenoBE", accent: "#1E6FBF", soft: "#eff6ff", bg: "#f4f7fb", border: "#e2e8f0", g1: "#123E7C", g2: "#1E6FBF", deep: "#123E7C" },
   emeraude: { nom: "Émeraude", accent: "#10B981", soft: "#ecfdf5", bg: "#f0faf6", border: "#d7ece5", g1: "#065F46", g2: "#34D399", deep: "#065F46" },
-  forêt: { nom: "Forêt (nature)", accent: "#337A56", soft: "#eef6f0", bg: "#f3f8f4", border: "#d9e9de", g1: "#1E4D38", g2: "#5CA87F", deep: "#1E4D38" },
-  christmas: { nom: "Christmas (guirlande)", accent: "#DC2626", soft: "#eafaf0", bg: "#f6faf7", border: "#d5e5da", g1: "#14532D", g2: "#F87171", deep: "#14532D" },
-  printemps: { nom: "Printemps (cerisier)", accent: "#D96C94", soft: "#fdf2f6", bg: "#fbf5f7", border: "#f2dbe3", g1: "#9D3A5C", g2: "#F08FB0", deep: "#9D3A5C" },
-  été: { nom: "Été (turquoise)", accent: "#0FA3B1", soft: "#e8f8fa", bg: "#f2fafb", border: "#d5edf0", g1: "#0B5F6C", g2: "#38C6D4", deep: "#0B5F6C" },
-  automne: { nom: "Automne (terracotta)", accent: "#C65D3B", soft: "#faf1ec", bg: "#f8f2ee", border: "#ecdcd2", g1: "#7A3B1E", g2: "#E08A5C", deep: "#7A3B1E" },
-  hiver: { nom: "Hiver (glacier)", accent: "#4E8FB0", soft: "#eef5f9", bg: "#f4f8fa", border: "#dbe7ee", g1: "#33566B", g2: "#8FBBD4", deep: "#33566B" },
+  forêt: { nom: "Forêt", accent: "#337A56", soft: "#eef6f0", bg: "#f3f8f4", border: "#d9e9de", g1: "#1E4D38", g2: "#5CA87F", deep: "#1E4D38" },
+  printemps: { nom: "Cerisier", accent: "#D96C94", soft: "#fdf2f6", bg: "#fbf5f7", border: "#f2dbe3", g1: "#9D3A5C", g2: "#F08FB0", deep: "#9D3A5C" },
+  été: { nom: "Turquoise", accent: "#0FA3B1", soft: "#e8f8fa", bg: "#f2fafb", border: "#d5edf0", g1: "#0B5F6C", g2: "#38C6D4", deep: "#0B5F6C" },
+  automne: { nom: "Terracotta", accent: "#C65D3B", soft: "#faf1ec", bg: "#f8f2ee", border: "#ecdcd2", g1: "#7A3B1E", g2: "#E08A5C", deep: "#7A3B1E" },
+  hiver: { nom: "Glacier", accent: "#4E8FB0", soft: "#eef5f9", bg: "#f4f8fa", border: "#dbe7ee", g1: "#33566B", g2: "#8FBBD4", deep: "#33566B" },
   ardoise: { nom: "Ardoise", accent: "#475569", soft: "#eef1f4", bg: "#f4f6f8", border: "#dde3e9", g1: "#1E293B", g2: "#64748B", deep: "#1E293B" },
+  christmas: { nom: "Christmas", accent: "#DC2626", soft: "#eafaf0", bg: "#f6faf7", border: "#d5e5da", g1: "#14532D", g2: "#F87171", deep: "#14532D" },
 };
 var curTheme = loadLs(LS.theme, "bleu");
 function applyTheme(id) {
@@ -427,8 +429,8 @@ function applyTheme(id) {
   try { document.documentElement.classList.toggle("dark", !!darkMode); } catch (e) {}
   saveLs(LS.theme, curTheme);
 }
-function setDark(v) { darkMode = !!v; saveLs(LS.dark, darkMode); applyTheme(curTheme); renderReglages(); }
-function setFont(v) { fontScale = v; saveLs(LS.font, v); applyFont(); renderReglages(); }
+function setDark(v) { darkMode = !!v; saveLs(LS.dark, darkMode); applyTheme(curTheme); render(); }
+function setFont(v) { fontScale = v; saveLs(LS.font, v); applyFont(); render(); }
 function applyFont() { try { document.body.style.zoom = fontScale / 100; } catch (e) {} }
 function exportData() {
   var data = { app: "ZenoBE", v: 1, date: new Date().toISOString(), fiches: fiches.map(slimFiche), favs: favs, recents: recents, guides: guides, glFavs: glFavs, glRecents: glRecents, theme: curTheme, dark: darkMode, font: fontScale, cfg: { user: cfg.user, repo: cfg.repo, branch: cfg.branch, folder: cfg.folder } };
@@ -440,8 +442,17 @@ function exportData() {
   toast("📤 Sauvegarde exportée (" + fiches.length + " fiche(s))");
 }
 function importData() {
-  var raw = (document.getElementById("imp-json").value || "").trim();
-  if (!raw) { toast("Collez d'abord le contenu du fichier de sauvegarde."); return; }
+  importDataText((document.getElementById("imp-json").value || "").trim());
+}
+function importDataFile(input) {
+  var f = input && input.files && input.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function () { importDataText(String(reader.result).trim()); input.value = ""; };
+  reader.readAsText(f);
+}
+function importDataText(raw) {
+  if (!raw) { toast("Aucun contenu de sauvegarde fourni."); return; }
   try {
     var d = JSON.parse(raw);
     if (d.app !== "ZenoBE" || !Array.isArray(d.fiches)) throw new Error("format");
@@ -467,7 +478,7 @@ function importData() {
     if (d.font) setFont(d.font);
     toast("✅ " + d.fiches.length + " fiche(s) restaurée(s)");
     render();
-  } catch (e) { toast("❌ Sauvegarde invalide — vérifiez le contenu collé."); }
+  } catch (e) { toast("❌ Sauvegarde invalide — vérifiez le fichier ou le contenu collé."); }
 }
 
 function persistFiches() { saveLs(LS.fiches, fiches.map(slimFiche)); updateCount(); }
@@ -868,6 +879,16 @@ function ghHeaders(raw) {
   if (cfg.token && cfg.token.trim()) h.Authorization = "Bearer " + cfg.token.trim();
   return h;
 }
+function ghRawHeaders() {
+  var h = {};
+  if (cfg.token && cfg.token.trim()) h.Authorization = "Bearer " + cfg.token.trim();
+  return h;
+}
+/* URL raw (non comptée dans le quota API GitHub) — le jeton Bearer reste requis pour un dépôt privé */
+function ghRawUrl(path, branch) {
+  return "https://raw.githubusercontent.com/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+    "/" + encodeURIComponent(branch || cfg.branch || "main") + "/" + String(path).split("/").map(encodeURIComponent).join("/");
+}
 
 async function syncGitHub(logFn, silent) {
   var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
@@ -885,7 +906,8 @@ async function syncGitHub(logFn, silent) {
     return;
   }
   if (r.status === 404) { logFn("❌ Dépôt ou branche introuvable. Vérifiez l'utilisateur / dépôt / branche. Un dépôt PRIVÉ requiert un jeton."); return; }
-  if (r.status === 401 || r.status === 403) { logFn("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+  if (r.status === 401) { logFn("❌ Jeton invalide ou expiré (erreur 401)."); return; }
+  if (r.status === 403) { logFn("❌ Quota GitHub épuisé ou jeton sans permission (erreur 403). Sans jeton : 60 requêtes/heure — réessayez plus tard ou ajoutez un jeton dans les réglages avancés."); return; }
   if (!r.ok) { logFn("❌ Erreur GitHub " + r.status); return; }
   var tree = (await r.json()).tree || [];
   var prefix = folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "";
@@ -901,9 +923,7 @@ async function syncGitHub(logFn, silent) {
   var ok = 0, replaced = 0;
   for (var i = 0; i < files.length; i++) {
     var p = files[i].path;
-    var rr = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-      "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-      { headers: ghHeaders(true) });
+    var rr = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
     if (!rr.ok) { logFn("⚠️ Échec : " + p); continue; }
     var md = await rr.text();
     var name = p.split("/").pop();
@@ -930,9 +950,7 @@ async function syncGitHub(logFn, silent) {
       var dFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(dFolder + "/") === 0; });
       var dNew = {};
       for (var m = 0; m < dFiles.length; m++) {
-        var rdoc = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-          "/contents/" + dFiles[m].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-          { headers: ghHeaders(true) });
+        var rdoc = await fetch(ghRawUrl(dFiles[m].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
         if (!rdoc.ok) { logFn("⚠️ Échec : " + dFiles[m].path); continue; }
         dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
         dok++;
@@ -959,9 +977,7 @@ async function syncGitHub(logFn, silent) {
     if (gFolder) {
       var gFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(gFolder + "/") === 0; });
       for (var q3 = 0; q3 < gFiles.length; q3++) {
-        var rgd = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-          "/contents/" + gFiles[q3].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-          { headers: ghHeaders(true) });
+        var rgd = await fetch(ghRawUrl(gFiles[q3].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
         if (!rgd.ok) { logFn("⚠️ Échec : " + gFiles[q3].path); continue; }
         importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
         gok++;
@@ -1071,9 +1087,7 @@ async function openGhDoc(path, label) {
   if (path.indexOf("/") !== 0) p = (folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "") + p;
   toast("📄 Téléchargement de « " + (label || path) + " »…");
   try {
-    var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-      "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-      { headers: ghHeaders(true) });
+    var r = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
     if (r.status === 404) {
       /* Fallback : lister le dossier parent et chercher une correspondance
          insensible à la casse et aux accents (ex. lien "harriet-lane.pdf"
@@ -1094,9 +1108,7 @@ async function openGhDoc(path, label) {
           if (!hit && norm(entries[i].name) === target) hit = entries[i].path;
         }
         if (hit) {
-          r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-            "/contents/" + hit.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-            { headers: ghHeaders(true) });
+          r = await fetch(ghRawUrl(hit.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
           toast("✅ Fichier trouvé : " + hit.split("/").pop());
         } else {
           toast("❌ « " + file + " » introuvable. Fichiers du dossier : " + cands.slice(0, 6).join(", "));
@@ -1107,7 +1119,7 @@ async function openGhDoc(path, label) {
         return;
       }
     }
-    if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+    if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide, ou quota GitHub épuisé (erreur " + r.status + ") — réessayez plus tard ou ajoutez un jeton."); return; }
     if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
     var buf = await r.arrayBuffer();
     var blob = new Blob([buf], { type: ghDocMime(p) });
@@ -1144,11 +1156,9 @@ async function openGhMdDoc(path, label) {
   if (path.indexOf("/") !== 0) p = (folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "") + p;
   toast("📄 Ouverture de « " + (label || path) + " »…");
   try {
-    var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-      "/contents/" + p.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch),
-      { headers: ghHeaders(true) });
+    var r = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
     if (r.status === 404) { toast("❌ Document .md introuvable dans le dépôt : " + p); return; }
-    if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+    if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide, ou quota GitHub épuisé (erreur " + r.status + ") — réessayez plus tard ou ajoutez un jeton."); return; }
     if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
     var md = await r.text();
     var parts = splitFiche(md);
@@ -1223,6 +1233,10 @@ function render() {
   else if (h.indexOf("#/guideline/") === 0) renderGuideView(decodeURIComponent(h.slice("#/guideline/".length)));
   else if (h.indexOf("#/guidelines") === 0) renderGuidelines();
   else if (h.indexOf("#/biometrie") === 0) renderBiometrie();
+  else if (h.indexOf("#/reglages/apropos") === 0) renderAPropos();
+  else if (h.indexOf("#/reglages/import") === 0) renderImport();
+  else if (h.indexOf("#/reglages/sauvegarde") === 0) renderReglSauvegarde();
+  else if (h.indexOf("#/reglages/interface") === 0) renderReglInterface();
   else if (h.indexOf("#/reglages") === 0) renderReglages();
   else if (h.indexOf("#/import") === 0) renderImport();
   else renderHome();
@@ -1238,9 +1252,10 @@ function renderHome() {
       '<svg class="logo-sq" width="132" height="132" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ZenoBE" style="margin:0 auto 10px"> <defs> <linearGradient id="s-bg" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="' + (THEMES[curTheme] || THEMES.bleu).g1 + '"/><stop offset="1" stop-color="' + (THEMES[curTheme] || THEMES.bleu).g2 + '"/> </linearGradient> <linearGradient id="s-brass" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#E7C55A"/><stop offset="1" stop-color="#B8891F"/> </linearGradient> <radialGradient id="s-sheen" cx="0.3" cy="0.25" r="0.9"> <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/> </radialGradient> </defs> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-bg)"/> <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#s-sheen)"/> <rect x="136" y="90" width="240" height="34" rx="17" fill="#FFFFFF"/> <rect x="136" y="290" width="240" height="34" rx="17" fill="#FFFFFF"/> <path d="M 150 124 L 362 290 L 362 256 L 150 124 Z" fill="#FFFFFF"/> <text x="256" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="66" font-weight="bold" letter-spacing="3"><tspan fill="#FFFFFF">Zeno</tspan><tspan fill="url(#s-brass)">BE</tspan></text> <circle cx="200" cy="422" r="9" fill="#FFFFFF" opacity="0.95"/> <circle cx="256" cy="422" r="6.5" fill="#FFFFFF" opacity="0.75"/> <circle cx="304" cy="422" r="4.5" fill="#FFFFFF" opacity="0.55"/> </svg>' +
       "<h1>Bienvenue dans ZenoBE</h1>" +
       '<p>Aucune fiche pour le moment.</p>' +
-      '<a class="btn btn-primary" href="#/import">📥 Importer mes fiches</a></div></div>';
+      '<a class="btn btn-primary" href="#/reglages/import">📥 Importer mes fiches</a></div></div>';
     view.innerHTML = html; return;
   }
+  html += '<div class="page-title">Fiches</div>';
   html += '<div class="searchbar"><input type="text" id="search" placeholder="🔎 Rechercher un médicament, une indication, une dose…" value="' + esc(ui.q) + '"/></div>';
   html += '<div class="tabbar">' +
     '<button class="' + (ui.tab === "fav" ? "on" : "") + '" onclick="setTab(\'fav\')">' + zenTile(ZENOBE_PICTOS.favoris, true) + 'Favoris</button>' +
@@ -1426,11 +1441,12 @@ function renderGuidelines() {
   var q = norm(glUi.q);
   var html = "";
   if (!guides.length) {
-    html += '<div class="card" style="text-align:center"><h1>Guidelines</h1>' +
+    html += '<div class="card" style="text-align:center"><div class="page-title">Guidelines</div>' +
       "<div class='empty'>Aucune fiche guideline pour le moment.<br/>" +
-      "Utilisez <a href='#/reglages'>Réglages → 🔄 Synchroniser</a> pour télécharger le dossier « _4.fichesguidelines » du dépôt Compendium.</div></div>";
+      "Utilisez <a href='#/reglages/import'>Réglages → Importer / Synchroniser</a> pour télécharger le dossier « _4.fichesguidelines » du dépôt Compendium.</div></div>";
     view.innerHTML = html; return;
   }
+  html += '<div class="page-title">Guidelines</div>';
   html += '<div class="searchbar"><input type="text" id="gl-search" placeholder="🔎 Rechercher une guideline, un secteur, un sujet…" value="' + esc(glUi.q) + '"/></div>';
   html += '<div class="tabbar">' +
     '<button class="' + (glUi.tab === "fav" ? "on" : "") + '" onclick="setGlTab(\'fav\')">' + zenTile(ZENOBE_PICTOS.favoris, true) + 'Favoris</button>' +
@@ -2051,18 +2067,79 @@ function computeDose() {
 
 /* ---------- Import ---------- */
 function renderReglages() {
-  var html = '<div class="card"><div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Réglages</div>';
-  html += "<h3>📥 Import / Sauvegarde</h3>";
-  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Importer des fiches (fichiers, presse-papiers), gérer la synchronisation GitHub et les données locales.</p>";
-  html += '<a class="btn btn-primary" href="#/import" style="text-decoration:none">Ouvrir la page Import</a>';
-  html += "<div style='height:18px'></div><h3>" + SYNC_ICO + " Synchronisation GitHub</h3>";
-  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Télécharger les dernières fiches du dépôt Compendium (ouvre la page Import et lance la synchronisation).</p>";
-  html += '<button class="btn btn-primary" onclick="syncFromReglages()">' + SYNC_ICO + ' Synchroniser maintenant</button>';
-  html += "<div style='height:18px'></div><h3>💾 Stockage local</h3>";
-  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Occupation : <b>" + Math.round(lsBytes() / 1024) + " Ko</b> · " + fiches.length + " fiche(s). Si l'app signale un stockage saturé, compacter réécrit les données en format léger (fiches conservées).</p>";
-  html += '<button class="btn btn-primary" onclick="repairStorage()">Nettoyer / compacter le stockage</button>';
-  html += "<div style='height:18px'></div><h3>Couleur de l'interface</h3>";
-  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Choisissez la palette de ZenoBE. Le choix est mémorisé sur cet appareil. D'autres réglages s'ajouteront ici par la suite.</p>";
+  var html = '<div class="card"><div class="page-title">' + RG_ICO.gear + " Réglages</div>";
+  html += reglLink("#/reglages/apropos", RG_ICO.info, "À propos de ZenoBE", "Version, créateur et informations.");
+  html += reglLink("#/reglages/import", RG_ICO.sync, "Importer / Synchroniser", "Ajouter des fiches et les mettre à jour depuis GitHub.");
+  html += reglLink("#/reglages/sauvegarde", RG_ICO.save, "Sauvegarde / Restauration", "Exporter ou restaurer toutes vos données en un fichier JSON.");
+  html += reglLink("#/reglages/interface", RG_ICO.palette, "Thèmes / Interface", "Couleur, mode nuit et taille du texte.", true);
+  html += "</div>";
+  view.innerHTML = html;
+}
+var RG_ICO = {
+  gear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>',
+  info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>',
+  sync: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 5.65 8.05l1.5 1.5A8 8 0 0 0 12 4zm-1 14a6 6 0 0 1-5.65-8.05l-1.5-1.5A8 8 0 0 0 12 20v3l4-4-4-4v3z"/></svg>',
+  save: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM12 19a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H5V5h10v4z"/></svg>',
+  palette: '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:-3px"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1a1.5 1.5 0 0 1-.11-2.13c.28-.31.69-.5 1.14-.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8zM6.5 13a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
+  back: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M15 18l-6-6 6-6"/></svg>'
+};
+function reglLink(href, ico, t, d, last) {
+  return '<a href="' + href + '" style="text-decoration:none;display:block">' +
+    '<div style="display:flex;align-items:center;gap:14px;padding:13px 4px;' + (last ? "" : "border-bottom:1px solid var(--border);") + '">' +
+    '<span style="width:38px;height:38px;border-radius:11px;background:linear-gradient(180deg,var(--g1),var(--accent));display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">' + ico + "</span>" +
+    '<span style="flex:1"><span style="font-size:15px;font-weight:700;color:var(--deep)">' + t + "</span><br />" +
+    '<span style="font-size:12.5px;color:var(--muted)">' + d + "</span></span>" +
+    '<span style="color:var(--accent);font-size:20px;font-weight:800">\u203a</span></div></a>';
+}
+function reglBack() {
+  return '<a class="back" href="#/reglages">' + RG_ICO.back + " Réglages</a>";
+}
+
+function renderAPropos() {
+  var html = reglBack() + '<div class="card"><div class="page-title">' + RG_ICO.info + " À propos de ZenoBE</div>";
+  html += '<div style="text-align:center;padding:10px 0 4px">';
+  html += '<div style="font-size:26px;font-weight:800;color:var(--deep)">Zeno<span style="color:var(--accent)">BE</span></div>';
+  html += '<div style="font-size:13px;color:var(--muted);margin-top:4px">Fiches médicaments &amp; guidelines pédiatriques</div>';
+  html += "</div>";
+  html += '<div style="height:14px"></div>';
+  html += '<div style="display:grid;gap:8px;font-size:14px">';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.9</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Dr Christophe Chantrain</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>CHC Pediaplan</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;padding:8px 2px"><span style="color:var(--muted)">Copyright</span><b>2026 — cchtrn</b></div>';
+  html += "</div>";
+  html += '<p class="field-note" style="margin-top:14px">Application locale et hors ligne : les fiches sont conservées sur cet appareil et mises à jour depuis votre coffre Obsidian via GitHub.</p>';
+  html += "</div>";
+  view.innerHTML = html;
+}
+
+function renderReglSauvegarde() {
+  var html = reglBack() + '<div class="card"><div class="page-title">' + RG_ICO.save + " Sauvegarde / Restauration</div>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Exporte fiches, guidelines, favoris, récents, thème et réglages (sans le jeton GitHub) dans un fichier au format <b>JSON</b> (<code>ZenoBE-sauvegarde-AAAA-MM-JJ.json</code>) à conserver hors de l'appareil.</p>";
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  html += '<button class="btn btn-primary" onclick="exportData()">Exporter la sauvegarde</button>';
+  html += '<button class="btn" onclick="document.getElementById(\'json-file\').click()">Restaurer depuis un fichier JSON…</button>';
+  html += '<input type="file" id="json-file" accept=".json,application/json" style="display:none" onchange="importDataFile(this)"/>';
+  html += "</div>";
+  html += "<p class='field-note'>La restauration fusionne par nom de fiche : rien n'est effacé sans votre accord. Le fichier JSON peut aussi servir à transférer vos données vers un autre appareil (il ne contient jamais le jeton GitHub).</p>";
+  html += "<div style='height:14px'></div><h3> Ou restaurer par copier-coller</h3>";
+  html += "<p style='font-size:12.5px;color:var(--muted);margin:4px 0 6px'>Ouvrez le fichier JSON de sauvegarde avec un éditeur de texte, copiez tout son contenu et collez-le ci-dessous.</p>";
+  html += '<textarea id="imp-json" placeholder="Collez ici le contenu d\'un fichier de sauvegarde ZenoBE…" style="min-height:90px;font-size:12px;font-family:monospace"></textarea>';
+  html += '<button class="btn" style="margin-top:8px" onclick="importData()">Restaurer depuis le texte collé</button>';
+  html += "<div style='height:18px'></div><h3> Stockage local</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Occupation : <b>" + Math.round(lsBytes() / 1024) + " Ko</b> · " + fiches.length + " fiche(s) · " + guides.length + " guideline(s). Si l'app signale un stockage saturé, nettoyer réécrit les données en format léger (fiches conservées).</p>";
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  html += '<button class="btn" onclick="repairStorage()">Nettoyer / compacter</button>';
+  html += '<button class="btn btn-danger" onclick="wipeAll()">Tout effacer</button>';
+  html += "</div>";
+  html += "</div>";
+  view.innerHTML = html;
+}
+
+function renderReglInterface() {
+  var html = reglBack() + '<div class="card"><div class="page-title">' + RG_ICO.palette + " Thèmes / Interface</div>";
+  html += "<h3>Couleur de l'interface</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Choisissez la palette de ZenoBE. Le choix est mémorisé sur cet appareil.</p>";
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
   Object.keys(THEMES).forEach(function (id) {
     var t = THEMES[id];
@@ -2076,49 +2153,71 @@ function renderReglages() {
       (actif ? "✓ " : "") + t.nom + "</button>";
   });
   html += "</div>";
-  html += "<div style='height:18px'></div><h3>🌙 Mode nuit</h3>";
+  html += "<div style='height:18px'></div><h3>Mode nuit</h3>";
   html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Affichage sombre — confort des gardes de nuit. Mémorisé sur cet appareil.</p>";
-  html += '<button class="btn' + (darkMode ? "" : " btn-primary") + '" onclick="setDark(false)">☀️ Jour</button> <button class="btn' + (darkMode ? " btn-primary" : "") + '" onclick="setDark(true)">🌙 Nuit</button>';
-  html += "<div style='height:18px'></div><h3>🔤 Taille du texte</h3>";
+  html += '<button class="btn' + (darkMode ? "" : " btn-primary") + '" onclick="setDark(false)">Jour</button> <button class="btn' + (darkMode ? " btn-primary" : "") + '" onclick="setDark(true)">Nuit</button>';
+  html += "<div style='height:18px'></div><h3>Taille du texte</h3>";
   html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Agrandit tout l'affichage (100 / 110 / 120 %).</p>";
   html += [100, 110, 120].map(function (v) {
     return '<button class="btn' + (fontScale === v ? " btn-primary" : "") + '" onclick="setFont(' + v + ')">' + (v === 100 ? "A" : v === 110 ? "A+" : "A++") + " · " + v + " %</button>";
   }).join(" ");
-  html += "<div style='height:18px'></div><h3>📤 Sauvegarde de mes données</h3>";
-  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Exporte fiches, favoris, récents, thème et réglages (sans le jeton GitHub) dans un fichier à conserver. Sur un nouvel appareil : copiez le contenu du fichier et collez-le ci-dessous.</p>";
-  html += '<button class="btn btn-primary" onclick="exportData()">📤 Exporter la sauvegarde</button>';
-  html += "<div style='height:10px'></div>";
-  html += '<textarea id="imp-json" placeholder="Collez ici le contenu d\'un fichier de sauvegarde ZenoBE…" style="min-height:90px;font-size:12px;font-family:monospace"></textarea>';
-  html += '<button class="btn" style="margin-top:8px" onclick="importData()">📥 Restaurer depuis une sauvegarde</button>';
   html += "</div>";
   view.innerHTML = html;
 }
+
 function setTheme(id) { applyTheme(id); render(); }
 
 function renderImport() {
-  var lastSync = cfg.lastSync ? new Date(cfg.lastSync).toLocaleString("fr-BE") : "jamais";
-  var html = '<div class="card"><div class="section-title">📥 Importer des fiches</div>';
-  html += '<p style="margin-top:0;color:var(--muted)">Formats acceptés : fichiers <code>.md</code> avec frontmatter YAML (format des fiches du coffre Obsidian).</p>';
-  /* Fichiers */
-  html += "<h3>Depuis des fichiers</h3>";
-  html += '<div class="dropzone" id="dropzone">📁 Cliquez ou glissez-déposez ici vos fichiers .md<br/>' +
+  var lastSync = cfg.lastSync ? new Date().toLocaleString("fr-BE") : "jamais";
+  var nbDocs = Object.keys(DOCS_CACHE.files).length;
+  var html = reglBack() + '<div class="card"><div class="page-title">' + RG_ICO.sync + " Importer / Synchroniser</div>";
+
+  /* Ma collection */
+  html += "<h3>Ma collection</h3>";
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  html += '<div style="flex:1 1 130px;background:var(--accent-soft);border-radius:11px;padding:10px 12px;text-align:center"><b style="display:block;font-size:20px;color:var(--g1)">' + fiches.length + '</b><span style="font-size:12px;color:var(--muted)">Fiches médicaments</span></div>';
+  html += '<div style="flex:1 1 130px;background:var(--accent-soft);border-radius:11px;padding:10px 12px;text-align:center"><b style="display:block;font-size:20px;color:var(--g1)">' + guides.length + '</b><span style="font-size:12px;color:var(--muted)">Guidelines</span></div>';
+  html += '<div style="flex:1 1 130px;background:var(--accent-soft);border-radius:11px;padding:10px 12px;text-align:center"><b style="display:block;font-size:20px;color:var(--g1)">' + nbDocs + '</b><span style="font-size:12px;color:var(--muted)">Normes (Labo/Scores)</span></div>';
+  html += "</div>";
+  html += '<p class="field-note">Dernière synchronisation : ' + esc(lastSync) + "</p>";
+
+  /* Ajouter des fiches */
+  html += "<div style='height:16px'></div><h3>Ajouter des fiches</h3>";
+  html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+  html += '<label style="margin:0;font-size:13.5px">Ranger dans :</label>';
+  html += '<select id="import-dest" style="width:auto;flex:0 0 auto;padding:7px 10px">';
+  html += '<option value="auto">Automatique (détection par tags)</option>';
+  html += '<option value="med">Médicaments</option>';
+  html += '<option value="gl">Guidelines</option>';
+  html += '<option value="normes">Normes (Labo/Scores)</option>';
+  html += "</select>";
+  html += '<span style="font-size:12px;color:var(--muted)">Tags reconnus : <code>medicament</code> → Médicaments · <code>guideline</code> → Guidelines · <code>normes</code>, <code>labo</code>, <code>scores</code> → Normes (sans tag : Médicaments)</span>';
+  html += "</div>";
+  html += '<div class="dropzone" id="dropzone">Cliquez ou glissez-déposez ici vos fichiers .md<br/>' +
     '<span style="font-size:12px">(sélection multiple possible)</span></div>';
   html += '<input type="file" id="file-input" accept=".md,.markdown,.txt" multiple style="display:none"/>';
-  /* Coller */
-  html += "<h3>Depuis le presse-papiers</h3>";
-  html += "<label>Collez le contenu d'une fiche (markdown)</label>";
+  html += "<p class='field-note'>Règle de fusion : une fiche portant le même nom remplace l'existante (mise à jour) — jamais de doublon.</p>";
+  html += "<div style='height:10px'></div>";
+  html += "<label>Depuis le presse-papiers</label>";
   html += '<textarea id="paste-area" rows="5" placeholder="---\ncréé : 2026-10-20\n…"></textarea>';
   html += '<div style="display:flex;gap:8px;margin-top:10px">' +
-    '<input type="text" id="paste-name" placeholder="Nom du médicament (ex : Amoxicilline-clavulanate)"/>' +
+    '<input type="text" id="paste-name" placeholder="Nom de la fiche (ex : Amoxicilline-clavulanate)"/>' +
     '<button class="btn btn-primary" onclick="importPaste()">Ajouter</button></div>';
-  html += "</div>";
 
-  /* Carte GitHub */
-  html += '<div class="card"><div class="section-title">' + SYNC_ICO + ' Synchronisation GitHub</div>';
-  html += '<p style="margin-top:0;color:var(--muted)">Architecture : le coffre Obsidian est poussé automatiquement vers GitHub ' +
-    "(plugiciel Git) ; l'application récupère ici les fiches du dépôt. Ajouter une fiche dans Obsidian → " +
-    "elle apparaît ici après synchronisation.</p>";
-  html += '<div class="grid2">' +
+  /* Synchroniser */
+  html += "</div>";
+  html += '<div class="card"><div class="section-title">' + RG_ICO.sync + " Synchroniser</div>";
+  html += "<p style='margin-top:0;color:var(--muted);font-size:13.5px'>Votre coffre Obsidian est poussé automatiquement vers GitHub ; un clic ici met l'application à jour : médicaments + guidelines + normes, tout d'un coup.</p>";
+  html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">';
+  html += '<button class="btn btn-primary" id="gh-sync-btn" style="font-size:15px;padding:12px 20px" onclick="runSync()">Mettre à jour maintenant</button>';
+  html += '<label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;cursor:pointer">' +
+    '<input type="checkbox" id="gh-auto"' + (cfg.autoSync ? " checked" : "") + ' style="width:auto"/> Auto au démarrage</label>';
+  html += '<span style="font-size:12px;color:var(--muted)">Dernière synchro : ' + esc(lastSync) + "</span></div>";
+  html += '<label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13.5px">' +
+    'Alerte si la dernière synchro date de plus de <input type="number" id="gh-alert" min="0" max="365" value="' + (parseInt(cfg.syncAlertDays, 10) || 0) + '" style="width:64px"/> jours (0 = désactivée) — le bouton de synchronisation en haut devient rouge</label>';
+  html += '<div class="log" id="gh-log"></div>';
+  html += '<details style="margin-top:10px"><summary style="font-weight:700;font-size:13.5px;color:var(--accent);cursor:pointer">Réglages avancés (dépôt, jeton)</summary>';
+  html += '<div class="grid2" style="margin-top:10px">' +
     "<div><label>Utilisateur GitHub</label><input type='text' id='gh-user' value='" + esc(cfg.user) + "'/></div>" +
     "<div><label>Dépôt</label><input type='text' id='gh-repo' value='" + esc(cfg.repo) + "'/></div>" +
     "<div><label>Branche</label><input type='text' id='gh-branch' value='" + esc(cfg.branch) + "'/></div>" +
@@ -2126,28 +2225,11 @@ function renderImport() {
     "</div>";
   html += "<label>Jeton GitHub (requis pour un dépôt privé — lecture seule)</label>" +
     "<input type='password' id='gh-token' value='" + esc(cfg.token) + "' placeholder='github_pat_…'/>";
-  html += "<p class='field-note'>Le jeton reste stocké uniquement sur cet appareil. Créer un jeton : GitHub → Settings → Developer settings → Personal access tokens → fine-grained, accès au seul dépôt, permission Contents : Read-only.</p>";
-  html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px">' +
-    '<button class="btn btn-primary" id="gh-sync-btn" onclick="runSync()">' + SYNC_ICO + ' Synchroniser maintenant</button>' +
-    '<label style="display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;cursor:pointer">' +
-    '<input type="checkbox" id="gh-auto"' + (cfg.autoSync ? " checked" : "") + ' style="width:auto"/> Synchroniser au démarrage (ignorée si la dernière synchro date de moins de 24 h)</label>' +
-    '<span style="font-size:12px;color:var(--muted)">Dernière synchro : ' + esc(lastSync) + "</span></div>";
-  html += '<label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13.5px">' +
-    'Alerte si la dernière synchro date de plus de <input type="number" id="gh-alert" min="0" max="365" value="' + (parseInt(cfg.syncAlertDays, 10) || 0) + '" style="width:64px"/> jours (0 = désactivée) — le bouton de synchronisation en haut devient rouge</label>';
+  html += "<p class='field-note'>Le jeton reste stocké uniquement sur cet appareil. Fine-grained, accès au seul dépôt, permission Contents : Read-only.</p>";
   html += '<label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;cursor:pointer">' +
-    '<input type="checkbox" id="gh-replace" style="width:auto"/> Remplacer toute la collection (sinon, fusion par nom de fiche)</label>';
-  html += '<div class="log" id="gh-log"></div>';
-  html += "</div>";
-
-  /* Gestion des données */
-  html += '<div class="card"><div class="section-title">🗄️ Données locales</div>';
-  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn" onclick="exportData()">⬇️ Exporter (sauvegarde JSON)</button>' +
-    '<button class="btn btn-danger" onclick="wipeAll()">🗑️ Tout effacer</button></div>';
-  html += '<p class="field-note">Les fiches importées sont conservées sur cet appareil (stockage local du navigateur) — ' +
-    "l'application fonctionne ensuite hors ligne.</p>";
-  html += '<p class="field-note">💡 Astuce : dans un aperçu intégré (Vibe), l&rsquo;accès réseau peut être bloqué — le fichier téléchargé ' +
-    "et ouvert depuis votre coffre fonctionne normalement.</p>";
+    '<input type="checkbox" id="gh-replace" style="width:auto"/> <b>Remplacer toute la collection locale</b> par le dépôt (sinon : fusion par nom de fiche)</label>';
+  html += "<p class='field-note'>⚠️ Le mode « remplacer » efface d'abord toutes les fiches locales de cet appareil.</p>";
+  html += "</details>";
   html += "</div>";
 
   view.innerHTML = html;
@@ -2174,6 +2256,7 @@ function renderImport() {
   });
 }
 
+
 function readGhForm() {
   cfg.user = document.getElementById("gh-user").value;
   cfg.repo = document.getElementById("gh-repo").value;
@@ -2190,7 +2273,10 @@ function runSync() {
   readGhForm();
   var logEl = document.getElementById("gh-log");
   var btn = document.getElementById("gh-sync-btn");
-  if (document.getElementById("gh-replace").checked) { fiches = []; persistFiches(); }
+  if (document.getElementById("gh-replace").checked) {
+    if (!confirm("Le mode « Remplacer toute la collection » va effacer toutes les fiches locales de cet appareil avant l'import. Continuer ?")) { return; }
+    fiches = []; guides = []; persistFiches(); persistGuides();
+  }
   logEl.style.display = "block";
   logEl.textContent = "";
   var log = function (m) { logEl.textContent += m + "\n"; logEl.scrollTop = logEl.scrollHeight; };
@@ -2198,16 +2284,51 @@ function runSync() {
   syncGitHub(log, false).then(function () { btn.disabled = false; });
 }
 
+function detectDest(md, filename) {
+  var parts = splitFiche(md);
+  var fm = parts.fm;
+  var hay = [(Array.isArray(fm.tags) ? fm.tags.join(" ") : fm.tags) || "", fm.categorie || "", fm.partie || "", fm.type || "", filename || ""].join(" ");
+  var k = normKey(hay);
+  if (k.indexOf("medicament") >= 0 || (k.indexOf("med") >= 0 && k.indexOf("medical") < 0)) return "med";
+  if (k.indexOf("guideline") >= 0) return "gl";
+  if (k.indexOf("norme") >= 0 || k.indexOf("labo") >= 0 || k.indexOf("score") >= 0) return "normes";
+  return "med";
+}
+var DEST_LABEL = { med: "Médicaments", gl: "Guidelines", normes: "Normes (Labo/Scores)" };
+function importDoc(filename, md) {
+  var name = String(filename).replace(/\.(md|markdown|txt)$/i, "") + ".md";
+  var rep = !!DOCS_CACHE.files[name];
+  DOCS_CACHE.files[name] = { md: md };
+  DOCS_CACHE.ts = Date.now();
+  docsPersist();
+  return { doc: name, replaced: rep };
+}
+function importAny(filename, md, dest) {
+  if (dest !== "med" && dest !== "gl" && dest !== "normes") dest = detectDest(md, filename);
+  var res, where;
+  if (dest === "gl") { res = importGuide(filename.replace(/\.(md|markdown|txt)$/i, ".md"), md); persistGuides(); where = "gl"; }
+  else if (dest === "normes") { res = importDoc(filename, md); where = "normes"; }
+  else { res = importMd(filename, md); persistFiches(); where = "med"; }
+  return { dest: where, replaced: res.replaced };
+}
 function handleFiles(fileList) {
   var files = Array.prototype.slice.call(fileList).filter(function (f) { return /\.(md|markdown|txt)$/i.test(f.name); });
-  if (!files.length) { toast("⚠️ Aucun fichier .md trouvé"); return; }
-  var done = 0, added = 0;
+  if (!files.length) { toast("Aucun fichier .md trouvé"); return; }
+  var sel = document.getElementById("import-dest");
+  var dest = sel ? sel.value : "auto";
+  var done = 0, added = 0, byDest = {};
   files.forEach(function (f) {
     var reader = new FileReader();
     reader.onload = function () {
-      var res = importMd(f.name, String(reader.result));
-      done++; if (!res.replaced) added++;
-      if (done === files.length) { persistFiches(); toast("✅ " + added + " fiche(s) ajoutée(s), " + (files.length - added) + " mise(s) à jour"); renderImport(); }
+      var res = importAny(f.name, String(reader.result), dest);
+      done++;
+      if (!res.replaced) added++;
+      byDest[res.dest] = (byDest[res.dest] || 0) + 1;
+      if (done === files.length) {
+        var parts = Object.keys(byDest).map(function (k) { return byDest[k] + " → " + DEST_LABEL[k]; });
+        toast((dest === "auto" ? "Import auto : " : "Import : ") + parts.join(" · ") + " (" + added + " ajout, " + (files.length - added) + " maj)");
+        renderImport();
+      }
     };
     reader.readAsText(f);
   });
@@ -2216,22 +2337,14 @@ function handleFiles(fileList) {
 function importPaste() {
   var md = document.getElementById("paste-area").value.trim();
   var name = document.getElementById("paste-name").value.trim() || "fiche-collee.md";
-  if (!md) { toast("⚠️ Collez d'abord le contenu d'une fiche"); return; }
+  if (!md) { toast("Collez d'abord le contenu d'une fiche"); return; }
   if (!/\.md$/i.test(name)) name += ".md";
-  var res = importMd(name, md);
-  persistFiches();
-  toast(res.replaced ? "✅ Fiche mise à jour" : "✅ Fiche ajoutée");
+  var sel = document.getElementById("import-dest");
+  var dest = sel ? sel.value : "auto";
+  var res = importAny(name, md, dest);
+  toast((res.replaced ? "Fiche mise à jour — " : "Fiche ajoutée — ") + DEST_LABEL[res.dest]);
   document.getElementById("paste-area").value = "";
   document.getElementById("paste-name").value = "";
-}
-
-function exportData() {
-  var data = { fiches: fiches, cfg: cfg, favs: favs, exported: new Date().toISOString() };
-  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "zenobe-sauvegarde.json";
-  document.body.appendChild(a); a.click(); a.remove();
 }
 
 function wipeAll() {
@@ -2646,21 +2759,25 @@ function nmUpdate() {
 }
 
 
+var NM_ICO = {
+  biometrie: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17l6-6 4 4 7-7v5h-2v-2.83l-5 5-4-4-4.83 4.83L3 17z"/><path d="M3 19h18v2H3z"/></svg>',
+  hemo: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+  labo: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v2h-1v5.2l4.6 8.4A2.5 2.5 0 0 1 16.4 21H7.6a2.5 2.5 0 0 1-2.2-3.4L10 9.2V4H9V2zm1.5 8.5L8.4 14h7.2l-2.1-3.5V4h-2v6.5z"/></svg>',
+  scores: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1zm-.7 12.3l4.7 4.7 4.7-4.7-1.4-1.4-3.3 3.3-3.3-3.3-1.4 1.4z"/></svg>'
+};
 var hubBtn = function (opt) {
-  var inner = '<div style="width:46px;height:46px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none"><span style="filter:brightness(0) invert(1)">' + opt.icon + '</span></div>' +
+  var inner = '<div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(180deg,var(--g1),var(--accent));color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">' + opt.icon + '</div>' +
     '<div style="flex:1">' +
-    '<div style="font-size:16px;font-weight:800;color:var(--deep)">' + opt.t + '</div>' +
+    '<div style="font-size:15px;font-weight:700;color:var(--deep)">' + opt.t + '</div>' +
     '<div style="font-size:12.5px;color:var(--muted);margin-top:2px">' + opt.d + '</div>' +
     '</div>' +
     (opt.soon
       ? '<div style="align-self:center"><span class="badge b-none">Bientôt</span></div>'
-      : '<div style="align-self:center;color:var(--accent);font-size:22px;font-weight:800">›</div>');
-  var style = 'display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
-    'background:linear-gradient(135deg,var(--accent-soft) 0%,var(--card) 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
-    'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)';
+      : '<div style="align-self:center;color:var(--accent);font-size:20px;font-weight:800">›</div>');
+  var style = 'display:flex;align-items:center;gap:14px;padding:13px 4px;' + (opt.last ? "" : "border-bottom:1px solid var(--border);");
   return opt.soon
     ? '<div style="' + style + ';opacity:.6">' + inner + '</div>'
-    : '<a href="' + opt.href + '" style="text-decoration:none"><div style="' + style + '">' + inner + '</div></a>';
+    : '<a href="' + opt.href + '" style="text-decoration:none;display:block"><div style="' + style + '">' + inner + '</div></a>';
 };
 
 function renderBiometrie() {
@@ -2676,13 +2793,13 @@ function renderBiometrie() {
       '<div class="fiche-card">' + inner +
       '<div style="position:absolute;top:10px;right:10px;color:var(--accent);font-weight:800">›</div></div></a>';
   };
-  view.innerHTML = '<h1 style="margin-bottom:2px">Normes et mesures</h1>' +
+  view.innerHTML = '<div class="page-title">Normes et mesures</div>' +
     nmBandHtml() +
-    '<div style="margin-top:12px">' +
-    hubBtn({ icon: "📏", t: "Biométrie", d: "Poids, taille/longueur, IMC et périmètre crânien — percentiles, z-scores et seuils OMS 2006/2007.", href: "#/biometrie/percentiles" }) +
-    hubBtn({ icon: "🫀", t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
-    hubBtn({ icon: "🧪", t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", href: "#/laboratoire" }) +
-    hubBtn({ icon: "🩺", t: "Scores cliniques", d: "Scores et repères cliniques : développement pubertaire (Tanner), et plus à venir.", href: "#/scores" }) +
+    '<div class="card" style="margin-top:12px">' +
+    hubBtn({ icon: NM_ICO.biometrie, t: "Biométrie", d: "Poids, taille/longueur, IMC et périmètre crânien — percentiles, z-scores et seuils OMS 2006/2007.", href: "#/biometrie/percentiles" }) +
+    hubBtn({ icon: NM_ICO.hemo, t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
+    hubBtn({ icon: NM_ICO.labo, t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", href: "#/laboratoire" }) +
+    hubBtn({ icon: NM_ICO.scores, t: "Scores cliniques", d: "Scores et repères cliniques : développement pubertaire (Tanner), et plus à venir.", href: "#/scores", last: true }) +
     '</div>';
   nmPageHook = null;
   nmBind();
@@ -2815,7 +2932,7 @@ function hmToggle(n) { hmOpen[n] = !hmOpen[n]; hmUpdate(); }
 function renderHemodynamique() {
   var view = document.getElementById("view");
   view.innerHTML = '<a class="back" href="#/biometrie">‹ Normes et mesures</a>' +
-    '<h1 style="margin-bottom:2px">Paramètres hémodynamiques</h1>' +
+    '<div class="page-title">Paramètres hémodynamiques</div>' +
     '<p class="meta-line">Normes attendues selon l\'âge.</p>' +
     nmBandHtml() +
     '<div id="hm-out" style="margin-top:10px"></div>';
@@ -3018,7 +3135,7 @@ async function docsFetch(kind) {
   try {
     var r = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
       "/contents/?ref=" + encodeURIComponent(branch), { headers: ghHeaders(false) });
-    if (r.status === 401 || r.status === 403) { docsStatus("❌ Jeton invalide ou expiré (erreur " + r.status + ")."); return; }
+    if (r.status === 401 || r.status === 403) { docsStatus("❌ Jeton invalide, ou quota GitHub épuisé (erreur " + r.status + ")."); return; }
     if (r.status === 404) { docsStatus("❌ Dépôt ou branche introuvable."); return; }
     if (!r.ok) { docsStatus("❌ Erreur GitHub " + r.status + "."); return; }
     var entries = await r.json();
@@ -3036,8 +3153,7 @@ async function docsFetch(kind) {
     var newFiles = {}, count = 0;
     for (var j = 0; j < files.length; j++) {
       if (files[j].type !== "file" || !/\.md$/i.test(files[j].name)) continue;
-      var rf = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-        "/contents/" + files[j].path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(true) });
+      var rf = await fetch(ghRawUrl(files[j].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
       if (!rf.ok) { docsStatus("⚠️ Échec : " + files[j].name); continue; }
       newFiles[files[j].name] = { path: files[j].path, md: await rf.text() };
       count++;
@@ -3063,7 +3179,7 @@ function docsRefreshPage(kind) {
 function renderDocsPage(kind) {
   var view = document.getElementById("view");
   var titre = kind === "labo" ? "Laboratoire" : "Scores cliniques";
-  view.innerHTML = '<h1 style="margin-bottom:2px">' + titre + '</h1>' +
+  view.innerHTML = '<div class="page-title">' + titre + '</div>' +
     '<div style="margin:10px 0 0"><button class="btn" onclick="docsRefreshPage(\'' + kind + '\')">🔄 Actualiser depuis GitHub</button></div>' +
     '<div id="docs-status" class="field-note" style="margin:6px 0 0"></div>' +
     '<div id="docs-list" style="margin-top:12px"></div>';
@@ -3094,7 +3210,7 @@ function docsRenderBody(name) {
   var parts = splitFiche(f.md);
   var body = document.getElementById("doc-body");
   if (!body) return;
-  body.innerHTML = '<h1 style="margin-bottom:2px">' + esc(parts.fm.titre || name.replace(/\.md$/i, "")) + '</h1>' +
+  body.innerHTML = '<div class="page-title">' + esc(parts.fm.titre || name.replace(/\.md$/i, "")) + '</div>' +
     (parts.fm.description ? '<p class="meta-line">' + esc(parts.fm.description) + '</p>' : "") +
     '<div class="card" style="padding:14px">' + mdToHtml(parts.body) + '</div>' +
     '<p class="meta-line" style="font-size:11px;margin:8px 2px 0">Source : ' + esc(f.path) + ' — dépôt GitHub « ' + esc((cfg.repo || "").trim()) + ' ».</p>';
@@ -3131,8 +3247,7 @@ async function docsFetchOne(kind, name) {
       if (docsNorm(files[j].name) === target) { hit = files[j]; break; }
     }
     if (!hit) { fail("❌ Fichier « " + name + " » introuvable dans " + folder + "."); return; }
-    var rf = await fetch("https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
-      "/contents/" + hit.path.split("/").map(encodeURIComponent).join("/") + "?ref=" + encodeURIComponent(branch), { headers: ghHeaders(true) });
+    var rf = await fetch(ghRawUrl(hit.path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
     if (!rf.ok) { fail("❌ Téléchargement impossible (erreur " + rf.status + ")."); return; }
     DOCS_CACHE.folder = folder;
     if (!DOCS_CACHE.files) DOCS_CACHE.files = {};
@@ -3150,7 +3265,7 @@ function renderScores() { renderDocsPage("scores"); }
 function renderScoresPuberte() {
   var view = document.getElementById("view");
   view.innerHTML = '<a class="back" href="#/scores">‹ Scores cliniques</a>' +
-    '<h1 style="margin-bottom:2px">Développement pubertaire</h1>' +
+    '<div class="page-title">Développement pubertaire</div>' +
     '<p class="meta-line">Stades de Tanner et repères de puberté précoce / retard pubertaire.</p>' +
     nmBandHtml() +
     '<div id="sc-out" style="margin-top:10px"></div>';
@@ -3218,7 +3333,7 @@ function renderPercentiles() {
   var view = document.getElementById("view");
   var st = percState;
   var html = '<a class="back" href="#/biometrie">‹ Normes et mesures</a>' +
-    '<h1 style="margin-bottom:2px">Biométrie</h1>' +
+    '<div class="page-title">Biométrie</div>' +
     nmBandHtml() +
     '<div class="card" style="margin-top:10px;padding:6px 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
     '<label style="font-size:13px;font-weight:700;color:var(--muted)">Périmètre crânien (cm) — 0–5 ans</label>' +
@@ -3370,7 +3485,7 @@ function updateSyncPill() {
 }
 function syncFromTop() {
   var b = document.getElementById("sync-pill");
-  if (!(cfg.user || "").trim() || !(cfg.repo || "").trim()) { window.location.hash = "#/import"; return; }
+  if (!(cfg.user || "").trim() || !(cfg.repo || "").trim()) { window.location.hash = "#/reglages/import"; return; }
   if (b && b.classList.contains("syncing")) return;
   if (b) { b.classList.remove("sync-alert"); b.classList.add("syncing"); }
   var last = "";
@@ -3385,7 +3500,7 @@ function syncFromTop() {
   });
 }
 function syncFromReglages() {
-  window.location.hash = "#/import";
+  window.location.hash = "#/reglages/import";
   setTimeout(runSync, 60);
 }
 document.addEventListener("keydown", function (e) {
@@ -3415,5 +3530,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="QSJzCqShTNv/1CNbvQTnRw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
