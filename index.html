@@ -68,6 +68,14 @@
   }
   .act-btn:active { opacity: .75; }
   .act-btn svg { flex: 0 0 auto; }
+  .count-pill.syncing {
+    background: #fff;
+    animation: sync-flash .9s ease-in-out infinite;
+  }
+  .count-pill.syncing svg { fill: var(--g1); }
+  @keyframes sync-flash {
+    50% { background: var(--g2); }
+  }
   main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
   /* iOS Safari zoome automatiquement au focus d'un input < 16px → forcer 16px */
   input, select, textarea { font-size: 16px !important; }
@@ -280,7 +288,7 @@
     <a href="#/biometrie">Normes et mesures</a>
   </nav>
   <div class="top-right">
-    <a class="count-pill" href="#/import" onclick="syncFromReglages();return false;" style="text-decoration:none;display:inline-flex;align-items:center" title="Synchroniser (GitHub)" aria-label="Synchroniser"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></a>
+    <a class="count-pill" href="#/import" id="sync-pill" onclick="syncFromTop();return false;" style="text-decoration:none;display:inline-flex;align-items:center" title="Synchroniser (GitHub)" aria-label="Synchroniser"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></a>
     <a class="count-pill" href="#/calculateur" style="text-decoration:none;display:inline-flex;align-items:center" title="Calculateur de doses" aria-label="Calculateur de doses"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg></a>
     <a class="count-pill" href="#/reglages" style="text-decoration:none;display:inline-flex;align-items:center" title="Réglages" aria-label="Réglages"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></a>
   </div>
@@ -288,7 +296,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.3 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.4 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -333,6 +341,7 @@ function glHydrate(g) {
   return g;
 }
 var guides = (loadLs(LS.gl, [])).map(glHydrate);
+var glCur = null; /* slug de la guideline affichée (v0.4.4) */
 var glFavs = loadLs(LS.glfav, []);
 var glRecents = loadLs(LS.glrec, []);
 var glFolder = loadLs(LS.glfolder, "");
@@ -536,9 +545,9 @@ function inlineMd(s) {
   x = x.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
   x = x.replace(/`([^`]+)`/g, "<code>$1</code>");
   x = x.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-  x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9 ._\-/]+\.(?:pdf|PDF|xlsx|xls|docx|png|jpg|jpeg))\s*\)/g,
+  x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9À-ÿ% . _\-\/]+\.(?:pdf|PDF|xlsx|xls|docx|png|jpg|jpeg))\s*\)/g,
     '<a href="#" class="gh-doc" data-doc="$2">$1 📄</a>');
-  x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9 ._\-/]+\.md)\s*\)/g,
+  x = x.replace(/\[([^\]]+)\]\(\s*(\/?[A-Za-z0-9À-ÿ% . _\-\/]+\.md)\s*\)/g,
     '<a href="#" class="gh-mddoc" data-doc="$2">$1</a>');
   return x;
 }
@@ -1080,7 +1089,11 @@ document.addEventListener("click", async function (e) {
 async function openGhMdDoc(path, label) {
   var basename = (path.split("/").pop() || "").toLowerCase();
   var f = fiches.find(function (x) { return (x.filename || "").toLowerCase() === basename; });
-  if (f) { window.location.hash = "#/fiche/" + f.slug; return; }
+  if (f) {
+    var ft = "#/fiche/" + f.slug + (glCur ? "?from=" + glCur : "");
+    if (window.location.hash === ft) render(); else window.location.hash = ft;
+    return;
+  }
   var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
   var branch = (cfg.branch || "main").trim(), folder = (cfg.folder || "").trim();
   if (!user || !repo || !cfg.token) { toast("⚠️ Renseignez la carte ☁️ Synchronisation (jeton requis)."); return; }
@@ -1097,6 +1110,15 @@ async function openGhMdDoc(path, label) {
     var md = await r.text();
     var parts = splitFiche(md);
     var fmT = parts.fm.titre || parts.fm.title || "";
+    var fmTags = parts.fm.tags || [];
+    var isGlDoc = fmTags.some(function (t) { return normKey(t) === "guidelines"; });
+    if (fmT && fmTags.length && !isGlDoc) {
+      var fres = importMd(basename, md);
+      toast("✅ Fiche reconnue : " + fres.fiche.title);
+      var fht = "#/fiche/" + fres.fiche.slug + (glCur ? "?from=" + glCur : "");
+      if (window.location.hash === fht) render(); else window.location.hash = fht;
+      return;
+    }
     var h1 = parts.body.match(/^#\s+(.+)$/m);
     var docTitle = (fmT || (h1 ? h1[1].trim() : "") || basename.replace(/\.md$/i, "")).trim();
     var html = '<a href="#" class="back gh-back">← Retour</a>';
@@ -1136,6 +1158,7 @@ function allTags() {
 
 function render() {
   var h = window.location.hash || "#/";
+  if (h.indexOf("#/guideline/") !== 0) glCur = null;
   document.querySelectorAll("#nav a").forEach(function (a) {
     a.classList.toggle("on", a.getAttribute("href") === h.split("/").slice(0, 2).join("/").replace(/\/$/, "") || (h === "#/" && a.getAttribute("href") === "#/"));
   });
@@ -1424,6 +1447,7 @@ function renderGuidelines() {
 function renderGuideView(slug) {
   var view = document.getElementById("view");
   var g = guides.find(function (x) { return x.slug === slug; });
+  if (g) glCur = g.slug;
   if (!g) { view.innerHTML = '<div class="empty">Fiche guideline introuvable. <a href="#/guidelines">Retour</a></div>'; return; }
   glRecents = [g.slug].concat(glRecents.filter(function (x) { return x !== g.slug; })).slice(0, 6);
   saveLs(LS.glrec, glRecents);
@@ -1441,6 +1465,7 @@ function renderGuideView(slug) {
   html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
     '<button class="act-btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favoris</button>' +
     '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
+    '<button class="act-btn" onclick="exportGuide(event,\'' + g.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Exporter</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
   html += g.html || mdToHtml(g.md || "");
@@ -1449,19 +1474,28 @@ function renderGuideView(slug) {
   glLinkFiches(g);
   glHydrateImages();
 }
+function glLinkKey(x, nk) {
+  return normKey(x.slug) === nk || normKey(x.title) === nk ||
+    normKey(String(x.filename || "").split("/").pop().replace(/\.md$/i, "")) === nk ||
+    (nk.length >= 4 && normKey(x.slug).indexOf(nk) === 0);
+}
 function glLinkFiches(g) {
   var links = document.querySelectorAll("#view a.gh-mddoc, #view a.gh-doc") || [];
   Array.prototype.forEach.call(links, function (a) {
     var d = (a.getAttribute("data-doc") || "").trim();
-    if (!d) return;
-    var base = d.split("?")[0].split("/").pop().replace(/\.(md|pdf|docx|doc)$/i, "");
-    var keys = [normKey(base), normKey(base.replace(/^[^A-Za-zÀ-ÿ]+/, ""))];
+    var text = (a.textContent || "").replace(/\s*📄$/, "").trim();
+    var cands = [];
+    if (d) {
+      var base = d.split("?")[0].split("/").pop().replace(/\.(md|pdf|docx|doc)$/i, "");
+      cands.push(normKey(base), normKey(base.replace(/^[^A-Za-zÀ-ÿ]+/, "")));
+    }
+    if (text) cands.push(normKey(text));
     var hit = null, isGuide = false;
-    for (var k = 0; k < keys.length && !hit; k++) {
-      if (!keys[k]) continue;
-      hit = fiches.filter(function (x) { return normKey(x.slug) === keys[k] || normKey(x.title) === keys[k]; })[0];
+    for (var k = 0; k < cands.length && !hit; k++) {
+      if (!cands[k]) continue;
+      hit = fiches.filter(function (x) { return glLinkKey(x, cands[k]); })[0];
       if (!hit) {
-        var gh = guides.filter(function (x) { return normKey(x.slug) === keys[k] || normKey(x.title) === keys[k]; })[0];
+        var gh = guides.filter(function (x) { return normKey(x.slug) === cands[k] || normKey(x.title) === cands[k]; })[0];
         if (gh) { hit = gh; isGuide = true; }
       }
     }
@@ -1469,7 +1503,7 @@ function glLinkFiches(g) {
     a.classList.remove("gh-mddoc"); a.classList.remove("gh-doc");
     a.removeAttribute("data-doc");
     a.setAttribute("href", (isGuide ? "#/guideline/" : "#/fiche/") + hit.slug + (isGuide ? "" : "?from=" + encodeURIComponent(g.slug)));
-    a.textContent = a.textContent.replace(/\s*📄$/, "").trim();
+    a.textContent = text;
   });
 }
 function glHydrateImages() {
@@ -1602,6 +1636,63 @@ function exportFiche(ev, slug) {
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
     a.download = f.slug + ".md";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+  document.body.appendChild(div);
+  setTimeout(function () {
+    document.addEventListener("click", function closer(e) {
+      if (div.parentNode && !div.contains(e.target)) { div.remove(); document.removeEventListener("click", closer); }
+    });
+  }, 0);
+}
+
+function exportGuide(ev, slug) {
+  var old = document.getElementById("zenobe-export-menu");
+  if (old) { old.remove(); return; }
+  var g = guides.find(function (x) { return x.slug === slug; });
+  if (!g) return;
+  var div = document.createElement("div");
+  div.id = "zenobe-export-menu";
+  div.style.cssText = "position:fixed;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.2);padding:8px;display:flex;flex-direction:column;gap:2px;min-width:260px";
+  if (ev && ev.currentTarget && ev.currentTarget.getBoundingClientRect) {
+    var r = ev.currentTarget.getBoundingClientRect();
+    div.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 280)) + "px";
+    div.style.top = (r.bottom + 6) + "px";
+  }
+  function item(label, fn) {
+    var b = document.createElement("button");
+    b.className = "btn";
+    b.style.cssText = "text-align:left;justify-content:flex-start;border:none;background:transparent;width:100%";
+    b.textContent = label;
+    b.onclick = function () { fn(); if (div.parentNode) div.remove(); };
+    div.appendChild(b);
+  }
+  item("📧 Partager par e-mail (fiche complète)", function () {
+    var body = "FICHE GUIDELINE : " + g.title + "\n";
+    if (g.tags && g.tags.length) body += "Catégories : " + g.tags.join(", ") + "\n";
+    if (g.updated || g.created) body += "Dernière mise à jour : " + (g.updated || g.created) + "\n";
+    body += "――――――――――――――――――――\n\n" + (g.md || ("# " + g.title)) +
+      "\n\n――――――――――――――――――――\n⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment.\n— Envoyé depuis ZenoBE, fiches guideline";
+    var href = "mailto:?subject=" + encodeURIComponent("Guideline ZenoBE — " + g.title) + "&body=" + encodeURIComponent(body);
+    if (href.length > 1900) {
+      toast("ℹ️ Fiche longue : certains webmails tronquent les e-mails longs — le PDF ou le fichier .md peut être préférable.");
+    }
+    window.location.href = href;
+  });
+  item("📄 Enregistrer en PDF", function () { window.print(); });
+  item("📋 Copier la fiche (Markdown)", function () {
+    var md = g.md || ("# " + g.title);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(md).then(function () { toast("✅ Fiche copiée dans le presse-papiers"); }, function () { toast("⚠️ Copie impossible sur cet appareil"); });
+    } else { toast("⚠️ Copie impossible sur cet appareil"); }
+  });
+  item("💾 Télécharger le fichier .md", function () {
+    var md = "---\ntitre: " + g.title + "\ntags: [" + (g.tags || []).join(", ") + "]\ncreated: " + (g.created || "") + "\nupdated: " + (g.updated || "") + "\nauthor: " + (g.author || "") + "\n---\n\n" + (g.md || ("# " + g.title));
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+    a.download = g.slug + ".md";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -3177,6 +3268,20 @@ function pcUpdate() {
 /* ================================================================
    Démarrage
 ================================================================ */
+function syncFromTop() {
+  var b = document.getElementById("sync-pill");
+  if (!(cfg.user || "").trim() || !(cfg.repo || "").trim()) { window.location.hash = "#/import"; return; }
+  if (b && b.classList.contains("syncing")) return;
+  if (b) b.classList.add("syncing");
+  var last = "";
+  syncGitHub(function (m) { last = m; toast(m); }, true).then(function () {
+    if (b) b.classList.remove("syncing");
+    if (last) toast(last);
+  }).catch(function () {
+    if (b) b.classList.remove("syncing");
+    toast("❌ Synchronisation interrompue.");
+  });
+}
 function syncFromReglages() {
   window.location.hash = "#/import";
   setTimeout(runSync, 60);
@@ -3206,6 +3311,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="dUl0gaaogsKpnSmN9aL13Q==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="20RXOHq3DK9xMEo/7apkvw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
