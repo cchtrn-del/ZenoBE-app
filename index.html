@@ -316,7 +316,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.9 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.10 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -883,14 +883,37 @@ function ghHeaders(raw) {
   return h;
 }
 function ghRawHeaders() {
-  var h = {};
-  if (cfg.token && cfg.token.trim()) h.Authorization = "Bearer " + cfg.token.trim();
-  return h;
+  /* Avec jeton (dépôt privé), on passe par l'API GitHub, qui accepte le contrôle CORS
+     du navigateur ; raw.githubusercontent.com le refuse (erreur « load failed » dans Safari).
+     Sans jeton (dépôt public), on reste sur raw : requête simple, sans préflight. */
+  if (cfg.token && cfg.token.trim()) return ghHeaders(true);
+  return {};
 }
 /* URL raw (non comptée dans le quota API GitHub) — le jeton Bearer reste requis pour un dépôt privé */
 function ghRawUrl(path, branch) {
+  var segs = String(path).split("/").map(encodeURIComponent).join("/");
+  if (cfg.token && cfg.token.trim())
+    return "https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+      "/contents/" + segs + "?ref=" + encodeURIComponent(branch || cfg.branch || "main");
   return "https://raw.githubusercontent.com/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
-    "/" + encodeURIComponent(branch || cfg.branch || "main") + "/" + String(path).split("/").map(encodeURIComponent).join("/");
+    "/" + encodeURIComponent(branch || cfg.branch || "main") + "/" + segs;
+}
+/* Télécharge un fichier du dépôt. Avec jeton, l'API contents refuse les fichiers > 1 Mo :
+   on retombe alors sur git/blobs (jusqu'à 100 Mo) via le listing du dossier. */
+async function ghFetch(path, branch) {
+  var r = await fetch(ghRawUrl(path, branch), { headers: ghRawHeaders() });
+  if (r.ok || !(cfg.token && cfg.token.trim())) return r;
+  var dir = String(path).split("/").slice(0, -1).join("/");
+  var file = String(path).split("/").pop();
+  var rl = await fetch("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+    "/contents/" + (dir ? dir.split("/").map(encodeURIComponent).join("/") + "/" : "") +
+    "?ref=" + encodeURIComponent(branch || cfg.branch || "main"), { headers: ghHeaders(false) });
+  if (!rl.ok) return r;
+  var entries = await rl.json(); var sha = null;
+  (entries || []).forEach(function (en) { if (en.type === "file" && en.name === file) sha = en.sha; });
+  if (!sha) return r;
+  return fetch("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+    "/git/blobs/" + encodeURIComponent(sha), { headers: ghHeaders(true) });
 }
 
 async function syncGitHub(logFn, silent) {
@@ -926,7 +949,7 @@ async function syncGitHub(logFn, silent) {
   var ok = 0, replaced = 0;
   for (var i = 0; i < files.length; i++) {
     var p = files[i].path;
-    var rr = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+    var rr = await ghFetch(p, branch);
     if (!rr.ok) { logFn("⚠️ Échec : " + p); continue; }
     var md = await rr.text();
     var name = p.split("/").pop();
@@ -957,7 +980,7 @@ async function syncGitHub(logFn, silent) {
       var dFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(dFolder + "/") === 0; });
       var dNew = {};
       for (var m = 0; m < dFiles.length; m++) {
-        var rdoc = await fetch(ghRawUrl(dFiles[m].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+        var rdoc = await ghFetch(dFiles[m].path, branch);
         if (!rdoc.ok) { logFn("⚠️ Échec : " + dFiles[m].path); continue; }
         try {
           dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
@@ -988,7 +1011,7 @@ async function syncGitHub(logFn, silent) {
     if (gFolder) {
       var gFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(gFolder + "/") === 0; });
       for (var q3 = 0; q3 < gFiles.length; q3++) {
-        var rgd = await fetch(ghRawUrl(gFiles[q3].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+        var rgd = await ghFetch(gFiles[q3].path, branch);
         if (!rgd.ok) { logFn("⚠️ Échec : " + gFiles[q3].path); continue; }
         try {
           importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
@@ -1102,7 +1125,7 @@ async function openGhDoc(path, label) {
   if (path.indexOf("/") !== 0) p = (folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "") + p;
   toast("📄 Téléchargement de « " + (label || path) + " »…");
   try {
-    var r = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+    var r = await ghFetch(p, branch);
     if (r.status === 404) {
       /* Fallback : lister le dossier parent et chercher une correspondance
          insensible à la casse et aux accents (ex. lien "harriet-lane.pdf"
@@ -1123,7 +1146,7 @@ async function openGhDoc(path, label) {
           if (!hit && norm(entries[i].name) === target) hit = entries[i].path;
         }
         if (hit) {
-          r = await fetch(ghRawUrl(hit.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+          r = await ghFetch(hit, branch);
           toast("✅ Fichier trouvé : " + hit.split("/").pop());
         } else {
           toast("❌ « " + file + " » introuvable. Fichiers du dossier : " + cands.slice(0, 6).join(", "));
@@ -1171,7 +1194,7 @@ async function openGhMdDoc(path, label) {
   if (path.indexOf("/") !== 0) p = (folder ? folder.replace(/^\/+|\/+$/g, "") + "/" : "") + p;
   toast("📄 Ouverture de « " + (label || path) + " »…");
   try {
-    var r = await fetch(ghRawUrl(p.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+    var r = await ghFetch(p, branch);
     if (r.status === 404) { toast("❌ Document .md introuvable dans le dépôt : " + p); return; }
     if (r.status === 401 || r.status === 403) { toast("❌ Jeton invalide, ou quota GitHub épuisé (erreur " + r.status + ") — réessayez plus tard ou ajoutez un jeton."); return; }
     if (!r.ok) { toast("❌ Erreur GitHub " + r.status); return; }
@@ -1585,11 +1608,10 @@ function glHydrateImages() {
   Array.prototype.forEach.call(imgs, function (im) {
     var p = im.getAttribute("data-glsrc");
     if (!p) return;
-    var url = /^https?:/i.test(p) ? p
-      : "https://raw.githubusercontent.com/" + encodeURIComponent((cfg.user || "").trim()) + "/" + encodeURIComponent((cfg.repo || "").trim()) + "/" + encodeURIComponent((cfg.branch || "main").trim()) + "/" +
-        (glFolder ? glFolder.split("/").map(encodeURIComponent).join("/") + "/" : "") + p.split("/").map(encodeURIComponent).join("/");
-    fetch(url, { headers: ghHeaders(false) })
-      .then(function (r) { return r.ok ? r.blob() : null; })
+    var url = /^https?:/i.test(p) ? p : null;
+    var preq = url ? fetch(url) : ghFetch((glFolder ? glFolder + "/" : "") + p);
+    preq
+      .then(function (r) { return r && r.ok ? r.blob() : null; })
       .then(function (b) { if (b) { im.src = URL.createObjectURL(b); } im.removeAttribute("data-glsrc"); })
       .catch(function () { im.removeAttribute("data-glsrc"); });
   });
@@ -2118,7 +2140,7 @@ function renderAPropos() {
   html += "</div>";
   html += '<div style="height:14px"></div>';
   html += '<div style="display:grid;gap:8px;font-size:14px">';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.9</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.10</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Dr Christophe Chantrain</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>CHC Pediaplan</b></div>';
   html += '<div style="display:flex;justify-content:space-between;padding:8px 2px"><span style="color:var(--muted)">Copyright</span><b>2026 — cchtrn</b></div>';
@@ -3168,7 +3190,7 @@ async function docsFetch(kind) {
     var newFiles = {}, count = 0;
     for (var j = 0; j < files.length; j++) {
       if (files[j].type !== "file" || !/\.md$/i.test(files[j].name)) continue;
-      var rf = await fetch(ghRawUrl(files[j].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
+      var rf = await ghFetch(files[j].path, branch);
       if (!rf.ok) { docsStatus("⚠️ Échec : " + files[j].name); continue; }
       newFiles[files[j].name] = { path: files[j].path, md: await rf.text() };
       count++;
@@ -3510,7 +3532,9 @@ function syncFromTop() {
     updateSyncPill();
   }).catch(function (e) {
     if (b) b.classList.remove("syncing");
-    toast("❌ Synchronisation interrompue" + (e && e.message ? " : " + e.message : " — consultez le journal sur Réglages → Importer / Synchroniser."));
+    var msg = (e && e.message) || "";
+    if (/load failed|networkerror|failed to fetch/i.test(msg)) msg = "impossible de joindre GitHub (réseau ou page hors ligne). Rechargez la page et vérifiez votre connexion internet.";
+    toast("❌ Synchronisation interrompue : " + (msg || "consultez le journal sur Réglages → Importer / Synchroniser."));
     updateSyncPill();
   });
 }
@@ -3545,6 +3569,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="syJeBkP+h2piJaMLGFeMCg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="3rlBU5Z6KN2389Y0ItGGhQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
