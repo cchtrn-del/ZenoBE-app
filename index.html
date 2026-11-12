@@ -371,9 +371,10 @@ function persistGuides() {
 function importGuide(filename, md) {
   var parts = splitFiche(md);
   var fm = parts.fm, body = parts.body;
-  var title = fm.titre || fm.title || filename.replace(/\.(md|markdown)$/i, "").trim();
+  var title = fm.titre || fm.title;
+  if (typeof title !== "string" || !title.trim()) title = filename.replace(/\.(md|markdown)$/i, "").trim();
   var h1 = body.match(/^#\s+(.+)$/m);
-  if ((!fm.titre && !fm.title) && h1) title = h1[1].trim();
+  if ((!fm.titre && !fm.title) && h1 && typeof h1[1] === "string") title = h1[1].trim();
   var tags = Array.isArray(fm.tags) ? fm.tags.slice() : [];
   var g = {
     slug: slugify(title), title: title, filename: filename,
@@ -440,6 +441,7 @@ function exportData() {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 800);
   toast("📤 Sauvegarde exportée (" + fiches.length + " fiche(s))");
+  return data;
 }
 function importData() {
   importDataText((document.getElementById("imp-json").value || "").trim());
@@ -503,7 +505,7 @@ function repairStorage() {
    Utilitaires
 ================================================================ */
 function norm(s) {
-  return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return String(s == null ? "" : s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 function slugify(s) {
   return norm(s).replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "non-classe";
@@ -848,9 +850,10 @@ function parseDoseInfo(doseStr) {
 function importMd(filename, md, logFn) {
   var parts = splitFiche(md);
   var fm = parts.fm, body = parts.body;
-  var title = fm.titre || fm.title || filename.replace(/\.(md|markdown|txt)$/i, "").trim();
+  var title = fm.titre || fm.title;
+  if (typeof title !== "string" || !title.trim()) title = filename.replace(/\.(md|markdown|txt)$/i, "").trim();
   var h1 = body.match(/^#\s+(.+)$/m);
-  if ((!fm.titre && !fm.title) && h1) title = h1[1].trim();
+  if ((!fm.titre && !fm.title) && h1 && typeof h1[1] === "string") title = h1[1].trim();
   var slug = slugify(title);
   var tags = [];
   if (Array.isArray(fm.tags)) tags = fm.tags.slice();
@@ -927,10 +930,14 @@ async function syncGitHub(logFn, silent) {
     if (!rr.ok) { logFn("⚠️ Échec : " + p); continue; }
     var md = await rr.text();
     var name = p.split("/").pop();
-    var res = importMd(name, md);
-    if (res.replaced) replaced++;
-    ok++;
-    logFn("✅ " + name);
+    try {
+      var res = importMd(name, md);
+      if (res.replaced) replaced++;
+      ok++;
+      logFn("✅ " + name);
+    } catch (e) {
+      logFn("⚠️ Fichier ignoré — " + name + " (" + ((e && e.message) || "erreur d'analyse") + ")");
+    }
   }
   persistFiches();
   cfg.lastSync = new Date().toISOString();
@@ -952,8 +959,12 @@ async function syncGitHub(logFn, silent) {
       for (var m = 0; m < dFiles.length; m++) {
         var rdoc = await fetch(ghRawUrl(dFiles[m].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
         if (!rdoc.ok) { logFn("⚠️ Échec : " + dFiles[m].path); continue; }
-        dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
-        dok++;
+        try {
+          dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
+          dok++;
+        } catch (e) {
+          logFn("⚠️ Fichier Labo/Scores ignoré — " + dFiles[m].path.split("/").pop() + " (" + ((e && e.message) || "erreur d'analyse") + ")");
+        }
       }
       if (dok) {
         DOCS_CACHE.folder = dFolder;
@@ -979,8 +990,12 @@ async function syncGitHub(logFn, silent) {
       for (var q3 = 0; q3 < gFiles.length; q3++) {
         var rgd = await fetch(ghRawUrl(gFiles[q3].path.split("/").map(encodeURIComponent).join("/"), branch), { headers: ghRawHeaders() });
         if (!rgd.ok) { logFn("⚠️ Échec : " + gFiles[q3].path); continue; }
-        importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
-        gok++;
+        try {
+          importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
+          gok++;
+        } catch (e) {
+          logFn("⚠️ Guideline ignorée — " + gFiles[q3].path.split("/").pop() + " (" + ((e && e.message) || "erreur d'analyse") + ")");
+        }
       }
       if (gok) {
         glFolder = gFolder;
@@ -3493,9 +3508,9 @@ function syncFromTop() {
     if (b) b.classList.remove("syncing");
     if (last) toast(last);
     updateSyncPill();
-  }).catch(function () {
+  }).catch(function (e) {
     if (b) b.classList.remove("syncing");
-    toast("❌ Synchronisation interrompue.");
+    toast("❌ Synchronisation interrompue" + (e && e.message ? " : " + e.message : " — consultez le journal sur Réglages → Importer / Synchroniser."));
     updateSyncPill();
   });
 }
@@ -3530,6 +3545,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="QSJzCqShTNv/1CNbvQTnRw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="syJeBkP+h2piJaMLGFeMCg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
