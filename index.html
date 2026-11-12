@@ -59,6 +59,15 @@
     background: rgba(255,255,255,.2); color: #fff; font-weight: 700;
     font-size: 12px; padding: 4px 10px; border-radius: 999px;
   }
+  .act-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accent); color: #fff; font-weight: 700;
+    font-size: 11.5px; padding: 5px 10px; border-radius: 999px;
+    text-decoration: none; border: none; cursor: pointer;
+    white-space: nowrap; flex: 0 0 auto; font-family: inherit;
+  }
+  .act-btn:active { opacity: .75; }
+  .act-btn svg { flex: 0 0 auto; }
   main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
   /* iOS Safari zoome automatiquement au focus d'un input < 16px → forcer 16px */
   input, select, textarea { font-size: 16px !important; }
@@ -271,7 +280,7 @@
     <a href="#/biometrie">Normes et mesures</a>
   </nav>
   <div class="top-right">
-    <span class="count-pill" id="count-pill">0 fiche</span>
+    <a class="count-pill" href="#/import" onclick="syncFromReglages();return false;" style="text-decoration:none;display:inline-flex;align-items:center" title="Synchroniser (GitHub)" aria-label="Synchroniser"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></a>
     <a class="count-pill" href="#/calculateur" style="text-decoration:none;display:inline-flex;align-items:center" title="Calculateur de doses" aria-label="Calculateur de doses"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg></a>
     <a class="count-pill" href="#/reglages" style="text-decoration:none;display:inline-flex;align-items:center" title="Réglages" aria-label="Réglages"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></a>
   </div>
@@ -279,7 +288,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.1 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.3 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -488,9 +497,7 @@ function toast(msg) {
   t.textContent = msg; t.style.display = "block";
   setTimeout(function () { t.style.display = "none"; }, 2600);
 }
-function updateCount() {
-  document.getElementById("count-pill").textContent = fiches.length + " fiche" + (fiches.length > 1 ? "s" : "");
-}
+function updateCount() { /* v0.4.3 : compteur retiré de l'en-tête, remplacé par le bouton de synchronisation */ }
 
 /* ================================================================
    Analyse markdown (nouveau format des fiches)
@@ -1132,7 +1139,14 @@ function render() {
   document.querySelectorAll("#nav a").forEach(function (a) {
     a.classList.toggle("on", a.getAttribute("href") === h.split("/").slice(0, 2).join("/").replace(/\/$/, "") || (h === "#/" && a.getAttribute("href") === "#/"));
   });
-  if (h.indexOf("#/fiche/") === 0) renderFiche(decodeURIComponent(h.slice(8)));
+  if (h.indexOf("#/fiche/") === 0) {
+    var fq = h.slice(8), fqm = fq.indexOf("?");
+    var fslug = decodeURIComponent(fqm < 0 ? fq : fq.slice(0, fqm));
+    var ffrom = "";
+    var fmr = /(?:^|[?&])from=([^&]*)/.exec(fq);
+    if (fmr) ffrom = decodeURIComponent(fmr[1]);
+    renderFiche(fslug, ffrom);
+  }
   else if (h.indexOf("#/calculateur") === 0) renderCalculateur();
   else if (h.indexOf("#/biometrie/percentiles") === 0) renderPercentiles();
   else if (h.indexOf("#/biometrie/hemodynamique") === 0) renderHemodynamique();
@@ -1353,9 +1367,9 @@ function renderGuidelines() {
   }
   html += '<div class="searchbar"><input type="text" id="gl-search" placeholder="🔎 Rechercher une guideline, un secteur, un sujet…" value="' + esc(glUi.q) + '"/></div>';
   html += '<div class="tabbar">' +
-    '<button class="' + (glUi.tab === "fav" ? "on" : "") + '" onclick="setGlTab(\'fav\')">★ Favoris</button>' +
-    '<button class="' + (glUi.tab === "cats" ? "on" : "") + '" onclick="setGlTab(\'cats\')">Secteurs</button>' +
-    '<button class="' + (glUi.tab === "recent" ? "on" : "") + '" onclick="setGlTab(\'recent\')">🕘 Récents</button>' +
+    '<button class="' + (glUi.tab === "fav" ? "on" : "") + '" onclick="setGlTab(\'fav\')">' + zenTile(ZENOBE_PICTOS.favoris, true) + 'Favoris</button>' +
+    '<button class="' + (glUi.tab === "cats" ? "on" : "") + '" onclick="setGlTab(\'cats\')">' + zenTile(ZENOBE_PICTOS.secteurs, true) + 'Secteurs</button>' +
+    '<button class="' + (glUi.tab === "recent" ? "on" : "") + '" onclick="setGlTab(\'recent\')">' + zenTile(ZENOBE_PICTOS.recents, true) + 'Récents</button>' +
     "</div>";
   if (q) html += '<span class="chip on" onclick="clearGlFilters()" style="margin-bottom:10px">✕ Réinitialiser la recherche</span>';
   var sect = function (title, cardsHtml) {
@@ -1424,15 +1438,39 @@ function renderGuideView(slug) {
   html += '<div class="fiche-head"><h1>' + esc(g.title) + "</h1></div>";
   if (tags) html += "<div>" + tags + "</div>";
   if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
-  html += '<div class="fiche-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">' +
-    '<button class="btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')">' + (isFav ? "★ Favori" : "☆ Favori") + "</button>" +
-    '<button class="btn" onclick="window.print()">🖨️ Imprimer</button>' +
+  html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
+    '<button class="act-btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favoris</button>' +
+    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
   html += g.html || mdToHtml(g.md || "");
   html += "</div>";
   view.innerHTML = html;
+  glLinkFiches(g);
   glHydrateImages();
+}
+function glLinkFiches(g) {
+  var links = document.querySelectorAll("#view a.gh-mddoc, #view a.gh-doc") || [];
+  Array.prototype.forEach.call(links, function (a) {
+    var d = (a.getAttribute("data-doc") || "").trim();
+    if (!d) return;
+    var base = d.split("?")[0].split("/").pop().replace(/\.(md|pdf|docx|doc)$/i, "");
+    var keys = [normKey(base), normKey(base.replace(/^[^A-Za-zÀ-ÿ]+/, ""))];
+    var hit = null, isGuide = false;
+    for (var k = 0; k < keys.length && !hit; k++) {
+      if (!keys[k]) continue;
+      hit = fiches.filter(function (x) { return normKey(x.slug) === keys[k] || normKey(x.title) === keys[k]; })[0];
+      if (!hit) {
+        var gh = guides.filter(function (x) { return normKey(x.slug) === keys[k] || normKey(x.title) === keys[k]; })[0];
+        if (gh) { hit = gh; isGuide = true; }
+      }
+    }
+    if (!hit) return;
+    a.classList.remove("gh-mddoc"); a.classList.remove("gh-doc");
+    a.removeAttribute("data-doc");
+    a.setAttribute("href", (isGuide ? "#/guideline/" : "#/fiche/") + hit.slug + (isGuide ? "" : "?from=" + encodeURIComponent(g.slug)));
+    a.textContent = a.textContent.replace(/\s*📄$/, "").trim();
+  });
 }
 function glHydrateImages() {
   var imgs = document.querySelectorAll("#view img[data-glsrc]") || [];
@@ -1450,7 +1488,15 @@ function glHydrateImages() {
 }
 
 /* ---------- Fiche ---------- */
-function renderFiche(slug) {
+var ACT_SVG = {
+  star: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+  starO: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+  calc: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg>',
+  print: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>',
+  export: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>'
+};
+
+function renderFiche(slug, from) {
   var f = fiches.find(function (x) { return x.slug === slug; });
   if (!f) { view.innerHTML = '<div class="empty">Fiche introuvable. <a href="#/">Retour</a></div>'; return; }
   var isFav = favs.indexOf(f.slug) >= 0;
@@ -1461,16 +1507,19 @@ function renderFiche(slug) {
   if (f.created) meta.push("Créée : " + esc(f.created));
   if (f.updated) meta.push("MAJ : " + esc(f.updated));
   var tags = f.tags.map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
-  var html = '<a class="back" href="#/">← Toutes les fiches</a>';
+  var gFrom = from ? guides.filter(function (x) { return x.slug === from; })[0] : null;
+  var html = gFrom
+    ? '<a class="back" href="#/guideline/' + encodeURIComponent(gFrom.slug) + '">← ' + esc(gFrom.title) + "</a>"
+    : '<a class="back" href="#/">← Toutes les fiches</a>';
   html += '<div class="card">';
   html += '<div class="fiche-head"><h1>' + esc(f.title) + "</h1></div>";
   if (tags) html += "<div>" + tags + "</div>";
   if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
-  html += '<div class="fiche-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">' +
-    '<button class="btn" onclick="toggleFavStar(event,\'' + f.slug + '\')">' + (isFav ? "★ Favori" : "☆ Favori") + "</button>" +
-    (f.poso.length ? '<a class="btn" href="#/calculateur?f=' + f.slug + '">🧮 Calculateur de dose</a>' : "") +
-    '<button class="btn" onclick="window.print()">🖨️ Imprimer</button>' +
-    '<button class="btn" onclick="exportFiche(event, \'' + f.slug + '\')">📤 Exporter</button>' +
+  html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
+    '<button class="act-btn" onclick="toggleFavStar(event,\'' + f.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favoris</button>' +
+    (f.poso.length ? '<a class="act-btn" href="#/calculateur?f=' + f.slug + '" title="Calculateur de dose" aria-label="Calculateur">' + ACT_SVG.calc + 'Calculateur</a>' : "") +
+    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
+    '<button class="act-btn" onclick="exportFiche(event, \'' + f.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Exporter</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
   var fHtml = mdToHtml(f.md || "");
@@ -3157,6 +3206,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 }
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="UXGJ/23/hzbIBDzbJn/iZw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="dUl0gaaogsKpnSmN9aL13Q==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
