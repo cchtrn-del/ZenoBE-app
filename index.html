@@ -316,7 +316,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.13 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.14 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1700,33 +1700,13 @@ function renderFiche(slug, from) {
     '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
     '<button class="act-btn" onclick="exportFiche(event, \'' + f.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Exporter</button>' +
     "</div>";
-  html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
   var fHtml = mdToHtml(f.md || "");
-  var SOM_MAP = [
-    { t: "Mode d'action", l: "Mode d'action" },
-    { t: "Noms commerciaux", l: "Noms comm." },
-    { t: "Indications et doses", l: "Indic. & doses" },
-    { t: "Effets secondaires", l: "Effets second." },
-    { t: "Remarques", l: "Remarques" },
-    { t: "Carte d'identité", l: "Carte d'ident." },
-    { t: "QuickNote", l: "QuickNote" }
-  ];
-  var somItems = [], re = /<h([234])[^>]*\bid="fh-(\d+)"[^>]*>([\s\S]*?)<\/h\1>/g, ms;
-  while ((ms = re.exec(fHtml))) {
-    var stxt = ms[3].replace(/<[^>]+>/g, "").trim();
-    if (stxt) {
-      var nk = normKey(stxt);
-      for (var si = 0; si < SOM_MAP.length; si++) {
-        if (nk === normKey(SOM_MAP[si].t)) { somItems.push({ id: "fh-" + ms[2], l: SOM_MAP[si].l }); break; }
-      }
-    }
-  }
-  if (somItems.length) {
-    html += '<div class="chips" style="margin:10px 0 0;flex-wrap:nowrap;overflow-x:auto">' + somItems.map(function (it) {
-      return '<span class="chip" onclick="jumpTo(\'' + it.id + '\')" style="white-space:nowrap;flex:0 0 auto">' + esc(it.l) + "</span>";
-    }).join("") + "</div>";
-  }
+  var dupRe = /^<h1 id="fh-\d+">([\s\S]*?)<\/h1>/;
+  fHtml = fHtml.replace(dupRe, function (wm, inner) {
+    return normKey(inner.replace(/<[^>]+>/g, "").trim()) === normKey(f.title) ? "" : wm;
+  });
   html += foldSections(fHtml);
+  html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
   html += "</div>";
   view.innerHTML = html;
 }
@@ -1755,13 +1735,6 @@ document.addEventListener("click", function (e) {
   e.preventDefault();
   h.parentElement.classList.toggle("open");
 });
-function jumpTo(id) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  var p = el;
-  while (p && p !== document.body) { if (p.classList && p.classList.contains("fold")) p.classList.add("open"); p = p.parentElement; }
-  try { el.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { el.scrollIntoView(); }
-}
 
   /* ---------- Export d'une fiche ---------- */
 function calcBackHtml(preselect, calcFiches) {
@@ -3622,5 +3595,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="3rlBU5Z6KN2389Y0ItGGhQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="99of8M4SswHjkbtEPYbAzA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="F9rZPpQU09GhWFwPTF28wQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
