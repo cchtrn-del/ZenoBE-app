@@ -316,7 +316,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.10 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.12 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -397,11 +397,14 @@ var THEMES = {
   emeraude: { nom: "Émeraude", accent: "#10B981", soft: "#ecfdf5", bg: "#f0faf6", border: "#d7ece5", g1: "#065F46", g2: "#34D399", deep: "#065F46" },
   forêt: { nom: "Forêt", accent: "#337A56", soft: "#eef6f0", bg: "#f3f8f4", border: "#d9e9de", g1: "#1E4D38", g2: "#5CA87F", deep: "#1E4D38" },
   printemps: { nom: "Cerisier", accent: "#D96C94", soft: "#fdf2f6", bg: "#fbf5f7", border: "#f2dbe3", g1: "#9D3A5C", g2: "#F08FB0", deep: "#9D3A5C" },
-  été: { nom: "Turquoise", accent: "#0FA3B1", soft: "#e8f8fa", bg: "#f2fafb", border: "#d5edf0", g1: "#0B5F6C", g2: "#38C6D4", deep: "#0B5F6C" },
+  été: { nom: "Sarcelle", accent: "#0FA3B1", soft: "#e8f8fa", bg: "#f2fafb", border: "#d5edf0", g1: "#0B5F6C", g2: "#38C6D4", deep: "#0B5F6C" },
   automne: { nom: "Terracotta", accent: "#C65D3B", soft: "#faf1ec", bg: "#f8f2ee", border: "#ecdcd2", g1: "#7A3B1E", g2: "#E08A5C", deep: "#7A3B1E" },
   hiver: { nom: "Glacier", accent: "#4E8FB0", soft: "#eef5f9", bg: "#f4f8fa", border: "#dbe7ee", g1: "#33566B", g2: "#8FBBD4", deep: "#33566B" },
   ardoise: { nom: "Ardoise", accent: "#475569", soft: "#eef1f4", bg: "#f4f6f8", border: "#dde3e9", g1: "#1E293B", g2: "#64748B", deep: "#1E293B" },
   christmas: { nom: "Christmas", accent: "#DC2626", soft: "#eafaf0", bg: "#f6faf7", border: "#d5e5da", g1: "#14532D", g2: "#F87171", deep: "#14532D" },
+  encre: { nom: "Encre", accent: "#000000", soft: "#ededed", bg: "#f2f2f2", border: "#d4d4d4", g1: "#000000", g2: "#555555", deep: "#111111" },
+  safran: { nom: "Safran", accent: "#EA580C", soft: "#F6EDE4", bg: "#FFFFFF", border: "#E7E5E4", g1: "#EA580C", g2: "#EA580C", deep: "#9A3412" },
+  miel: { nom: "Miel", accent: "#D4A017", soft: "#F6EFDC", bg: "#FFFFFF", border: "#E7E5E4", g1: "#D4A017", g2: "#D4A017", deep: "#7A5900" },
 };
 var curTheme = loadLs(LS.theme, "bleu");
 function applyTheme(id) {
@@ -2140,7 +2143,7 @@ function renderAPropos() {
   html += "</div>";
   html += '<div style="height:14px"></div>';
   html += '<div style="display:grid;gap:8px;font-size:14px">';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.10</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.12</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Dr Christophe Chantrain</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>CHC Pediaplan</b></div>';
   html += '<div style="display:flex;justify-content:space-between;padding:8px 2px"><span style="color:var(--muted)">Copyright</span><b>2026 — cchtrn</b></div>';
@@ -3138,26 +3141,34 @@ function docsPersist() { saveLs(LS.docs, DOCS_CACHE); }
 function docsNorm(s) { return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, ""); }
 function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? normKey(String(v[0] || "")) : normKey(String(v || "")); }
 
-function docCard(t, href) {
-  return '<a href="' + href + '" style="text-decoration:none"><div style="display:flex;align-items:center;gap:12px;padding:14px 14px;margin:0 0 12px;' +
-    'background:linear-gradient(135deg,var(--accent-soft) 0%,var(--card) 55%);border:1px solid var(--border);border-left:5px solid var(--accent);' +
-    'border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)">' +
-    '<div style="flex:1;font-size:16px;font-weight:800;color:var(--deep)">' + esc(t) + '</div>' +
-    '<div style="color:var(--accent);font-size:22px;font-weight:800">\u203a</div></div></a>';
+function docRow(kind, r, last) {
+  return '<a href="' + r.href + '" style="text-decoration:none;display:block">' +
+    '<div style="display:flex;align-items:center;gap:14px;padding:13px 4px;' + (last ? "" : "border-bottom:1px solid var(--border);") + '">' +
+    '<span style="width:38px;height:38px;border-radius:11px;background:linear-gradient(180deg,var(--g1),var(--accent));color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">' +
+    (kind === "labo" ? NM_ICO.labo : NM_ICO.scores) + "</span>" +
+    '<span style="flex:1"><span style="font-size:15px;font-weight:700;color:var(--deep)">' + esc(r.t) + "</span><br />" +
+    '<span style="font-size:12.5px;color:var(--muted)">' + esc(r.d) + "</span></span>" +
+    '<span style="color:var(--accent);font-size:20px;font-weight:800">\u203a</span></div></a>';
 }
 
 function docsShowList(kind) {
   var list = document.getElementById("docs-list");
   if (!list) return;
   var names = Object.keys(DOCS_CACHE.files).sort();
-  var html = "";
+  var rows = [];
   for (var i = 0; i < names.length; i++) {
     var parts = splitFiche(DOCS_CACHE.files[names[i]].md);
     var part = docsPartie(parts.fm);
     if (part && part !== kind) continue;
-    html += docCard(parts.fm.titre || names[i].replace(/\.md$/i, ""), "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]));
+    var base = names[i].replace(/\.md$/i, "");
+    var t = (parts.fm && typeof parts.fm.titre === "string" && parts.fm.titre.trim()) ? parts.fm.titre.trim() : base;
+    var d = (parts.fm && typeof parts.fm.description === "string" && parts.fm.description.trim()) ? parts.fm.description.trim() : "Document « " + base + " »";
+    rows.push({ t: t, d: d, href: "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]) });
   }
-  if (!html) html = '<div class="warning-box">Aucun fichier .md pour cette partie dans le dossier « _7.scores_et_labos » du dépôt. Utilisez 🔄 Actualiser après avoir ajouté vos fichiers.</div>';
+  var html = "";
+  for (var j = 0; j < rows.length; j++) html += docRow(kind, rows[j], j === rows.length - 1);
+  if (!html) html = '<div class="warning-box">Aucun fichier .md pour cette partie dans le dossier « _7.scores_et_labos » du dépôt. Utilisez la synchronisation générale (🔄) après avoir ajouté vos fichiers.</div>';
+  else html = '<div class="card" style="padding:6px 16px">' + html + "</div>";
   list.innerHTML = html;
 }
 
@@ -3207,25 +3218,20 @@ async function docsFetch(kind) {
   }
 }
 
-function docsRefreshPage(kind) {
-  var list = document.getElementById("docs-list");
-  if (list) list.innerHTML = '<p class="meta-line">Chargement…</p>';
-  docsFetch(kind);
-}
 
 function renderDocsPage(kind) {
   var view = document.getElementById("view");
   var titre = kind === "labo" ? "Laboratoire" : "Scores cliniques";
   view.innerHTML = '<div class="page-title">' + titre + '</div>' +
-    '<div style="margin:10px 0 0"><button class="btn" onclick="docsRefreshPage(\'' + kind + '\')">🔄 Actualiser depuis GitHub</button></div>' +
     '<div id="docs-status" class="field-note" style="margin:6px 0 0"></div>' +
     '<div id="docs-list" style="margin-top:12px"></div>';
   var names = Object.keys(DOCS_CACHE.files);
   if (names.length) {
     docsShowList(kind);
-    docsStatus("📋 " + names.length + " fichier(s) en cache — 🔄 pour actualiser.");
+    docsStatus("📋 " + names.length + " fichier(s) — mis à jour par la synchronisation générale (🔄).");
   } else {
-    docsFetch(kind);
+    docsStatus("");
+    document.getElementById("docs-list").innerHTML = '<div class="warning-box">Aucun document en cache pour l\'instant. Lancez la synchronisation générale (🔄 en haut de l\'écran d\'accueil, ou Réglages → Importer / Synchroniser) : elle met à jour tous les dossiers, y compris les normes Labo et Scores.</div>';
   }
 }
 
@@ -3570,5 +3576,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="3rlBU5Z6KN2389Y0ItGGhQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="2/JlXW5ddmgyzYXBfyBogA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
