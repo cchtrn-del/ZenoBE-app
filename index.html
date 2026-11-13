@@ -316,7 +316,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.12 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.13 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -325,7 +325,7 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1",
+var LS = { diag: "fm.diag.v1", fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1",
   gl: "fm.guides.v1", glfav: "fm.glfav.v1", glrec: "fm.glrec.v1", glfolder: "fm.glfolder.v1" };
 
 function loadLs(key, fallback) {
@@ -348,7 +348,7 @@ function hydrateFiche(f) {
   f.text = f.text || norm(f.title + " " + (f.tags || []).join(" ") + " " + (f.md || ""));
   return f;
 }
-var fiches = (loadLs(LS.fiches, [])).map(hydrateFiche);
+var fiches = (loadLs(LS.fiches, [])).map(function (x) { try { return hydrateFiche(x); } catch (e) { try { x.html = ""; x.text = ""; } catch (e2) {} return x; } });
 var cfg = loadLs(LS.cfg, { user: "cchtrn-del", repo: "Compendium", branch: "main", folder: "", token: "", autoSync: false, syncAlertDays: 7, lastSync: null });
 var favs = loadLs(LS.fav, []);
 var recents = loadLs(LS.rec, []);
@@ -360,7 +360,7 @@ function glHydrate(g) {
   g.text = g.text || norm(g.title + " " + (g.tags || []).join(" ") + " " + (g.md || ""));
   return g;
 }
-var guides = (loadLs(LS.gl, [])).map(glHydrate);
+var guides = (loadLs(LS.gl, [])).map(function (x) { try { return glHydrate(x); } catch (e) { try { x.html = ""; x.text = ""; } catch (e2) {} return x; } });
 var glCur = null; /* slug de la guideline affichée (v0.4.4) */
 var glFavs = loadLs(LS.glfav, []);
 var glRecents = loadLs(LS.glrec, []);
@@ -541,6 +541,21 @@ function toast(msg) {
   setTimeout(function () { t.style.display = "none"; }, 2600);
 }
 function updateCount() { /* v0.4.3 : compteur retiré de l'en-tête, remplacé par le bouton de synchronisation */ }
+window.addEventListener("error", function (ev) {
+  try {
+    var m = String((ev && ev.message) || "erreur inconnue");
+    toast("⚠️ Erreur : " + m);
+    saveLs(LS.diag, "js|" + m + "|" + String((ev && ev.filename) || "") + ":" + String((ev && ev.lineno) || ""));
+  } catch (e) {}
+});
+window.addEventListener("unhandledrejection", function (ev) {
+  try {
+    var r = (ev && ev.reason) || {};
+    var m = String((r && r.message) || r || "opération interrompue");
+    toast("⚠️ Erreur : " + m);
+    saveLs(LS.diag, "async|" + m);
+  } catch (e) {}
+});
 
 /* ================================================================
    Analyse markdown (nouveau format des fiches)
@@ -903,26 +918,34 @@ function ghRawUrl(path, branch) {
 }
 /* Télécharge un fichier du dépôt. Avec jeton, l'API contents refuse les fichiers > 1 Mo :
    on retombe alors sur git/blobs (jusqu'à 100 Mo) via le listing du dossier. */
+function fetchTimeout(url, opts, ms) {
+  return Promise.race([
+    fetch(url, opts),
+    new Promise(function (_, rej) { setTimeout(function () { rej(new Error("délai dépassé (" + (ms / 1000) + " s)")); }, ms); })
+  ]);
+}
 async function ghFetch(path, branch) {
-  var r = await fetch(ghRawUrl(path, branch), { headers: ghRawHeaders() });
+  var r = await fetchTimeout(ghRawUrl(path, branch), { headers: ghRawHeaders() }, 45000);
   if (r.ok || !(cfg.token && cfg.token.trim())) return r;
   var dir = String(path).split("/").slice(0, -1).join("/");
   var file = String(path).split("/").pop();
-  var rl = await fetch("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+  var rl = await fetchTimeout("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
     "/contents/" + (dir ? dir.split("/").map(encodeURIComponent).join("/") + "/" : "") +
-    "?ref=" + encodeURIComponent(branch || cfg.branch || "main"), { headers: ghHeaders(false) });
+    "?ref=" + encodeURIComponent(branch || cfg.branch || "main"), { headers: ghHeaders(false) }, 45000);
   if (!rl.ok) return r;
   var entries = await rl.json(); var sha = null;
   (entries || []).forEach(function (en) { if (en.type === "file" && en.name === file) sha = en.sha; });
   if (!sha) return r;
-  return fetch("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
-    "/git/blobs/" + encodeURIComponent(sha), { headers: ghHeaders(true) });
+  return fetchTimeout("https://api.github.com/repos/" + encodeURIComponent(cfg.user) + "/" + encodeURIComponent(cfg.repo) +
+    "/git/blobs/" + encodeURIComponent(sha), { headers: ghHeaders(true) }, 45000);
 }
 
 async function syncGitHub(logFn, silent) {
   var user = (cfg.user || "").trim(), repo = (cfg.repo || "").trim();
   var branch = (cfg.branch || "main").trim(), folder = (cfg.folder || "").trim();
   if (!user || !repo) { if (!silent) logFn("⚠️ Renseignez au minimum l'utilisateur et le dépôt."); return; }
+  var prevDiag = loadLs(LS.diag, null);
+  if (prevDiag) { logFn("🩺 Dernier diagnostic enregistré : " + String(prevDiag) + " — merci de le communiquer si le problème persiste."); try { localStorage.removeItem(LS.diag); } catch (e) {} }
   logFn("Connexion au dépôt " + user + "/" + repo + " (branche " + branch + ")…");
   var url = "https://api.github.com/repos/" + encodeURIComponent(user) + "/" + encodeURIComponent(repo) +
     "/git/trees/" + encodeURIComponent(branch) + "?recursive=1";
@@ -952,7 +975,10 @@ async function syncGitHub(logFn, silent) {
   var ok = 0, replaced = 0;
   for (var i = 0; i < files.length; i++) {
     var p = files[i].path;
-    var rr = await ghFetch(p, branch);
+    logFn("⏳ " + p.split("/").pop());
+    var rr;
+    try { rr = await ghFetch(p, branch); }
+    catch (e) { logFn("⚠️ Échec " + p.split("/").pop() + " (" + ((e && e.message) || "réseau") + ")"); continue; }
     if (!rr.ok) { logFn("⚠️ Échec : " + p); continue; }
     var md = await rr.text();
     var name = p.split("/").pop();
@@ -983,7 +1009,10 @@ async function syncGitHub(logFn, silent) {
       var dFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(dFolder + "/") === 0; });
       var dNew = {};
       for (var m = 0; m < dFiles.length; m++) {
-        var rdoc = await ghFetch(dFiles[m].path, branch);
+        logFn("⏳ " + dFiles[m].path.split("/").pop());
+        var rdoc;
+        try { rdoc = await ghFetch(dFiles[m].path, branch); }
+        catch (e) { logFn("⚠️ Échec " + dFiles[m].path.split("/").pop() + " (" + ((e && e.message) || "réseau") + ")"); continue; }
         if (!rdoc.ok) { logFn("⚠️ Échec : " + dFiles[m].path); continue; }
         try {
           dNew[dFiles[m].path.split("/").pop()] = { path: dFiles[m].path, md: await rdoc.text() };
@@ -1014,7 +1043,10 @@ async function syncGitHub(logFn, silent) {
     if (gFolder) {
       var gFiles = tree.filter(function (t) { return t.type === "blob" && /\.md$/i.test(t.path) && t.path.indexOf(gFolder + "/") === 0; });
       for (var q3 = 0; q3 < gFiles.length; q3++) {
-        var rgd = await ghFetch(gFiles[q3].path, branch);
+        logFn("⏳ " + gFiles[q3].path.split("/").pop());
+        var rgd;
+        try { rgd = await ghFetch(gFiles[q3].path, branch); }
+        catch (e) { logFn("⚠️ Échec " + gFiles[q3].path.split("/").pop() + " (" + ((e && e.message) || "réseau") + ")"); continue; }
         if (!rgd.ok) { logFn("⚠️ Échec : " + gFiles[q3].path); continue; }
         try {
           importGuide(gFiles[q3].path.split("/").pop(), await rgd.text());
@@ -1251,6 +1283,18 @@ function allTags() {
 }
 
 function render() {
+  try { renderInner(); }
+  catch (e) {
+    try {
+      var v = document.getElementById("view");
+      if (v) v.innerHTML = '<div class="card"><div class="page-title">Oups…</div><div class="empty">Cette page n\'a pas pu être affichée : ' +
+        esc(String((e && e.message) || "erreur inconnue")) + '.<br/>La synchronisation 🔄 puis Réglages → Sauvegarde (Nettoyer le stockage) peuvent résoudre le problème.</div></div>';
+      toast("⚠️ Erreur d\'affichage : " + ((e && e.message) || "inconnue"));
+      try { saveLs(LS.diag, "render|" + window.location.hash + "|" + String((e && e.message) || "")); } catch (e2) {}
+    } catch (e3) {}
+  }
+}
+function renderInner() {
   var h = window.location.hash || "#/";
   if (h.indexOf("#/guideline/") !== 0) glCur = null;
   document.querySelectorAll("#nav a").forEach(function (a) {
@@ -1670,10 +1714,11 @@ function renderFiche(slug, from) {
   var somItems = [], re = /<h([234])[^>]*\bid="fh-(\d+)"[^>]*>([\s\S]*?)<\/h\1>/g, ms;
   while ((ms = re.exec(fHtml))) {
     var stxt = ms[3].replace(/<[^>]+>/g, "").trim();
-    if (!stxt) continue;
-    var nk = normKey(stxt);
-    for (var si = 0; si < SOM_MAP.length; si++) {
-      if (nk === normKey(SOM_MAP[si].t)) { somItems.push({ id: "fh-" + ms[2], l: SOM_MAP[si].l }); break; }
+    if (stxt) {
+      var nk = normKey(stxt);
+      for (var si = 0; si < SOM_MAP.length; si++) {
+        if (nk === normKey(SOM_MAP[si].t)) { somItems.push({ id: "fh-" + ms[2], l: SOM_MAP[si].l }); break; }
+      }
     }
   }
   if (somItems.length) {
@@ -3576,6 +3621,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="ySJeJbZE7PvM1exbn7VQ/w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="tREL8J5A5ljyyt3Lfcmo+w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="3rlBU5Z6KN2389Y0ItGGhQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="2/JlXW5ddmgyzYXBfyBogA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="99of8M4SswHjkbtEPYbAzA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
