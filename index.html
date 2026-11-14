@@ -45,7 +45,13 @@
     position: sticky; top: 62px; z-index: 25;
     box-shadow: 0 6px 14px rgba(15,23,42,.10);
   }
-  @media (max-width: 700px) { .nm-band { top: 106px; } } /* topbar sur 2 lignes sur petit écran */
+  @media (max-width: 700px) {
+    .topbar { flex-wrap: wrap; gap: 8px 10px; padding: 8px 12px; }
+    .brand { order: 1; }
+    .top-right { order: 2; margin-left: auto; }
+    .nav { order: 3; flex-basis: 100%; }
+    .nm-band { top: 84px; }
+  } /* smartphone : logo + boutons sur la 1re ligne, navigation sur la 2e */
   .brand .logo { font-size: 20px; color: #fff; }
   .nav { display: flex; gap: 4px; }
   .nav a {
@@ -316,7 +322,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.14 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.18 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1597,7 +1603,7 @@ function renderGuideView(slug) {
   saveLs(LS.glrec, glRecents);
   var isFav = glFavs.indexOf(g.slug) >= 0;
   var meta = [];
-  if (g.author) meta.push("✍️ " + esc(g.author));
+  if (g.author) meta.push(esc(g.author));
   if (g.created) meta.push("Créée : " + esc(g.created));
   if (g.updated) meta.push("MAJ : " + esc(g.updated));
   var tags = g.tags.map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
@@ -1607,9 +1613,9 @@ function renderGuideView(slug) {
   if (tags) html += "<div>" + tags + "</div>";
   if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
   html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
-    '<button class="act-btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favoris</button>' +
-    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
-    '<button class="act-btn" onclick="exportGuide(event,\'' + g.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Exporter</button>' +
+    '<button class="act-btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favo</button>' +
+    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Impr</button>' +
+    '<button class="act-btn" onclick="exportGuide(event,\'' + g.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Export</button>' +
     "</div>";
   html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
   html += foldSections(g.html || mdToHtml(g.md || "", true));
@@ -1682,7 +1688,7 @@ function renderFiche(slug, from) {
   recents = [f.slug].concat(recents.filter(function (x) { return x !== f.slug; })).slice(0, 6);
   saveLs(LS.rec, recents);
   var meta = [];
-  if (f.author) meta.push("✍️ " + esc(f.author));
+  if (f.author) meta.push(esc(f.author));
   if (f.created) meta.push("Créée : " + esc(f.created));
   if (f.updated) meta.push("MAJ : " + esc(f.updated));
   var tags = f.tags.map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
@@ -1695,18 +1701,21 @@ function renderFiche(slug, from) {
   if (tags) html += "<div>" + tags + "</div>";
   if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
   html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
-    '<button class="act-btn" onclick="toggleFavStar(event,\'' + f.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favoris</button>' +
-    (f.poso.length ? '<a class="act-btn" href="#/calculateur?f=' + f.slug + '" title="Calculateur de dose" aria-label="Calculateur">' + ACT_SVG.calc + 'Calculateur</a>' : "") +
-    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Imprimer</button>' +
-    '<button class="act-btn" onclick="exportFiche(event, \'' + f.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Exporter</button>' +
+    '<button class="act-btn" onclick="toggleFavStar(event,\'' + f.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favo</button>' +
+    (f.poso.length ? '<a class="act-btn" href="#/calculateur?f=' + f.slug + '" title="Calculateur de dose" aria-label="Calculateur">' + ACT_SVG.calc + 'Calc</a>' : "") +
+    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Impr</button>' +
+    '<button class="act-btn" onclick="exportFiche(event, \'' + f.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Export</button>' +
     "</div>";
   var fHtml = mdToHtml(f.md || "");
   var dupRe = /^<h1 id="fh-\d+">([\s\S]*?)<\/h1>/;
   fHtml = fHtml.replace(dupRe, function (wm, inner) {
-    return normKey(inner.replace(/<[^>]+>/g, "").trim()) === normKey(f.title) ? "" : wm;
+    var k = normKey(inner.replace(/<[^>]+>/g, "").trim());
+    var t = normKey(f.title || "");
+    if (k && (k === t || t.indexOf(k) === 0 || k.indexOf(t) === 0)) return "";
+    return wm;
   });
   html += foldSections(fHtml);
-  html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration.</div>';
+  html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration. Les noms commerciaux et formes présentés sont ceux disponibles en Belgique.</div>';
   html += "</div>";
   view.innerHTML = html;
 }
@@ -1721,7 +1730,7 @@ function foldSections(html) {
     var bodyEnd = (i + 1 < marks.length) ? marks[i + 1].start : html.length;
     var body = html.slice(mk.end, bodyEnd);
     var title = mk.tag.replace(/<[^>]+>/g, "");
-    var open = /carte d.?identite|indications et doses|quicknote/.test(norm(title));
+    var open = /quicknote|indications et doses/.test(norm(title));
     out += html.slice(pos, mk.start);
     out += '<div class="fold' + (open ? " open" : "") + '">' + mk.tag + '<div class="fold-body">' + body + "</div></div>";
     pos = bodyEnd;
@@ -3596,5 +3605,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="3rlBU5Z6KN2389Y0ItGGhQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="99of8M4SswHjkbtEPYbAzA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="F9rZPpQU09GhWFwPTF28wQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="+h9pDd7XUZ54WrFf6BbzIA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
