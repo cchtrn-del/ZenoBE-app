@@ -331,7 +331,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.19 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.21 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1460,7 +1460,8 @@ function renderHome() {
       var txt = norm((parts.fm.titre || "") + " " + (parts.fm.description || "") + " " + parts.body);
       if (txt.indexOf(q) < 0) return;
       var part = docKindOf(parts.fm);
-      glob.push({ t: parts.fm.titre || n.replace(/\.md$/i, ""), d: part === "scores" ? "Scores cliniques" : "Laboratoire", li: liaisonMode && hasLiaisonTags(parts.fm.tags), href: "#/" + (part === "scores" ? "scores" : "laboratoire") + "/view/" + encodeURIComponent(n) });
+      if (part !== "scores" && part !== "labo" && part !== "both") return;
+      glob.push({ t: parts.fm.titre || n.replace(/\.md$/i, ""), d: part === "labo" ? "Laboratoire" : "Scores cliniques", li: liaisonMode && hasLiaisonTags(parts.fm.tags), href: "#/" + (part === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(n) });
     });
     if (glob.length) {
       html += sect("🔎 Aussi dans ZenoBE", '<div class="droplist" style="margin-bottom:0">' + glob.slice(0, 8).map(function (g) {
@@ -3190,14 +3191,18 @@ function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? nor
 function docKindOf(fm) {
   var tg = [];
   if (fm && Array.isArray(fm.tags)) tg = fm.tags; else if (fm && fm.tags) tg = [String(fm.tags)];
+  var isScores = false, isLabo = false;
   for (var i = 0; i < tg.length; i++) {
     var n = normKey(String(tg[i]));
-    if (n.indexOf("score") >= 0) return "scores";
-    if (n.indexOf("labo") >= 0 || n.indexOf("norme") >= 0) return "labo";
+    if (n.indexOf("score") >= 0) isScores = true;
+    else if (n.indexOf("labo") >= 0) isLabo = true;
   }
   var p = docsPartie(fm);
-  if (p.indexOf("score") >= 0) return "scores";
-  if (p.indexOf("labo") >= 0) return "labo";
+  if (p.indexOf("score") >= 0) isScores = true;
+  else if (p.indexOf("labo") >= 0) isLabo = true;
+  if (isScores && isLabo) return "both";
+  if (isScores) return "scores";
+  if (isLabo) return "labo";
   return "";
 }
 
@@ -3219,7 +3224,7 @@ function docsShowList(kind) {
   for (var i = 0; i < names.length; i++) {
     var parts = splitFiche(DOCS_CACHE.files[names[i]].md);
     var part = docKindOf(parts.fm);
-    if (part && part !== kind) continue;
+    if (part !== kind && part !== "both") continue;
     var base = names[i].replace(/\.md$/i, "");
     var t = (parts.fm && typeof parts.fm.titre === "string" && parts.fm.titre.trim()) ? parts.fm.titre.trim() : base;
     var d = (parts.fm && typeof parts.fm.description === "string" && parts.fm.description.trim()) ? parts.fm.description.trim() : "Document « " + base + " »";
@@ -3640,5 +3645,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="F9rZPpQU09GhWFwPTF28wQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="+h9pDd7XUZ54WrFf6BbzIA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="kyJenwRp+2POgRS56/Eixw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="CmD8z/loMsGjYaaxXcKxqg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
