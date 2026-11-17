@@ -223,6 +223,15 @@
     display: inline-block; background: var(--accent-soft); color: var(--accent);
     font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 5px;
   }
+  /* ---------- Priorité soins de liaison ---------- */
+  :root { --liaison-soft:#f4eeff; --liaison-border:#8b5cf6; --liaison-g1:#7c3aed; --liaison-g2:#a78bfa; }
+  html.dark { --liaison-soft:#241b3f; }
+  .fiche-card.liaison { background:var(--liaison-soft); border-color:var(--liaison-border); }
+  .doc-row.liaison { background:var(--liaison-soft); border-radius:12px; }
+  .doc-row.liaison > span:first-child { background:linear-gradient(180deg,var(--liaison-g1),var(--liaison-g2)) !important; }
+  .dropitem.liaison-item { background:var(--liaison-soft); }
+  .dropitem.liaison-item:hover, .dropitem.liaison-item:active { background:#ece2ff; }
+  html.dark .dropitem.liaison-item:hover { background:#2f2450; }
   .empty {
     text-align: center; padding: 40px 20px; color: var(--muted);
   }
@@ -322,7 +331,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.18 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.19 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -331,7 +340,7 @@
 /* ================================================================
    État et persistance
 ================================================================ */
-var LS = { diag: "fm.diag.v1", fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1",
+var LS = { diag: "fm.diag.v1", fiches: "fm.fiches.v2", cfg: "fm.github.v2", fav: "fm.fav.v2", rec: "fm.recents.v2", theme: "fm.theme.v1", docs: "fm.docs.v1", dark: "fm.dark.v1", font: "fm.font.v1", liaison: "fm.liaison.v1",
   gl: "fm.guides.v1", glfav: "fm.glfav.v1", glrec: "fm.glrec.v1", glfolder: "fm.glfolder.v1" };
 
 function loadLs(key, fallback) {
@@ -413,6 +422,14 @@ var THEMES = {
   miel: { nom: "Miel", accent: "#D4A017", soft: "#F6EFDC", bg: "#FFFFFF", border: "#E7E5E4", g1: "#D4A017", g2: "#D4A017", deep: "#7A5900" },
 };
 var curTheme = loadLs(LS.theme, "bleu");
+var liaisonMode = loadLs(LS.liaison, false);
+function setLiaison(v) { liaisonMode = !!v; saveLs(LS.liaison, liaisonMode); render(); }
+function hasLiaisonTags(tags) {
+  var a = Array.isArray(tags) ? tags : (tags ? [String(tags)] : []);
+  for (var i = 0; i < a.length; i++) { if (normKey(String(a[i])).indexOf("liaison") >= 0) return true; }
+  return false;
+}
+
 function applyTheme(id) {
   var t = THEMES[id] || THEMES.bleu;
   curTheme = THEMES[id] ? id : "bleu";
@@ -1367,7 +1384,7 @@ function renderHome() {
     });
     html += favList.length ? sect(zenTile(ZENOBE_PICTOS.favoris) + "Mes favoris · " + favList.length,
       '<div class="droplist" style="margin-bottom:0">' + favList.map(function (f) {
-        return '<div class="dropitem" onclick="openFiche(\'' + f.slug + '\')">★ ' + esc(f.title) +
+        return '<div class="dropitem' + (liaisonMode && hasLiaisonTags(f.tags) ? ' liaison-item' : '') + '" onclick="openFiche(\'' + f.slug + '\')">★ ' + esc(f.title) +
           '<span class="m" style="float:right;margin-top:2px">' + (f.updated ? "MAJ : " + esc(f.updated) : "") + "</span></div>";
       }).join("") + "</div>")
       : sect(zenTile(ZENOBE_PICTOS.favoris) + "Mes favoris", '<div class="empty">Aucun favori — touchez l\'étoile ☆ d\'une fiche pour l\'ajouter.</div>');
@@ -1381,7 +1398,7 @@ function renderHome() {
     if (recs.length) {
       html += sect(zenTile(ZENOBE_PICTOS.recents) + "Récemment consultées",
         '<div class="droplist" style="margin-bottom:0">' + recs.map(function (f, i) {
-          return '<div class="dropitem" onclick="openFiche(\'' + f.slug + '\')">' +
+          return '<div class="dropitem' + (liaisonMode && hasLiaisonTags(f.tags) ? ' liaison-item' : '') + '" onclick="openFiche(\'' + f.slug + '\')">' +
             (i === 0 ? "▸ " : "· ") + esc(f.title) +
             '<span class="m" style="float:right;margin-top:2px">' + (i === 0 ? "la plus récente" : (f.updated ? "MAJ : " + esc(f.updated) : "")) + "</span></div>";
         }).join("") + "</div>");
@@ -1424,7 +1441,7 @@ function renderHome() {
   if (q) {
     var glob = [];
     fiches.filter(function (f) { return f.poso.length && f.text.indexOf(q) >= 0; }).slice(0, 3).forEach(function (f) {
-      glob.push({ t: f.title, d: "Calculateur de dose", href: "#/calculateur?f=" + encodeURIComponent(f.slug) });
+      glob.push({ t: f.title, d: "Calculateur de dose", li: liaisonMode && hasLiaisonTags(f.tags), href: "#/calculateur?f=" + encodeURIComponent(f.slug) });
     });
     var NORMES_PAGES = [
       { t: "Biométrie", d: "Poids, taille, IMC, PC — percentiles OMS / CDC", href: "#/biometrie/percentiles", kw: "poids taille imc percentile perimetre cranien croissance oms cdc z score surface corporelle sc" },
@@ -1433,7 +1450,7 @@ function renderHome() {
       { t: "Scores cliniques", d: "Scores et repères cliniques", href: "#/scores", kw: "scores cliniques tanner puberte developpement glasgow" }
     ];
     guides.filter(function (g) { return g.text.indexOf(q) >= 0; }).slice(0, 3).forEach(function (g) {
-      glob.push({ t: g.title, d: "Guidelines", href: "#/guideline/" + encodeURIComponent(g.slug) });
+      glob.push({ t: g.title, d: "Guidelines", li: liaisonMode && hasLiaisonTags(g.tags), href: "#/guideline/" + encodeURIComponent(g.slug) });
     });
     NORMES_PAGES.forEach(function (p) {
       if (norm(p.t + " " + p.kw).indexOf(q) >= 0) glob.push({ t: p.t, d: p.d, href: p.href });
@@ -1442,12 +1459,12 @@ function renderHome() {
       var parts = splitFiche(DOCS_CACHE.files[n].md);
       var txt = norm((parts.fm.titre || "") + " " + (parts.fm.description || "") + " " + parts.body);
       if (txt.indexOf(q) < 0) return;
-      var part = docsPartie(parts.fm);
-      glob.push({ t: parts.fm.titre || n.replace(/\.md$/i, ""), d: part === "scores" ? "Scores cliniques" : "Laboratoire", href: "#/" + (part === "scores" ? "scores" : "laboratoire") + "/view/" + encodeURIComponent(n) });
+      var part = docKindOf(parts.fm);
+      glob.push({ t: parts.fm.titre || n.replace(/\.md$/i, ""), d: part === "scores" ? "Scores cliniques" : "Laboratoire", li: liaisonMode && hasLiaisonTags(parts.fm.tags), href: "#/" + (part === "scores" ? "scores" : "laboratoire") + "/view/" + encodeURIComponent(n) });
     });
     if (glob.length) {
       html += sect("🔎 Aussi dans ZenoBE", '<div class="droplist" style="margin-bottom:0">' + glob.slice(0, 8).map(function (g) {
-        return '<div class="dropitem" onclick="window.location.hash=\'' + g.href + '\">' + esc(g.t) +
+        return '<div class="dropitem' + (g.li ? ' liaison-item' : '') + '" onclick="window.location.hash=\'' + g.href + '\">' + esc(g.t) +
           '<span class="m" style="float:right;margin-top:2px">' + esc(g.d) + "</span></div>";
       }).join("") + "</div>");
     }
@@ -1462,7 +1479,7 @@ function renderHome() {
 function cardHtml(f) {
   var isFav = favs.indexOf(f.slug) >= 0;
   var tags = f.tags.slice(0, 3).map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join("");
-  return '<div class="fiche-card" onclick="openFiche(\'' + f.slug + '\')">' +
+  return '<div class="fiche-card' + (liaisonMode && hasLiaisonTags(f.tags) ? ' liaison' : '') + '" onclick="openFiche(\'' + f.slug + '\')">' +
     '<button class="star" title="Favori" onclick="toggleFavStar(event,\'' + f.slug + '\')">' + (isFav ? "★" : "☆") + "</button>" +
     '<p class="t">' + esc(f.title) + "</p>" + tags +
     '<p class="m">' + (f.updated ? "MAJ : " + esc(f.updated) : (f.created ? "Créée : " + esc(f.created) : "")) + "</p>" +
@@ -1523,7 +1540,7 @@ function glTags(g) { return g.tags.filter(function (t) { return normKey(t) !== "
 function glCard(g) {
   var isFav = glFavs.indexOf(g.slug) >= 0;
   var tags = glTags(g).slice(0, 3).map(function (t) { return '<span class="tagchip">' + esc(t) + "</span>"; }).join(" ");
-  return '<div class="fiche-card" onclick="openGuide(\'' + g.slug + '\')">' +
+  return '<div class="fiche-card' + (liaisonMode && hasLiaisonTags(g.tags) ? ' liaison' : '') + '" onclick="openGuide(\'' + g.slug + '\')">' +
     '<button class="star" title="Favori" onclick="toggleGlFavStar(event,\'' + g.slug + '\')">' + (isFav ? "★" : "☆") + "</button>" +
     '<p class="t">' + esc(g.title) + "</p>" + tags + "<div></div></div>";
 }
@@ -1617,8 +1634,8 @@ function renderGuideView(slug) {
     '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Impr</button>' +
     '<button class="act-btn" onclick="exportGuide(event,\'' + g.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Export</button>' +
     "</div>";
-  html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
   html += foldSections(g.html || mdToHtml(g.md || "", true));
+  html += '<div class="disclaimer">⚠️ Recommandations de pratique — le contexte clinique et les protocoles locaux priment. Destiné aux professionnels de santé.</div>';
   html += "</div>";
   view.innerHTML = html;
   glLinkFiches(g);
@@ -2228,6 +2245,9 @@ function renderReglInterface() {
   html += [100, 110, 120].map(function (v) {
     return '<button class="btn' + (fontScale === v ? " btn-primary" : "") + '" onclick="setFont(' + v + ')">' + (v === 100 ? "A" : v === 110 ? "A+" : "A++") + " · " + v + " %</button>";
   }).join(" ");
+  html += "<div style='height:18px'></div><h3>Priorité soins de liaison</h3>";
+  html += "<p style='font-size:13px;color:var(--muted);margin:4px 0 10px'>Met en évidence (fond violet) toutes les fiches portant le tag « liaison » — médicaments, guidelines et normes. Mémorisé sur cet appareil.</p>";
+  html += '<label style="display:flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer"><input type="checkbox" onchange="setLiaison(this.checked)"' + (liaisonMode ? " checked" : "") + ' style="width:18px;height:18px"/> Activer la mise en évidence des fiches de liaison</label>';
   html += "</div>";
   view.innerHTML = html;
 }
@@ -3167,10 +3187,23 @@ var DOCS_CACHE = loadLs(LS.docs, { folder: null, files: {}, ts: 0 });
 function docsPersist() { saveLs(LS.docs, DOCS_CACHE); }
 function docsNorm(s) { return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, ""); }
 function docsPartie(fm) { var v = fm && fm.partie; return Array.isArray(v) ? normKey(String(v[0] || "")) : normKey(String(v || "")); }
+function docKindOf(fm) {
+  var tg = [];
+  if (fm && Array.isArray(fm.tags)) tg = fm.tags; else if (fm && fm.tags) tg = [String(fm.tags)];
+  for (var i = 0; i < tg.length; i++) {
+    var n = normKey(String(tg[i]));
+    if (n.indexOf("score") >= 0) return "scores";
+    if (n.indexOf("labo") >= 0 || n.indexOf("norme") >= 0) return "labo";
+  }
+  var p = docsPartie(fm);
+  if (p.indexOf("score") >= 0) return "scores";
+  if (p.indexOf("labo") >= 0) return "labo";
+  return "";
+}
 
 function docRow(kind, r, last) {
   return '<a href="' + r.href + '" style="text-decoration:none;display:block">' +
-    '<div style="display:flex;align-items:center;gap:14px;padding:13px 4px;' + (last ? "" : "border-bottom:1px solid var(--border);") + '">' +
+    '<div class="' + (r.li ? "doc-row liaison" : "doc-row") + '" style="display:flex;align-items:center;gap:14px;padding:13px 4px;' + (last ? "" : "border-bottom:1px solid var(--border);") + '">' +
     '<span style="width:38px;height:38px;border-radius:11px;background:linear-gradient(180deg,var(--g1),var(--accent));color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto">' +
     (kind === "labo" ? NM_ICO.labo : NM_ICO.scores) + "</span>" +
     '<span style="flex:1"><span style="font-size:15px;font-weight:700;color:var(--deep)">' + esc(r.t) + "</span><br />" +
@@ -3185,12 +3218,12 @@ function docsShowList(kind) {
   var rows = [];
   for (var i = 0; i < names.length; i++) {
     var parts = splitFiche(DOCS_CACHE.files[names[i]].md);
-    var part = docsPartie(parts.fm);
+    var part = docKindOf(parts.fm);
     if (part && part !== kind) continue;
     var base = names[i].replace(/\.md$/i, "");
     var t = (parts.fm && typeof parts.fm.titre === "string" && parts.fm.titre.trim()) ? parts.fm.titre.trim() : base;
     var d = (parts.fm && typeof parts.fm.description === "string" && parts.fm.description.trim()) ? parts.fm.description.trim() : "Document « " + base + " »";
-    rows.push({ t: t, d: d, href: "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]) });
+    rows.push({ t: t, d: d, li: liaisonMode && hasLiaisonTags(parts.fm.tags), href: "#/" + (kind === "labo" ? "laboratoire" : "scores") + "/view/" + encodeURIComponent(names[i]) });
   }
   var html = "";
   for (var j = 0; j < rows.length; j++) html += docRow(kind, rows[j], j === rows.length - 1);
@@ -3606,5 +3639,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="99of8M4SswHjkbtEPYbAzA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="F9rZPpQU09GhWFwPTF28wQ==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="+h9pDd7XUZ54WrFf6BbzIA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="kyJenwRp+2POgRS56/Eixw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
