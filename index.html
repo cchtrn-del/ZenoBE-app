@@ -330,8 +330,8 @@
 </div>
 
 <main id="view"></main>
-<footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.22 — 2026 — copyright cchtrn</div>
+<footer>ZenoBE - Outil d'aide à la décision et à la prescription - Ces actes restent la responsabilité du prescripteur - Les doses calculées sont automatiques et doivent être contrôlées.</footer>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.25 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1632,7 +1632,6 @@ function renderGuideView(slug) {
   if (meta.length) html += '<p class="meta-line">' + meta.join(" · ") + "</p>";
   html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
     '<button class="act-btn" onclick="toggleGlFavStar(event,\'' + g.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favo</button>' +
-    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Impr</button>' +
     '<button class="act-btn" onclick="exportGuide(event,\'' + g.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Export</button>' +
     "</div>";
   html += foldSections(g.html || mdToHtml(g.md || "", true));
@@ -1696,7 +1695,8 @@ var ACT_SVG = {
   starO: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
   calc: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4v2h10V6H7zm0 5h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3zM7 16h3v3H7v-3zm5 0h3v3h-3v-3zm5 0h2v3h-2v-3z"/></svg>',
   print: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>',
-  export: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>'
+  export: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
+  inter: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17a5 5 0 1 1 4.9-6H17a5 5 0 1 1-4.9 6H7z"/><path d="M10 14l4-4"/></svg>'
 };
 
 function renderFiche(slug, from) {
@@ -1721,7 +1721,7 @@ function renderFiche(slug, from) {
   html += '<div class="fiche-actions" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px 0 4px">' +
     '<button class="act-btn" onclick="toggleFavStar(event,\'' + f.slug + '\')" title="Ajouter ou retirer des favoris" aria-label="Favoris">' + (isFav ? ACT_SVG.star : ACT_SVG.starO) + 'Favo</button>' +
     (f.poso.length ? '<a class="act-btn" href="#/calculateur?f=' + f.slug + '" title="Calculateur de dose" aria-label="Calculateur">' + ACT_SVG.calc + 'Calc</a>' : "") +
-    '<button class="act-btn" onclick="window.print()" title="Imprimer la fiche" aria-label="Imprimer">' + ACT_SVG.print + 'Impr</button>' +
+    '<button class="act-btn" onclick="openInteractions(event, \'' + f.slug + '\')" title="Vérifier les interactions médicamenteuses (Drugs.com)" aria-label="Interactions">' + ACT_SVG.inter + 'Inter</button>' +
     '<button class="act-btn" onclick="exportFiche(event, \'' + f.slug + '\')" title="Exporter la fiche" aria-label="Exporter">' + ACT_SVG.export + 'Export</button>' +
     "</div>";
   var fHtml = mdToHtml(f.md || "");
@@ -1733,6 +1733,7 @@ function renderFiche(slug, from) {
     return wm;
   });
   html += foldSections(fHtml);
+  html += '<p class="field-note">ℹ️ Interactions : Drugs.com (base américaine), noms anglais recommandés.</p>';
   html += '<div class="disclaimer">⚠️ Vérifier la posologie dans le référentiel officiel avant toute administration. Les noms commerciaux et formes présentés sont ceux disponibles en Belgique.</div>';
   html += "</div>";
   view.innerHTML = html;
@@ -1770,6 +1771,37 @@ function calcBackHtml(preselect, calcFiches) {
   return '<a class="back" href="#/">← Toutes les fiches</a>';
 }
 
+function genericName(title) {
+  var n = (title || "").replace(/\([^)]*\)/g, " ").replace(/\[[^\]]*\]/g, " ").replace(/[,;].*$/, "").replace(/\s+/g, " ").trim();
+  try { n = n.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) {}
+  return n;
+}
+function openInteractions(ev, slug) {
+  if (ev && ev.stopPropagation) ev.stopPropagation();
+  if (ev) ev.preventDefault();
+  var f = fiches.find(function (x) { return x.slug === slug; });
+  if (!f) return;
+  var name = genericName(f.title);
+  var w = window.open("https://www.drugs.com/drug_interactions.html", "_blank", "noopener");
+  if (w) w.opener = null;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(name).then(function () {
+      toast("🔎 « " + name + " » copié — collez-le (⌘V ou appui long) dans Drugs.com, choisissez la suggestion, puis ajoutez l'autre médicament");
+    }, function () {
+      toast("🔎 Drugs.com ouvert dans un onglet — encodez « " + name + " » puis l'autre médicament");
+    });
+  } else {
+    toast("🔎 Drugs.com ouvert dans un onglet — encodez « " + name + " » puis l'autre médicament");
+  }
+}
+function zenobePrint() {
+  var ua = (navigator && navigator.userAgent) || "";
+  if (/iPhone|iPod/.test(ua)) {
+    toast("📱 Sur iPhone : bouton Partager de Safari (carré avec flèche) → Imprimer");
+    return;
+  }
+  window.print();
+}
 function exportFiche(ev, slug) {
   var old = document.getElementById("zenobe-export-menu");
   if (old) { old.remove(); return; }
@@ -1803,7 +1835,7 @@ function exportFiche(ev, slug) {
     }
     window.location.href = href;
   });
-  item("📄 Enregistrer en PDF", function () { window.print(); });
+  item("🖨️ Imprimer / PDF", function () { zenobePrint(); });
   item("📋 Copier la fiche (Markdown)", function () {
     var md = f.md || ("# " + f.title);
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1860,7 +1892,7 @@ function exportGuide(ev, slug) {
     }
     window.location.href = href;
   });
-  item("📄 Enregistrer en PDF", function () { window.print(); });
+  item("🖨️ Imprimer / PDF", function () { zenobePrint(); });
   item("📋 Copier la fiche (Markdown)", function () {
     var md = g.md || ("# " + g.title);
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2188,12 +2220,13 @@ function renderAPropos() {
   html += "</div>";
   html += '<div style="height:14px"></div>';
   html += '<div style="display:grid;gap:8px;font-size:14px">';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.22</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.25</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Christophe Chantrain MD, PhD</b></div>';
   html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>Groupe santé CHC de Liège et Centre CLEA</b></div>';
   html += '<div style="display:flex;justify-content:space-between;padding:8px 2px"><span style="color:var(--muted)">Copyright</span><b>2026 — cchtrn</b></div>';
   html += "</div>";
   html += '<p class="field-note" style="margin-top:14px">Application locale et hors ligne : les fiches sont conservées sur cet appareil et mises à jour depuis votre coffre Obsidian via GitHub.</p>';
+  html += '<p class="field-note">Interactions : analyse via le site externe Drugs.com (marché américain) — noms anglais recommandés.</p>';
   html += "</div>";
   view.innerHTML = html;
 }
@@ -3647,5 +3680,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="kyJenwRp+2POgRS56/Eixw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="CmD8z/loMsGjYaaxXcKxqg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="cZsrM8s2L0ay5avPCyxR8w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="9N/12ria0YC+c3lv2UIqVA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
