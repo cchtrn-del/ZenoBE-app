@@ -331,7 +331,7 @@
 
 <main id="view"></main>
 <footer>ZenoBE — ⚠️ Outil d'aide à la décision — vérifier chaque posologie avant administration. Les doses calculées sont automatiques et doivent être contrôlées.</footer>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.21 — 2026 — copyright cchtrn</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding:0 16px 14px">version 0.4.22 — 2026 — copyright cchtrn</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1447,7 +1447,7 @@ function renderHome() {
       { t: "Biométrie", d: "Poids, taille, IMC, PC — percentiles OMS / CDC", href: "#/biometrie/percentiles", kw: "poids taille imc percentile perimetre cranien croissance oms cdc z score surface corporelle sc" },
       { t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque selon l'âge", href: "#/biometrie/hemodynamique", kw: "tension arterielle ta fc frequence cardiaque hemodynamique pouls hta map epals signes vitaux" },
       { t: "Laboratoire", d: "Valeurs biologiques de référence", href: "#/laboratoire", kw: "laboratoire labo nfs formule sanguine hemoglobine hte plaquettes leucocytes vcm biologie sang" },
-      { t: "Scores cliniques", d: "Scores et repères cliniques", href: "#/scores", kw: "scores cliniques tanner puberte developpement glasgow" }
+      { t: "Scores cliniques", d: "Scores et repères cliniques en pédiatrie", href: "#/scores", kw: "scores cliniques tanner puberte developpement glasgow" }
     ];
     guides.filter(function (g) { return g.text.indexOf(q) >= 0; }).slice(0, 3).forEach(function (g) {
       glob.push({ t: g.title, d: "Guidelines", li: liaisonMode && hasLiaisonTags(g.tags), href: "#/guideline/" + encodeURIComponent(g.slug) });
@@ -2188,9 +2188,9 @@ function renderAPropos() {
   html += "</div>";
   html += '<div style="height:14px"></div>';
   html += '<div style="display:grid;gap:8px;font-size:14px">';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.12</b></div>';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Dr Christophe Chantrain</b></div>';
-  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>CHC Pediaplan</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Version</span><b>0.4.22</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Créateur</span><b>Christophe Chantrain MD, PhD</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:8px 2px"><span style="color:var(--muted)">Institution</span><b>Groupe santé CHC de Liège et Centre CLEA</b></div>';
   html += '<div style="display:flex;justify-content:space-between;padding:8px 2px"><span style="color:var(--muted)">Copyright</span><b>2026 — cchtrn</b></div>';
   html += "</div>";
   html += '<p class="field-note" style="margin-top:14px">Application locale et hors ligne : les fiches sont conservées sur cet appareil et mises à jour depuis votre coffre Obsidian via GitHub.</p>';
@@ -2887,7 +2887,7 @@ function renderBiometrie() {
     hubBtn({ icon: NM_ICO.biometrie, t: "Biométrie", d: "Poids, taille/longueur, IMC et périmètre crânien — percentiles, z-scores et seuils OMS 2006/2007.", href: "#/biometrie/percentiles" }) +
     hubBtn({ icon: NM_ICO.hemo, t: "Hémodynamique", d: "Tension artérielle et fréquence cardiaque attendues selon l\'âge (P5 · P50 · P95).", href: "#/biometrie/hemodynamique" }) +
     hubBtn({ icon: NM_ICO.labo, t: "Laboratoire", d: "Valeurs de référence biologiques pédiatriques.", href: "#/laboratoire" }) +
-    hubBtn({ icon: NM_ICO.scores, t: "Scores cliniques", d: "Scores et repères cliniques : développement pubertaire (Tanner), et plus à venir.", href: "#/scores", last: true }) +
+    hubBtn({ icon: NM_ICO.scores, t: "Scores cliniques", d: "Scores et repères cliniques en pédiatrie.", href: "#/scores", last: true }) +
     '</div>';
   nmPageHook = null;
   nmBind();
@@ -3646,5 +3646,6 @@ if (cfg.autoSync && (fiches.length === 0 || lastSyncAge > 24 * 3600 * 1000)) {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="+h9pDd7XUZ54WrFf6BbzIA==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="kyJenwRp+2POgRS56/Eixw==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="CmD8z/loMsGjYaaxXcKxqg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" nonce="cZsrM8s2L0ay5avPCyxR8w==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
